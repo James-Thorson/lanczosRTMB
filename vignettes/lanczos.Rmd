@@ -20,7 +20,7 @@ start_time = Sys.time()
 This vignette demonstrates how Lanczos methods can be used to approximate standard errors and epsilon bias-correction for penalized likelihood models, without directly forming or inverting the Hessian matrix representing associations among random effects. 
 
 ```{r setup, warning = FALSE}
-library(CSPDM)
+library(lanczosRTMB)
 library(RTMB)
 ```
 
@@ -48,7 +48,12 @@ nll = function(p){
   ADREPORT( sumexpu )
   REPORT( sumexpu )
   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
-  nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+  nll2 = dgamma( 
+    y, 
+    shape = 1/exp(2*p$logcv), 
+    scale = exp(p$u) * exp(2*p$logcv), 
+    log=TRUE
+  )
   jnll = -1 * ( sum(nll1) + sum(nll2) )
   if(what == "jnll") return(jnll)
   if(what == "sumexpu") return(sumexpu)
@@ -71,6 +76,7 @@ obj = RTMB::MakeADFun(
 
 # optimize 
 opt = nlminb( obj$par, obj$fn, obj$gr )
+opt
 ```
 
 ## Fit as a penalized likelihood model
@@ -116,6 +122,9 @@ lanczos_nll( pen, k = 10, m = 10 )
 # Marginal likelihood using Laplace
 opt$obj
 ```
+
+## Delta methods
+
 Alternatively, we can apply Lanczos methods to standard errors for parameters.  Here, we will sample the first three random effects
 
 ```{r}
@@ -176,6 +185,8 @@ c( pen$report()$sumexpu, sqrt(Var) )
 summary(sdrep)['sumexpu',]
 ```
 
+## Epsilon methods
+
 Finally, we can use the gradient of the log-likelihood with respect to a dummy variable epsilon to correct for retransformation bias:
 
 ```{r}
@@ -214,4 +225,4 @@ run_time = Sys.time() - start_time
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
 
-# Works cited
+## Works cited
