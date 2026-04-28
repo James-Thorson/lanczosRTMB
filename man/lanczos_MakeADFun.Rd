@@ -19,11 +19,7 @@ lanczos_MakeADFun(
 
 \item{parameters}{Parameter list (or parameter vector) used by \code{func}.}
 
-\item{random}{As \link[TMB]{MakeADFun}.}
-
 \item{k}{dimension for Kyrlov subspace}
-
-\item{profile}{As \link[TMB]{MakeADFun}.}
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
@@ -44,4 +40,33 @@ An object (list) of class \code{tinyVAST}. Elements include:
 \description{
 Make a function that returns the Lanczos-Laplace approximation for
 a user-supplied joint likelihood and designated random effects
+}
+\examples{
+# Simulate lognormal-gamma process
+set.seed(123)
+library(RTMB)
+n = 30
+n_sum = 3
+u = 0 + rnorm(n)
+y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
+
+# Fit as GLMM
+what = "jnll"
+nll = function(p){
+  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
+  nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
+  nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+  jnll = -1 * ( sum(nll1) + sum(nll2) )
+  return(jnll)
+}
+
+# Build
+obj = lanczos_MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", k = 10 )
+opt = nlminb( obj$par, obj$fn )
+
+# Compare with RTMB
+obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u" )
+opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
+opt$par - opt2$par
+
 }
