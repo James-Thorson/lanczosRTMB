@@ -6,7 +6,6 @@ likelihood models, without directly forming or inverting the Hessian
 matrix representing associations among random effects.
 
 ``` r
-
 library(lanczosRTMB)
 #> Loading required package: RTMB
 library(RTMB)
@@ -17,7 +16,6 @@ library(RTMB)
 We first simulate data from a compound lognormal-Gamma process:
 
 ``` r
-
 set.seed(123)
 n = 30
 n_sum = 3
@@ -33,7 +31,6 @@ We then define a function to compute the joint likelihood, while also
 allowing us to calculate other outputs for later use:
 
 ``` r
-
 nll = function(p){
   sumexpu = sum(exp(p$u[seq_len(n_sum)]))
   ADREPORT( sumexpu )
@@ -56,7 +53,6 @@ Finally, we fit this model as a log-linked generalized linear mixed
 model (GLMM):
 
 ``` r
-
 # Build RTMB object
 what = "jnll"
 obj = RTMB::MakeADFun( 
@@ -97,7 +93,6 @@ Next, we show that the model can be refitted using penalized likelihood,
 conditional upon fixed values for variance parameters:
 
 ``` r
-
 # Define RTMB object for penalized likelihood
 newmap = list(
   mu = factor(NA), 
@@ -120,7 +115,6 @@ We can then use stochastic trace estimation and the Lanczos method to
 approximate the log-determinant of the Hessian for random effects:
 
 ``` r
-
 # log-determinant using Lanczos
 Hv = make_Hv(pen)
 lanczos_logdet( Hv, k = 10, m = 3, n = length(pen$par) )
@@ -138,7 +132,6 @@ Using this log-determinant, we can also compare the log-marginal
 likelihood using Lanczos with the full calculation:
 
 ``` r
-
 # Marginal likelihoods using Lanczos
 lanczos_nll( pen, k = 10, m = 10 )
 #>      nll   sd_nll 
@@ -155,7 +148,6 @@ Alternatively, we can apply Lanczos methods to standard errors for
 parameters. Here, we will sample the first three random effects
 
 ``` r
-
 samples = lanczos_sample(
    Hv = Hv,
    v = c( rep(1,3), rep(0,n-3) ),
@@ -177,7 +169,6 @@ with respect to a derived quantity. This involves calculating the
 gradient for the derived quantity with respect to coefficients:
 
 ``` r
-
 what = "sumexpu"
 grad = RTMB::MakeADFun( 
   nll, 
@@ -192,7 +183,6 @@ matrix and use that to calculate a Monte Carlo estimator for standard
 errors:
 
 ``` r
-
 samples = lanczos_sample(
    Hv = Hv,
    v = grad,
@@ -204,7 +194,7 @@ samples = lanczos_sample(
 # Compare SD of samples with the delta method
 sumexpu1 = apply( samples, MARGIN = 2, FUN = \(v)pen$report(v)$sumexpu )
 c( pen$report()$sumexpu, sd(sumexpu1) )
-#> [1] 4.064121 0.948774
+#> [1] 4.064121 0.974645
 summary(sdrep)['sumexpu',]
 #>   Estimate Std. Error 
 #>   4.064121   1.194484
@@ -214,7 +204,6 @@ Alternatively, we can calculate the standard error for a derived
 quantity using Lanczos within the delta method:
 
 ``` r
-
 # 
 Var = lanczos_variance(
   Hv = Hv,
@@ -236,7 +225,6 @@ Finally, we can use the gradient of the log-likelihood with respect to a
 dummy variable epsilon to correct for retransformation bias:
 
 ``` r
-
 # One-sided finite difference
 what = "biascorr"
 phat = obj$env$parList()
@@ -270,6 +258,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 1.97 secs
+Runtime for this vignette: 3.07 secs
 
 ## Works cited
