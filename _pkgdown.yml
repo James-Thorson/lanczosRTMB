@@ -1,0 +1,36 @@
+url: https://james-thorson.github.io/lanczosRTMB/
+template:
+  bootstrap: 5
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - lanczos
+
+reference:
+- title: internal
+  contents:
+  - tridiag
+
+- title: 'Approximate properties'
+  desc: |
+    Core tools, using Lanczos to approximate model properties
+  contents:
+  - lanczos_logdet
+  - lanczos_nll
+  - lanczos_sample
+  - lanczos_variance
+
+- title: 'Helper functions'
+  desc: |
+    Helper tools, used for components of an analysis
+  contents:
+  - lanczos
+  - make_Hv
+
+- title: 'Experimental and development'
+  desc: |
+    Experimental tools, under development.
+  contents:
+  - lanczos_MakeADFun
