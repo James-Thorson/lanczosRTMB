@@ -96,32 +96,32 @@ opt = nlminb( obj$par, obj$fn, obj$gr )
 #> iter: 1  value: 42.25048 mgc: 0.1961147 ustep: 1 
 #> iter: 2  value: 42.25047 mgc: 0.003648652 ustep: 1 
 #> iter: 3  value: 42.25047 mgc: 1.232595e-06 ustep: 1 
-#> iter: 4  mgc: 1.407763e-13 
-#> iter: 1  mgc: 1.407763e-13 
+#> iter: 4  mgc: 1.403322e-13 
+#> iter: 1  mgc: 1.403322e-13 
 #> outer mgc:  0.1645561 
 #> iter: 1  value: 42.03535 mgc: 0.2020453 ustep: 1 
 #> iter: 2  value: 42.03534 mgc: 0.004116722 ustep: 1 
 #> iter: 3  value: 42.03534 mgc: 1.65679e-06 ustep: 1 
-#> iter: 4  mgc: 2.68674e-13 
+#> iter: 4  mgc: 2.68896e-13 
 #> iter: 1  value: 42.37252 mgc: 0.0298795 ustep: 1 
 #> iter: 2  value: 42.37252 mgc: 6.610381e-05 ustep: 1 
-#> iter: 3  mgc: 4.124088e-10 
-#> iter: 1  mgc: 4.124088e-10 
+#> iter: 3  mgc: 4.124083e-10 
+#> iter: 1  mgc: 4.124083e-10 
 #> outer mgc:  0.1417209 
 #> iter: 1  value: 42.27696 mgc: 0.003953647 ustep: 1 
 #> iter: 2  value: 42.27696 mgc: 9.898509e-07 ustep: 1 
-#> iter: 3  mgc: 9.148238e-14 
-#> iter: 1  mgc: 9.148238e-14 
+#> iter: 3  mgc: 9.192647e-14 
+#> iter: 1  mgc: 9.192647e-14 
 #> outer mgc:  0.02801003 
 #> iter: 1  value: 42.11956 mgc: 0.0445184 ustep: 1 
 #> iter: 2  value: 42.11956 mgc: 0.0001876571 ustep: 1 
-#> iter: 3  mgc: 3.31473e-09 
-#> iter: 1  mgc: 3.31473e-09 
+#> iter: 3  mgc: 3.314731e-09 
+#> iter: 1  mgc: 3.314731e-09 
 #> outer mgc:  0.04623801 
 #> iter: 1  value: 41.96495 mgc: 0.04784547 ustep: 1 
 #> iter: 2  value: 41.96495 mgc: 0.0002183498 ustep: 1 
-#> iter: 3  mgc: 4.517448e-09 
-#> iter: 1  mgc: 4.517448e-09 
+#> iter: 3  mgc: 4.517449e-09 
+#> iter: 1  mgc: 4.517449e-09 
 #> outer mgc:  0.02447321 
 #> iter: 1  value: 41.81629 mgc: 0.04627014 ustep: 1 
 #> iter: 2  value: 41.81629 mgc: 0.0002053923 ustep: 1 
@@ -135,16 +135,16 @@ opt = nlminb( obj$par, obj$fn, obj$gr )
 #> outer mgc:  0.0002425434 
 #> iter: 1  value: 41.78946 mgc: 0.0008453203 ustep: 1 
 #> iter: 2  value: 41.78946 mgc: 6.814674e-08 ustep: 1 
-#> iter: 3  mgc: 9.992007e-16 
-#> iter: 1  mgc: 9.992007e-16 
+#> iter: 3  mgc: 1.998401e-15 
+#> iter: 1  mgc: 1.998401e-15 
 #> outer mgc:  3.242996e-05 
-#> iter: 1  value: 41.78943 mgc: 3.211221e-06 ustep: 1 
-#> iter: 2  mgc: 9.825474e-13 
-#> iter: 1  mgc: 9.825474e-13 
+#> iter: 1  value: 41.78943 mgc: 3.211222e-06 ustep: 1 
+#> iter: 2  mgc: 9.829915e-13 
+#> iter: 1  mgc: 9.829915e-13 
 #> outer mgc:  1.636354e-06 
-#> iter: 1  mgc: 9.825474e-13 
+#> iter: 1  mgc: 9.829915e-13 
 sdrep = sdreport(obj, bias.correct = TRUE )
-#> iter: 1  mgc: 9.825474e-13 
+#> iter: 1  mgc: 9.829915e-13 
 #> outer mgc:  1.636354e-06 
 #> iter: 1  value: 41.79255 mgc: 0.001303796 ustep: 1 
 #> iter: 2  value: 41.79255 mgc: 1.620694e-07 ustep: 1 
@@ -152,27 +152,27 @@ sdrep = sdreport(obj, bias.correct = TRUE )
 #> outer mgc:  0.0269305 
 #> iter: 1  value: 41.78634 mgc: 0.001303796 ustep: 1 
 #> iter: 2  value: 41.78634 mgc: 1.621195e-07 ustep: 1 
-#> iter: 3  mgc: 3.552714e-15 
+#> iter: 3  mgc: 2.664535e-15 
 #> outer mgc:  0.0269297 
 #> iter: 1  value: 41.79749 mgc: 0.003904606 ustep: 1 
 #> iter: 2  value: 41.79749 mgc: 1.23556e-06 ustep: 1 
-#> iter: 3  mgc: 1.452172e-13 
+#> iter: 3  mgc: 1.461054e-13 
 #> outer mgc:  0.0311446 
 #> iter: 1  value: 41.78139 mgc: 0.003912423 ustep: 1 
 #> iter: 2  value: 41.78139 mgc: 1.23487e-06 ustep: 1 
-#> iter: 3  mgc: 1.449951e-13 
+#> iter: 3  mgc: 1.447731e-13 
 #> outer mgc:  0.03114147 
 #> iter: 1  value: 41.81138 mgc: 0.003904606 ustep: 1 
 #> iter: 2  value: 41.81138 mgc: 1.232402e-06 ustep: 1 
-#> iter: 3  mgc: 1.44329e-13 
+#> iter: 3  mgc: 1.452172e-13 
 #> outer mgc:  0.01275106 
 #> iter: 1  value: 41.76748 mgc: 0.003912423 ustep: 1 
 #> iter: 2  value: 41.76748 mgc: 1.238033e-06 ustep: 1 
-#> iter: 3  mgc: 1.458833e-13 
+#> iter: 3  mgc: 1.461054e-13 
 #> outer mgc:  0.01276952 
 #> outer mgc:  2.704224 
 #> Re-using symbolic Cholesky
-#> iter: 1  mgc: 9.825474e-13 
+#> iter: 1  mgc: 9.829915e-13 
 #> Matching hessian patterns... Done
 #> outer mgc:  4.734025 
 H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
@@ -181,7 +181,7 @@ H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-#> outer mgc:  1.458833e-13 
+#> outer mgc:  1.461054e-13 
 Hv = make_Hv( pen )
 
 # Gradient-based Lanczos sampling

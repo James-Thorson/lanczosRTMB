@@ -68,16 +68,8 @@ a user-supplied joint likelihood and designated random effects</p>
 <dd><p>Parameter list (or parameter vector) used by <code>func</code>.</p></dd>
 
 
-<dt id="arg-random">random<a class="anchor" aria-label="anchor" href="#arg-random"></a></dt>
-<dd><p>As <a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a>.</p></dd>
-
-
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
 <dd><p>dimension for Kyrlov subspace</p></dd>
-
-
-<dt id="arg-profile">profile<a class="anchor" aria-label="anchor" href="#arg-profile"></a></dt>
-<dd><p>As <a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">MakeADFun</a>.</p></dd>
 
 
 <dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
@@ -108,6 +100,130 @@ lower variance using a fixed seed.</p></dd>
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Simulate lognormal-gamma process</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/kaskr/RTMB" class="external-link">RTMB</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">30</span></span></span>
+<span class="r-in"><span><span class="va">n_sum</span> <span class="op">=</span> <span class="fl">3</span></span></span>
+<span class="r-in"><span><span class="va">u</span> <span class="op">=</span> <span class="fl">0</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span> <span class="va">n</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">0.5</span><span class="op">^</span><span class="fl">2</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">u</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span><span class="op">^</span><span class="fl">2</span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Fit as GLMM</span></span></span>
+<span class="r-in"><span><span class="va">what</span> <span class="op">=</span> <span class="st">"jnll"</span></span></span>
+<span class="r-in"><span><span class="va">nll</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">sumexpu</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">u</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sum</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">nll1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">u</span>, mean<span class="op">=</span><span class="va">p</span><span class="op">$</span><span class="va">mu</span>, sd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">logsd</span><span class="op">)</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">nll2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span><span class="op">(</span><span class="va">y</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">p</span><span class="op">$</span><span class="va">logcv</span><span class="op">)</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">u</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">p</span><span class="op">$</span><span class="va">logcv</span><span class="op">)</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">jnll</span> <span class="op">=</span> <span class="op">-</span><span class="fl">1</span> <span class="op">*</span> <span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">nll1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">nll2</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">jnll</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Build</span></span></span>
+<span class="r-in"><span><span class="va">obj</span> <span class="op">=</span> <span class="fu">lanczos_MakeADFun</span><span class="op">(</span> <span class="va">nll</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>u<span class="op">=</span><span class="va">u</span>, mu <span class="op">=</span> <span class="fl">0</span>, logsd <span class="op">=</span> <span class="fl">0</span>, logcv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, random <span class="op">=</span> <span class="st">"u"</span>, k <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">opt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">obj</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj</span><span class="op">$</span><span class="va">fn</span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compare with RTMB</span></span></span>
+<span class="r-in"><span><span class="va">obj2</span> <span class="op">=</span> <span class="fu">MakeADFun</span><span class="op">(</span> <span class="va">nll</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>u<span class="op">=</span><span class="va">u</span>, mu <span class="op">=</span> <span class="fl">0</span>, logsd <span class="op">=</span> <span class="fl">0</span>, logcv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, random <span class="op">=</span> <span class="st">"u"</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">opt2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">obj2</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj2</span><span class="op">$</span><span class="va">fn</span>, <span class="va">obj2</span><span class="op">$</span><span class="va">gr</span> <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 58.37851 mgc: 2.856111 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 57.98311 mgc: 0.6945181 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 57.98169 mgc: 0.04932098 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  value: 57.98169 mgc: 0.0002842405 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 5  mgc: 9.465661e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 9.465661e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Matching hessian patterns... Done</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  11.72122 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 39.77521 mgc: 3.895884 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 39.74061 mgc: 0.3920337 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 39.74061 mgc: 0.005037983 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  value: 39.74061 mgc: 8.569536e-07 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 5  mgc: 2.620126e-14 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 46.39835 mgc: 0.7570035 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 46.39798 mgc: 0.03489372 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 46.39798 mgc: 8.200935e-05 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  mgc: 4.552982e-10 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 4.552982e-10 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  1.84157 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 40.59271 mgc: 0.7974252 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 40.5909 mgc: 0.0294835 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 40.5909 mgc: 3.901207e-05 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  mgc: 7.772716e-11 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 44.68845 mgc: 0.1246689 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 44.68844 mgc: 0.0009686411 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 44.68844 mgc: 5.984028e-08 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  mgc: 1.44329e-15 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 1.44329e-15 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.5755699 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 43.92098 mgc: 0.380674 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 43.92087 mgc: 0.01093109 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 43.92087 mgc: 8.978169e-06 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  mgc: 6.059375e-12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 6.059375e-12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.71546 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 43.01585 mgc: 0.5486935 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 43.01565 mgc: 0.01743663 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 43.01565 mgc: 2.527355e-05 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  mgc: 5.775047e-11 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 5.775047e-11 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.359416 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 42.25048 mgc: 0.1961147 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 42.25047 mgc: 0.003648652 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 42.25047 mgc: 1.232595e-06 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  mgc: 1.403322e-13 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 1.403322e-13 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.1645561 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 42.03535 mgc: 0.2020453 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 42.03534 mgc: 0.004116722 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  value: 42.03534 mgc: 1.65679e-06 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 4  mgc: 2.68896e-13 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 42.37252 mgc: 0.0298795 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 42.37252 mgc: 6.610381e-05 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  mgc: 4.124083e-10 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 4.124083e-10 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.1417209 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 42.27696 mgc: 0.003953647 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 42.27696 mgc: 9.898509e-07 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  mgc: 9.192647e-14 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 9.192647e-14 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.02801003 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 42.11956 mgc: 0.0445184 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 42.11956 mgc: 0.0001876571 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  mgc: 3.314731e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 3.314731e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.04623801 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 41.96495 mgc: 0.04784547 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 41.96495 mgc: 0.0002183498 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  mgc: 4.517449e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 4.517449e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.02447321 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 41.81629 mgc: 0.04627014 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 41.81629 mgc: 0.0002053923 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  mgc: 4.020242e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 4.020242e-09 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.002854085 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 41.79253 mgc: 0.006424874 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 41.79253 mgc: 3.939604e-06 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  mgc: 1.480149e-12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 1.480149e-12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  0.0002425434 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 41.78946 mgc: 0.0008453203 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  value: 41.78946 mgc: 6.814674e-08 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 3  mgc: 1.998401e-15 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 1.998401e-15 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  3.242996e-05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  value: 41.78943 mgc: 3.211222e-06 ustep: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 2  mgc: 9.829915e-13 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 9.829915e-13 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  1.636354e-06 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> iter: 1  mgc: 9.829915e-13 </span>
+<span class="r-in"><span><span class="va">opt</span><span class="op">$</span><span class="va">par</span> <span class="op">-</span> <span class="va">opt2</span><span class="op">$</span><span class="va">par</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            mu         logsd         logcv </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -2.380471e-05  4.309889e-05 -9.203910e-05 </span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
