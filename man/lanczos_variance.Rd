@@ -5,18 +5,15 @@
 \title{Estimate variance using Lanczos method}
 \usage{
 lanczos_variance(
-  Hv,
-  v,
+  Hq,
+  q,
   k = c(25, 30),
   min_spectral_ratio = 1e-10,
   orthogonalize = FALSE
 )
 }
 \arguments{
-\item{Hv}{function that calculates the product \code{Hv}}
-
-\item{v}{vector to use when calculating variance, either an indicator for a single
-parameter, or a gradient evaluated at the MLE for a derived quantity}
+\item{Hq}{function that calculates the product \code{H \%*\% q}}
 
 \item{k}{can be a vector}
 
@@ -26,6 +23,9 @@ where values < minimum are truncated to minimum
 
 \item{orthogonalize}{Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)}
+
+\item{v}{vector to use when calculating variance, either an indicator for a single
+parameter, or a gradient evaluated at the MLE for a derived quantity}
 }
 \description{
 Estimate squared standard error (variance) for a parameter or derived quantity

@@ -4,10 +4,10 @@
 \alias{lanczos}
 \title{Assemble tri-diagonal matrix}
 \usage{
-lanczos(Hv, q1, k, orthogonalize = FALSE, tol = 1e-12)
+lanczos(Hq, q1, k, orthogonalize = FALSE, tol = 1e-12)
 }
 \arguments{
-\item{Hv}{function that calculates the product \code{Hv}}
+\item{Hq}{function that calculates the product \code{H \%*\% q}}
 
 \item{q1}{initial vector used for defining a Kyrlov subspace}
 
@@ -23,10 +23,10 @@ Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 }
 \examples{
 H = diag(exp(rnorm(5)))
-v = rep(1,5)
-Hv = function(v) (H \%*\% v)[,1]
+q = rep(1,5)
+Hq = function(q) (H \%*\% q)[,1]
 
-L = lanczos(Hv, v, k = 5, ortho = TRUE)
+L = lanczos(Hq, q, k = 5, ortho = TRUE)
 T = tridiag(L$alpha, L$beta)
 
 # Should match H if and only if L$m = nrow(H)

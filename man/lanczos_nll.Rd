@@ -4,7 +4,7 @@
 \alias{lanczos_nll}
 \title{Estimate log-marginal likelihood using Lanczos method}
 \usage{
-lanczos_nll(obj, k, m, Hv, seed = NULL)
+lanczos_nll(obj, k, m, Hq, seed = NULL)
 }
 \arguments{
 \item{obj}{TMB object (output from \code{TMB::MakeADFun})}
@@ -14,7 +14,7 @@ lanczos_nll(obj, k, m, Hv, seed = NULL)
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
 
-\item{Hv}{function that calculates the product \code{Hv}}
+\item{Hq}{function that calculates the product \code{H \%*\% q}}
 
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
@@ -54,11 +54,11 @@ H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-Hv = make_Hv( pen )
+Hq = make_Hv( pen )
 
 # Compare determinant
-Hv = make_Hv(pen)
-lanczos_logdet( Hv, k = 10, m = 3, n = length(pen$par) )
+Hq = make_Hv(pen)
+lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 Matrix::determinant( H )
 
 # Compare marginal likelihoods

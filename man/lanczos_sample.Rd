@@ -4,10 +4,10 @@
 \alias{lanczos_sample}
 \title{Sample from Lanczos method}
 \usage{
-lanczos_sample(Hv, v, k, nsamp = 1, orthogonalize = FALSE)
+lanczos_sample(Hq, q, k, nsamp = 1, orthogonalize = FALSE)
 }
 \arguments{
-\item{Hv}{function that calculates the product \code{Hv}}
+\item{Hq}{function that calculates the product \code{H \%*\% q}}
 
 \item{k}{dimension for Kyrlov subspace}
 
@@ -50,7 +50,7 @@ H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-Hv = make_Hv( pen )
+Hq = make_Hq( pen )
 
 # Gradient-based Lanczos sampling
 what = "sumexpu"
@@ -58,7 +58,7 @@ grad = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )$gr( opt$par )[1,]
 what = "jnll"
 sample_x = function(n){ x = rnorm(n); return( x / sqrt(sum(x^2))) }
 samples = lanczos_sample(
-  Hv = Hv,
+  Hq = Hq,
   v = grad,
   k = 30,
   n = 1000,

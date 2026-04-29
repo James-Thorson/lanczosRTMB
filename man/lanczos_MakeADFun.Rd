@@ -11,7 +11,8 @@ lanczos_MakeADFun(
   k,
   profile = NULL,
   m = 3,
-  seed = 123
+  seed = 123,
+  do_grad = FALSE
 )
 }
 \arguments{
@@ -34,7 +35,7 @@ An object (list) of class \code{tinyVAST}. Elements include:
 \item{par}{parameter-vector of fixed effects}
 \item{fn}{function that returns the Lanczos-Laplace approximation given fixed effects}
 \item{env}{environment of local variables}
-\item{Hv}{function that returns the Hessian-vector product (for use in debugging)}
+\item{Hq}{function that returns the Hessian-vector product (for use in debugging)}
 }
 }
 \description{

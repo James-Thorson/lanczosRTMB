@@ -4,10 +4,18 @@
 \alias{lanczos_logdet}
 \title{Estimate log-determinant likelihood using Lanczos method}
 \usage{
-lanczos_logdet(Hv, k, m, n, seed = NULL, orthogonalize = TRUE)
+lanczos_logdet(
+  Hq,
+  k,
+  m,
+  n,
+  seed = NULL,
+  orthogonalize = TRUE,
+  return_extra = FALSE
+)
 }
 \arguments{
-\item{Hv}{function that calculates the product \code{Hv}}
+\item{Hq}{function that calculates the product \code{H \%*\% q}}
 
 \item{k}{dimension for Kyrlov subspace}
 

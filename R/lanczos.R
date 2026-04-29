@@ -7,7 +7,7 @@
 #' @description
 #' Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 #'
-#' @param Hv function that calculates the product `Hv`
+#' @param Hq function that calculates the product `H %*% q`
 #' @param q1 initial vector used for defining a Kyrlov subspace
 #' @param k dimension for Kyrlov subspace
 #' @param orthogonalize Whether to do two-pass Gram-Schmidt re-normalization
@@ -16,10 +16,10 @@
 #'
 #' @examples
 #' H = diag(exp(rnorm(5)))
-#' v = rep(1,5)
-#' Hv = function(v) (H %*% v)[,1]
+#' q = rep(1,5)
+#' Hq = function(q) (H %*% q)[,1]
 #'
-#' L = lanczos(Hv, v, k = 5, ortho = TRUE)
+#' L = lanczos(Hq, q, k = 5, ortho = TRUE)
 #' T = tridiag(L$alpha, L$beta)
 #'
 #' # Should match H if and only if L$m = nrow(H)
@@ -30,7 +30,7 @@
 #'
 #' @export
 lanczos <-
-function( Hv,
+function( Hq,
           q1,
           k,
           orthogonalize = FALSE,
@@ -47,7 +47,7 @@ function( Hv,
   m = k   # actual number of Lanczos steps performed
 
   for (j in 1:k) {
-    w = Hv(q)
+    w = Hq(q)
     alpha[j] = sum(q * w)
 
     if (j > 1) {
@@ -91,70 +91,70 @@ function( Hv,
 }
 
 #' @title
-#' Make function to calculate H %*% v
+#' Make function to calculate H %*% q
 #'
 #' @description
 #' Given a TMB object, make a function that efficiently calculates
-#'   `H %*% v` without constructing H itself, and instead using `grad_x( grad_x(f) %** v)`
-#'   given function f(x) that returns the negative log-likelihood.  This can
+#'   `H %*% q` without constructing H itself, and instead using `grad_u( grad_u(f) %** q)`
+#'   given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`.  This can
 #'   then be used e.g. in Lanczos methods when H is too large to construct explicitly
 #'
 #' @param obj TMB object (output from `TMB::MakeADFun`)
-#' @param par parameter vector `p` used when evaluating `H`
+#' @param par parameter vector `u` used when evaluating `H`
 #'
 #' @examples
 #' u = rnorm(100)
 #' y = rpois(length(u), exp(u))
 #' nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
 #' obj = RTMB::MakeADFun( nll, list(u=u) )
-#' Hv = make_Hv( obj )
+#' Hq = make_Hq( obj )
 #' # Confirm
-#' v = rnorm( length(obj$par) )
-#' all.equal( Hv(v)[1,], (obj$he()%*%v)[,1] )
+#' q = rnorm( length(obj$par) )
+#' all.equal( Hq(q)[1,], (obj$he()%*%v)[,1] )
 #'
 #' @export
-make_Hv <-
+make_Hq <-
 function( obj,
-          par = obj$env$last.par.best,
+          uhat = obj$env$last.par.best,
           tape ){
 
   # Make environment for passing v without retaping
   env <- new.env(parent = emptyenv())
-  env$mle = par
-  env$v = 0 * par
-  fetch_v = function() env$v
+  env$uhat = par
+  env$q = 0 * par
+  fetch_q = function() env$q
 
   # grad
   if(missing(tape)) tape = GetTape(obj)
-  dfdx = tape$jacfun()
-  dfdx$simplify()
+  dfdu = tape$jacfun()
+  dfdu$simplify()
 
   # grad * v
-  dfdx_v = function(x){
-    v = DataEval(fetch_v)
-    dfdx(x) %*% v
+  dfdu_q = function(u){
+    q = DataEval(fetch_q)
+    dfdu(u) %*% q
   }
-  tape_dfdx_v = MakeTape(
-    f = dfdx_v,
-    x = par
+  tape_dfdu_q = MakeTape(
+    f = dfdu_q,
+    x = uhat
   )
-  tape_dfdx_v$simplify()
-  tape_dfdx_v$reorder()
+  tape_dfdu_q$simplify()
+  tape_dfdu_q$reorder()
 
   # grad( grad * v )
-  d2fdx2_v = tape_dfdx_v$jacfun()
-  d2fdx2_v$simplify()
-  d2fdx2_v$reorder()
+  d2fdu2_q = tape_dfdu_q$jacfun()
+  d2fdu2_q$simplify()
+  d2fdu2_q$reorder()
 
   # Function to supply v for grad( grad * v )
-  Hv <- function(v) {
-    env$v = v
-    d2fdx2_v$force.update()
-    return(d2fdx2_v(env$mle))
+  Hq <- function(q) {
+    env$q = q
+    d2fdu2_q$force.update()
+    return(d2fdu2_q(env$uhat))
   }
 
   # bundle with environment
-  out = Hv
+  out = Hq
   attr(out,"env") = env
   return(out)
 }
@@ -224,7 +224,7 @@ function( alpha,
 #' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 #' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-#' Hv = make_Hv( pen )
+#' Hq = make_Hq( pen )
 #'
 #' # Gradient-based Lanczos sampling
 #' what = "sumexpu"
@@ -232,7 +232,7 @@ function( alpha,
 #' what = "jnll"
 #' sample_x = function(n){ x = rnorm(n); return( x / sqrt(sum(x^2))) }
 #' samples = lanczos_sample(
-#'   Hv = Hv,
+#'   Hq = Hq,
 #'   v = grad,
 #'   k = 30,
 #'   n = 1000,
@@ -254,17 +254,17 @@ function( alpha,
 #'
 #' @export
 lanczos_sample <-
-function( Hv,
-          v,
+function( Hq,
+          q,
           k,
           nsamp = 1,
           orthogonalize = FALSE) {
 
-  norm_v = sqrt(sum(v^2))
-  v = v / norm_v
+  norm_q = sqrt(sum(q^2))
+  q = q / norm_q
 
   #
-  L = lanczos(Hv, v, k, orthogonalize = orthogonalize)
+  L = lanczos(Hq, q, k, orthogonalize = orthogonalize)
   T = tridiag(L$alpha, L$beta)
   if( FALSE ){
     L$Q %*% T %*% t(L$Q) # SHOULD MATCH H
@@ -307,15 +307,15 @@ function( Hv,
 #'
 #' @export
 lanczos_variance <-
-function( Hv,
-          v,
+function( Hq,
+          q,
           k = c(25,30),
           min_spectral_ratio = 1e-10,
           orthogonalize = FALSE ) {
 
-  norm_v = sqrt(sum(v^2))
-  v = v / norm_v
-  L = lanczos( Hv, v, max(k), orthogonalize = orthogonalize )
+  norm_q = sqrt(sum(q^2))
+  q = q / norm_q
+  L = lanczos( Hq, q, max(k), orthogonalize = orthogonalize )
   Tri = tridiag(L$alpha, L$beta)
 
   fn = function( dim ){
@@ -360,23 +360,25 @@ function( Hv,
 #'
 #' @export
 lanczos_logdet <-
-function( Hv,
+function( Hq,
           k,
           m,
           n,
           seed = NULL,
-          orthogonalize = TRUE ) {
+          orthogonalize = TRUE,
+          return_extra = FALSE ) {
 
   if( !is.null(seed) ){
     set.seed(seed)
   }
-  v_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
+  q1_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
   logdet = numeric(m)
+  L = vector("list", length = m)
 
   for (mindex in 1:m) {
-    v = v_m[,mindex]
-    L = lanczos( Hv = Hv, q1 = v, k = max(k), orthogonalize = orthogonalize )
-    Tri = tridiag(L$alpha, L$beta)
+    q1 = q1_m[,mindex]
+    L[[mindex]] = lanczos( Hq = Hq, q1 = q1, k = max(k), orthogonalize = orthogonalize )
+    Tri = tridiag(L[[mindex]]$alpha, L[[mindex]]$beta)
     eig = eigen(Tri, symmetric = TRUE)
     which_pos = which( eig$values > 0 )
     log_quad = sum(log(eig$values[which_pos]) * eig$vectors[1, which_pos]^2)
@@ -384,7 +386,11 @@ function( Hv,
   }
 
   #
-  return( logdet )
+  if( isFALSE(return_extra) ){
+    return( logdet )
+  }else{
+    return( list(logdet = logdet, q1_m = q1_m, L = L) )
+  }
 }
 
 #' @title
@@ -396,7 +402,7 @@ function( Hv,
 #'
 #' @inheritParams lanczos
 #' @inheritParams lanczos_logdet
-#' @inheritParams make_Hv
+#' @inheritParams make_Hq
 #'
 #' @examples
 #' # Simulate lognormal-gamma process
@@ -428,11 +434,11 @@ function( Hv,
 #' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 #' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-#' Hv = make_Hv( pen )
+#' Hq = make_Hv( pen )
 #'
 #' # Compare determinant
-#' Hv = make_Hv(pen)
-#' lanczos_logdet( Hv, k = 10, m = 3, n = length(pen$par) )
+#' Hq = make_Hv(pen)
+#' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 #' Matrix::determinant( H )
 #'
 #' # Compare marginal likelihoods
@@ -444,16 +450,16 @@ lanczos_nll <-
 function( obj,
           k,
           m,
-          Hv,
+          Hq,
           seed = NULL ) {
 
-  if( missing(Hv) ){
-    Hv = make_Hv( obj )
+  if( missing(Hq) ){
+    Hq = make_Hq( obj )
   }
 
   #
   inner_par = obj$env$last.par.best
-  logdet = lanczos_logdet( Hv, k, m, n = length(inner_par), seed = seed )
+  logdet = lanczos_logdet( Hq, k, m, n = length(inner_par), seed = seed )
   nll = obj$env$f(inner_par) - (0.5*length(inner_par)*log(2*pi)) + 0.5*mean(logdet)
   sd_nll = 0.5 * sd(logdet)
   return( c(nll = nll, sd_nll = sd_nll) )
@@ -475,7 +481,7 @@ function( obj,
 #' \item{par}{parameter-vector of fixed effects}
 #' \item{fn}{function that returns the Lanczos-Laplace approximation given fixed effects}
 #' \item{env}{environment of local variables}
-#' \item{Hv}{function that returns the Hessian-vector product (for use in debugging)}
+#' \item{Hq}{function that returns the Hessian-vector product (for use in debugging)}
 #' }
 #'
 #' @examples
@@ -514,7 +520,14 @@ function( func,
           k,
           profile = NULL,
           m = 3,
-          seed = 123 ){
+          seed = 123,
+          do_grad = FALSE ){
+
+  # vectors
+  #  p = profile
+  #  u = random
+  #  v = fixed
+  #  x = (p,u,v)
 
   #
   env <- new.env(parent = emptyenv())
@@ -522,68 +535,94 @@ function( func,
   cmb <- function(f, ...) function(p) f(p, ...) ## Helper to make closure
 
   # DataEval updates
-  env$par_vec = unlist(parameters)
-  names(env$par_vec) = unlist(sapply( seq_along(parameters), \(x) rep(names(parameters)[x], length(parameters[[x]])) ))
-  fetch_par_vec = function() env$par_vec
+  env$x = unlist(parameters)
+  names(env$x) = unlist(sapply( seq_along(parameters), \(i) rep(names(parameters)[i], length(parameters[[i]])) ))
+  fetch_x = function() env$x
   #fetch_fixed_vec = function() env$fixed_vec
 
   # jnll w.r.t. random effects (`parnames = random`) or
   # random and profile (`parnames = c(random,profile)`), conditional on fixed effects
-  jnll_x = function( xvec, func, parnames ){
+  jnll_vec = function( vec, func, parnames ){
     "c" <- ADoverload("c")
     "[<-" <- ADoverload("[<-")
-    par_vec = DataEval(fetch_par_vec)
-    par_vec[which(names(par_vec) %in% parnames)] = xvec
+    x = DataEval(fetch_x)
+    x[which(names(par_vec) %in% parnames)] = vec
     parlist = parameters
     for(i in seq_along(parlist)){
-      parlist[[i]][] = par_vec[which(names(par_vec)==names(parameters)[i])]
+      parlist[[i]][] = x[which(names(vec)==names(parameters)[i])]
     }
     func(parlist )
   }
 
-  # Get tape w.r.t. fixed and random effects for optimizing inner problem
-  tape_u = MakeTape(
-    f = cmb( jnll_x, func = func, parnames = c(random, profile) ),
+
+  # Get tape w.r.t. profile and random effects for optimizing inner problem
+  tape_pu = MakeTape(
+    f = cmb( jnll_vec, func = func, parnames = c(random, profile) ),
     x = unlist(parameters[names(parameters) %in% c(random, profile)])
   )
-  tape_u$simplify()
-  tape_u$reorder()
+  tape_pu$simplify()
+  tape_pu$reorder()
+
+  if( isTRUE(do_grad) ){
+    # get tape w.r.t. fixed given random effects
+    tape_v = MakeTape(
+      f = cmb( jnll_vec, func = func, parnames = fixed ),
+      x = unlist(parameters[names(parameters) %in% fixed])
+    )
+    tape_v$simplify()
+    tape_v$reorder()
+    grad_v = tape_v$jacfun()
+
+    #Hq_q = make_Hv_phi(
+    #  obj_phi = tape_phi,
+    #  par_phi = unlist(parameters[names(parameters) %in% fixed]),
+    #  u_hat = unlist(parameters[names(parameters) %in% c(random, profile)])
+    #)
+  }
 
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
-  dfdu = tape_u$jacfun()
-  dfdu$simplify()
-  dfdu$reorder()
+  dfdpu = tape_pu$jacfun()
+  dfdpu$simplify()
+  dfdpu$reorder()
 
   # Make function for Hessian w.r.t. random effects (not profiled vars)
   # Hessian-vector product, for Lanczos log-det of Laplace w.r.t. random effects
-  tape_random = MakeTape(
-    f = cmb( jnll_x, func = func, parnames = random ),
+  tape_u = MakeTape(
+    f = cmb( jnll_vec, func = func, parnames = random ),
     x = unlist(parameters[names(parameters) %in% random])
   )
-  tape_random$simplify()
-  tape_random$reorder()
-  Hv = make_Hv(
-    tape = tape_random,
+  tape_u$simplify()
+  tape_u$reorder()
+  Hq = make_Hq(
+    tape = tape_u,
     par = unlist(parameters[names(parameters) %in% random])
   )
 
+  # Experiment
+  if( FALSE ){
+    tape_joint = MakeTape(
+      f = func,
+      x = parameters
+    )
+  }
+
   # Objective function
-  nll = function(fixedvec){
+  nll = function(v){
     # Define fixed effects and assign to global environment
-    env$par_vec[which(names(env$par_vec) %in% fixed)] = fixedvec
-    tape_u$force.update()
-    dfdu$force.update()
+    env$x[which(names(env$x) %in% fixed)] = v
+    tape_pu$force.update()
+    dfdpu$force.update()
 
     if( is.null(env$inner_start) ){
-      env$inner_start = env$par_vec[names(env$par_vec) %in% c(random,profile)]
+      env$puhat = env$x[names(env$par_vec) %in% c(random,profile)]
       env$best = Inf
     }
 
     # Run inner and assign xhat to global environment
     out = optim(
-      par = env$inner_start,
-      fn = tape_u,
-      gr = dfdu,
+      par = env$puhat,
+      fn = tape_pu,
+      gr = dfdpu,
       method = "L-BFGS-B",
       control = list(trace=0, maxit = 1e3, factr = 1e-2)
     )
@@ -591,35 +630,46 @@ function( func,
     # Define profiled effects, and assign to global environment
     which_profile = which( names(out$par) %in% profile )
     if( length(which_profile) > 0 ){
-      env$par_vec[which(names(env$par_vec) %in% profile)] = out$par[which_profile]
-      tape_random$force.update()
+      env$x[which(names(env$x) %in% profile)] = out$par[which_profile]
+      tape_u$force.update()
     }
 
-    # Have to assign into env(Hv)$mle to evaluate at right point
+    # Have to assign into env(Hq)$mle to evaluate at right point
     which_random = which( names(out$par) %in% random )
     if( length(which_random) > 0 ){
-      attr(Hv,"env")$mle = out$par[which_random]
+      attr(Hq,"env")$uhat = out$par[which_random]
       env$logdet1_m = lanczos_logdet(
-        Hv = Hv,
+        Hq = Hq,
         k = k,
         m = m,
         n = length(which_random),
-        seed = seed
+        seed = seed,
+        return_extra = do_grad
       )
     }else{
       env$logdet1_m = rep(0, m)
     }
 
     # Get jnll
-    jnll = tape_u( out$par )
+    jnll = tape_pu( out$par )
 
     # Assemble laplace
-    neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m)
+    if(isTRUE(do_grad)){
+      neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m$logdet)
+    }else{
+      neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m)
+    }
+
+    #
+    if( isTRUE(do_grad) ){
+      # Gradient of joint likelihood w.r.t. fixed effects
+      grad_phi$force.update()
+      grad1 = grad_phi(fixedvec)
+    }
 
     # Assign best and return
     if( neglogmarglik < env$best ){
-      #env$inner_start = env$par_vec[names(env$par_vec) %in% c(random,profile)]
-      env$inner_start = out$par
+      env$puhat = out$par
       env$best = neglogmarglik
     }
     return( neglogmarglik )
@@ -630,7 +680,7 @@ function( func,
     par = unlist(parameters[fixed]),
     fn = nll,
     env = env,
-    Hv = Hv
+    Hq = Hq
   )
   return(out)
 }
