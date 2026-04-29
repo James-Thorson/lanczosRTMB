@@ -27,7 +27,7 @@ reference:
     Helper tools, used for components of an analysis
   contents:
   - lanczos
-  - make_Hv
+  - make_Hq
 
 - title: 'Experimental and development'
   desc: |

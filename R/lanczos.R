@@ -545,10 +545,10 @@ function( func,
     "c" <- ADoverload("c")
     "[<-" <- ADoverload("[<-")
     x = DataEval(fetch_x)
-    x[which(names(vec) %in% parnames)] = vec
+    x[which(names(x) %in% parnames)] = vec
     parlist = parameters
     for(i in seq_along(parlist)){
-      parlist[[i]][] = x[which(names(vec)==names(parameters)[i])]
+      parlist[[i]][] = x[which(names(x)==names(parameters)[i])]
     }
     func(parlist )
   }
@@ -594,7 +594,7 @@ function( func,
   tape_u$reorder()
   Hq = make_Hq(
     tape = tape_u,
-    par = unlist(parameters[names(parameters) %in% random])
+    uhat = unlist(parameters[names(parameters) %in% random])
   )
 
   # Experiment
@@ -613,7 +613,7 @@ function( func,
     dfdpu$force.update()
 
     if( is.null(env$inner_start) ){
-      env$puhat = env$x[names(env$v) %in% c(random,profile)]
+      env$puhat = env$x[names(env$x) %in% c(random,profile)]
       env$best = Inf
     }
 
