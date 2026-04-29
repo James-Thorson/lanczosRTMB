@@ -30,6 +30,7 @@ obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u" )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
 
+
 ###############
 # Load objects for lanczos_MakeADFun
 ###############
@@ -51,152 +52,337 @@ do_grad = FALSE
   cmb <- function(f, ...) function(p) f(p, ...) ## Helper to make closure
 
   # DataEval updates
-  env$par_vec = unlist(parameters)
-  names(env$par_vec) = unlist(sapply( seq_along(parameters), \(x) rep(names(parameters)[x], length(parameters[[x]])) ))
-  fetch_par_vec = function() env$par_vec
+  env$x = unlist(parameters)
+  names(env$x) = unlist(sapply( seq_along(parameters), \(i) rep(names(parameters)[i], length(parameters[[i]])) ))
+  fetch_x = function() env$x
   #fetch_fixed_vec = function() env$fixed_vec
 
   # jnll w.r.t. random effects (`parnames = random`) or
   # random and profile (`parnames = c(random,profile)`), conditional on fixed effects
-  jnll_x = function( xvec, func, parnames ){
+  jnll_vec = function( vec, func, parnames ){
     "c" <- ADoverload("c")
     "[<-" <- ADoverload("[<-")
-    par_vec = DataEval(fetch_par_vec)
-    par_vec[which(names(par_vec) %in% parnames)] = xvec
+    x = DataEval(fetch_x)
+    x[which(names(x) %in% parnames)] = vec
     parlist = parameters
     for(i in seq_along(parlist)){
-      parlist[[i]][] = par_vec[which(names(par_vec)==names(parameters)[i])]
+      parlist[[i]][] = x[which(names(x)==names(parameters)[i])]
     }
     func(parlist )
   }
 
+
   # Get tape w.r.t. profile and random effects for optimizing inner problem
-  tape_u = MakeTape(
-    f = cmb( jnll_x, func = func, parnames = c(random, profile) ),
+  tape_pu = MakeTape(
+    f = cmb( jnll_vec, func = func, parnames = c(random, profile) ),
     x = unlist(parameters[names(parameters) %in% c(random, profile)])
   )
-  tape_u$simplify()
-  tape_u$reorder()
+  tape_pu$simplify()
+  tape_pu$reorder()
 
   if( isTRUE(do_grad) ){
     # get tape w.r.t. fixed given random effects
-    tape_phi = MakeTape(
-      f = cmb( jnll_x, func = func, parnames = fixed ),
+    tape_v = MakeTape(
+      f = cmb( jnll_vec, func = func, parnames = fixed ),
       x = unlist(parameters[names(parameters) %in% fixed])
     )
-    tape_phi$simplify()
-    tape_phi$reorder()
-    grad_phi = tape_phi$jacfun()
+    tape_v$simplify()
+    tape_v$reorder()
+    grad_v = tape_v$jacfun()
 
-    Hv_phi = make_Hv_phi(
-      obj_phi = tape_phi,
-      par_phi = unlist(parameters[names(parameters) %in% fixed]),
-      u_hat = unlist(parameters[names(parameters) %in% c(random, profile)])
-    )
+    #Hq_q = make_Hv_phi(
+    #  obj_phi = tape_phi,
+    #  par_phi = unlist(parameters[names(parameters) %in% fixed]),
+    #  u_hat = unlist(parameters[names(parameters) %in% c(random, profile)])
+    #)
   }
 
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
-  dfdu = tape_u$jacfun()
-  dfdu$simplify()
-  dfdu$reorder()
+  dfdpu = tape_pu$jacfun()
+  dfdpu$simplify()
+  dfdpu$reorder()
 
   # Make function for Hessian w.r.t. random effects (not profiled vars)
   # Hessian-vector product, for Lanczos log-det of Laplace w.r.t. random effects
-  tape_random = MakeTape(
-    f = cmb( jnll_x, func = func, parnames = random ),
+  tape_u = MakeTape(
+    f = cmb( jnll_vec, func = func, parnames = random ),
     x = unlist(parameters[names(parameters) %in% random])
   )
-  tape_random$simplify()
-  tape_random$reorder()
-  Hv = make_Hv(
-    tape = tape_random,
-    par = unlist(parameters[names(parameters) %in% random])
+  tape_u$simplify()
+  tape_u$reorder()
+  Hq = make_Hq(
+    tape = tape_u,
+    uhat = unlist(parameters[names(parameters) %in% random])
   )
 
 
 #
-tape = tape_joint
-par = unlist(parameters)
-which_random = which( names(env$par_vec) %in% random )
+tape_x = MakeTape( nll, parameters )
+x = env$x
+which_random = which( names(env$x) %in% random )
 
-
-
-###################
-# Development functions
-###################
-
-make_Hv_joint <-
+make_d2fdx2_q <-
 function( tape,
-          par,
+          x,
           which_random ){
 
   # Make environment for passing v without retaping
   local_env <- new.env(parent = emptyenv())
-  local_env$mle = par
-  local_env$v = 0 * par[which_random]
-  fetch_v = function() env$v
+  local_env$xhat = x
+  local_env$qprime = rep(0, length(x))
+  fetch_qprime = function() local_env$qprime
 
   # grad
   dfdx = tape$jacfun()
   dfdx$simplify()
 
   # grad * v
-  dfd_v = function(x){
-    v = DataEval(fetch_v)
-    dfdx(x)[which_random] %*% v
+  dfdx_qprime = function(x){
+    qprime = DataEval(fetch_qprime)
+    dfdx(x) %*% qprime
   }
-  tape_dfdx_joint = MakeTape(
-    f = dfdx_joint,
-    x = par
+  tape_dfdx_qprime = MakeTape(
+    f = dfdx_qprime,
+    x = x
   )
-  tape_dfdx_v$simplify()
-  tape_dfdx_v$reorder()
+  tape_dfdx_qprime$simplify()
+  tape_dfdx_qprime$reorder()
 
   # grad( grad * v )
-  d2fdx2_v = tape_dfdx_v$jacfun()
-  d2fdx2_v$simplify()
-  d2fdx2_v$reorder()
+  d2fdx2_qprime = tape_dfdx_qprime$jacfun()
+  d2fdx2_qprime$simplify()
+  d2fdx2_qprime$reorder()
 
   # Function to supply v for grad( grad * v )
-  Hv <- function(v) {
-    env$v = v
-    d2fdx2_v$force.update()
-    return(d2fdx2_v(env$mle))
+  d2fdx2_q <- function(q) {
+    env$qprime[which_random] = q
+    d2fdx2_qprime$force.update()
+    return(d2fdx2_qprime(env$x)[which_random])
   }
 
   # bundle with environment
-  out = Hv
-  attr(out,"env") = env
+  out = d2fdx2_q
+  attr(out,"env") = local_env
   return(out)
 }
 
+# Build and test
+d2fdx2_q = make_d2fdx2_q( tape_x, x = x, which_random )
+d2fdx2_q( rnorm(length(which_random)) )
 
-make_Hv_phi <- function(obj_phi, par_phi, u_hat, ...) {
-  # obj_phi is a tape of jnll w.r.t. phi, with u fixed via DataEval
-  # The HVP H_phi * v = d/dphi [ (d jnll/dphi) . v ]
-  env <- new.env(parent = emptyenv())
-  env$v <- 0 * par_phi
-  env$u <- u_hat
-  fetch_v <- function() env$v
+# Test again
+attr(d2fdx2_q,"env")$xhat[]
 
-  dfdphi <- tape_phi$jacfun()
-  dfdphi_v <- function(phi) {
-    v <- DataEval(fetch_v)
-    dfdphi(phi) %*% v
-  }
-  tape2 <- MakeTape(dfdphi_v, par_phi)
-  tape2$simplify(); tape2$reorder()
-  d2fdphi2_v <- tape2$jacfun()
-  d2fdphi2_v$simplify(); d2fdphi2_v$reorder()
-
-  Hv_phi <- function(v) {
-    env$v <- v
-    d2fdphi2_v$force.update()
-    d2fdphi2_v(par_phi)
-  }
-  attr(Hv_phi, "env") <- env
-  Hv_phi
+#
+which_fixed = which( names(env$x) %in% fixed)
+v = opt$par
+Hq <- function(q) {
+  env$q = q
+  d2fdu2_q$force.update()
+  return(d2fdu2_q(env$uhat))
 }
+
+###################
+# Experiment
+###################
+
+# Re-do as penalized likelihood
+newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
+pen = RTMB::MakeADFun( nll, parameters, map = newmap )
+Hq = make_Hq(pen)
+L = lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par), return_extra = TRUE )
+
+func = nll
+#parameters = parameters
+random = "u"
+fixed = c("mu", "logsd", "logcv")
+u_hat = env$x[which_random]
+Q_list = lapply(L$L, \(x) x$Q )
+L_list = lapply(L$L, \(x) x[c("alpha","beta")] )
+n_u = length(parameters$u)
+
+make_logdet_tape <- function( func,
+                               parameters,
+                               random,
+                               fixed,
+                               u_hat,
+                               Q_list,    # saved from forward lanczos pass
+                               L_list,    # saved alpha/beta from forward pass
+                               n_u ) {
+
+  par_phi <- unlist(parameters[fixed])
+  n_phi   <- length(par_phi)
+  n_u     <- length(u_hat)
+
+  # Store u_hat and Q matrices as plain numeric in env -- these are stop_grad'd
+  env <- new.env(parent = emptyenv())
+  env$u    <- u_hat
+  env$Q_list <- Q_list    # list of plain numeric matrices
+  env$L_list <- L_list
+  fetch_u    <- function() env$u
+
+  m <- length(Q_list)
+
+  # jnll as function of [u, phi] jointly
+  par_both <- c(u_hat, par_phi)
+  n_u      <- length(u_hat)
+
+  jnll_both <- function(x) {
+    "[<-" <- ADoverload("[<-")
+    "c"   <- ADoverload("c")
+    u   <- x[seq_len(n_u)]
+    phi <- x[n_u + seq_len(n_phi)]
+    pvec <- unlist(parameters)
+    pvec[names(pvec) %in% random] <- u
+    pvec[names(pvec) %in% fixed]  <- phi
+    parlist <- parameters
+    for (i in seq_along(parlist))
+      parlist[[i]][] <- pvec[names(pvec) == names(parameters)[i]]
+    func(parlist)
+  }
+
+  tape_both <- MakeTape(jnll_both, x = par_both)
+  tape_both$simplify()
+  dfdx <- tape_both$jacfun()
+  dfdx$simplify()
+
+  # Scalar: sum over probes of  e1' log(T_i) e1 * n_u
+  # where T_i is defined by alpha_k = q_k' H_uu q_k
+  # and q_k are plain numeric from Q_list[[i]]
+  # This whole thing is a function of phi only (u fixed via stop_grad)
+
+  logdet_of_phi <- function(phi) {
+    "[<-" <- ADoverload("[<-")
+    "c"   <- ADoverload("c")
+    u <- DataEval(fetch_u)          # stop_grad on u
+    x_eval <- c(u, phi)             # u fixed, phi live
+
+    total <- 0
+    for (i in seq_len(m)) {
+      Q   <- env$Q_list[[i]]        # plain numeric, stop_grad
+      L   <- env$L_list[[i]]
+      k_i <- L$m
+
+      alphas <- numeric(k_i)
+      betas  <- numeric(k_i - 1)
+
+      for (j in seq_len(k_i)) {
+        q_j      <- Q[, j]                    # plain numeric
+        grad_all <- dfdx(x_eval)              # live w.r.t. phi
+        grad_u   <- grad_all[seq_len(n_u)]    # u-block
+        alphas[j] <- sum(q_j * grad_u)        # q' H_uu q via grad_u at x_eval
+
+        if (j > 1) {
+          # recompute beta from the residual using saved q vectors
+          q_prev <- Q[, j-1]
+          r <- grad_u - alphas[j] * q_j - betas[j-1] * q_prev
+          betas[j-1] <- sqrt(sum(r * r))
+        }
+      }
+
+      Tri  <- tridiag(alphas, betas)
+      eig  <- eigen(Tri, symmetric = TRUE)
+      wpos <- which(eig$values > 0)
+      total <- total +
+        sum(log(eig$values[wpos]) * eig$vectors[1, wpos]^2) * n_u
+    }
+
+    total / m
+  }
+
+  # Now tape the whole thing w.r.t. phi
+  tape_logdet <- MakeTape(logdet_of_phi, x = par_phi)
+  tape_logdet$simplify()
+  tape_logdet$reorder()
+
+  # Gradient function
+  grad_logdet <- tape_logdet$jacfun()
+  grad_logdet$simplify()
+  grad_logdet$reorder()
+
+  list(
+    fn  = function(phi) tape_logdet(phi),
+    gr  = function(phi) grad_logdet(phi),
+    tape = tape_logdet
+  )
+}
+
+###################
+# Development functions
+###################
+
+#make_Hv_joint <-
+#function( tape,
+#          par,
+#          which_random ){
+#
+#  # Make environment for passing v without retaping
+#  local_env <- new.env(parent = emptyenv())
+#  local_env$mle = par
+#  local_env$v = 0 * par[which_random]
+#  fetch_v = function() env$v
+#
+#  # grad
+#  dfdx = tape$jacfun()
+#  dfdx$simplify()
+#
+#  # grad * v
+#  dfd_v = function(x){
+#    v = DataEval(fetch_v)
+#    dfdx(x)[which_random] %*% v
+#  }
+#  tape_dfdx_joint = MakeTape(
+#    f = dfdx_joint,
+#    x = par
+#  )
+#  tape_dfdx_v$simplify()
+#  tape_dfdx_v$reorder()
+#
+#  # grad( grad * v )
+#  d2fdx2_v = tape_dfdx_v$jacfun()
+#  d2fdx2_v$simplify()
+#  d2fdx2_v$reorder()
+#
+#  # Function to supply v for grad( grad * v )
+#  Hv <- function(v) {
+#    env$v = v
+#    d2fdx2_v$force.update()
+#    return(d2fdx2_v(env$mle))
+#  }
+#
+#  # bundle with environment
+#  out = Hv
+#  attr(out,"env") = env
+#  return(out)
+#}
+#
+#
+#make_Hv_phi <- function(obj_phi, par_phi, u_hat, ...) {
+#  # obj_phi is a tape of jnll w.r.t. phi, with u fixed via DataEval
+#  # The HVP H_phi * v = d/dphi [ (d jnll/dphi) . v ]
+#  env <- new.env(parent = emptyenv())
+#  env$v <- 0 * par_phi
+#  env$u <- u_hat
+#  fetch_v <- function() env$v
+#
+#  dfdphi <- tape_phi$jacfun()
+#  dfdphi_v <- function(phi) {
+#    v <- DataEval(fetch_v)
+#    dfdphi(phi) %*% v
+#  }
+#  tape2 <- MakeTape(dfdphi_v, par_phi)
+#  tape2$simplify(); tape2$reorder()
+#  d2fdphi2_v <- tape2$jacfun()
+#  d2fdphi2_v$simplify(); d2fdphi2_v$reorder()
+#
+#  Hv_phi <- function(v) {
+#    env$v <- v
+#    d2fdphi2_v$force.update()
+#    d2fdphi2_v(par_phi)
+#  }
+#  attr(Hv_phi, "env") <- env
+#  Hv_phi
+#}
 
 lanczos_logdet_grad <- function(Hv_phi, par_phi, result, n) {
   m <- length(result$L_list)
