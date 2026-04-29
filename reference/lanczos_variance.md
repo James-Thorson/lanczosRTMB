@@ -7,8 +7,8 @@ quantity without forming the Hessian matrix directly
 
 ``` r
 lanczos_variance(
-  Hv,
-  v,
+  Hq,
+  q,
   k = c(25, 30),
   min_spectral_ratio = 1e-10,
   orthogonalize = FALSE
@@ -17,15 +17,9 @@ lanczos_variance(
 
 ## Arguments
 
-- Hv:
+- Hq:
 
-  function that calculates the product `Hv`
-
-- v:
-
-  vector to use when calculating variance, either an indicator for a
-  single parameter, or a gradient evaluated at the MLE for a derived
-  quantity
+  function that calculates the product `H %*% q`
 
 - k:
 
@@ -39,3 +33,9 @@ lanczos_variance(
 - orthogonalize:
 
   Whether to do two-pass Gram-Schmidt re-normalization (much slower)
+
+- v:
+
+  vector to use when calculating variance, either an indicator for a
+  single parameter, or a gradient evaluated at the MLE for a derived
+  quantity

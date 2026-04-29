@@ -116,8 +116,8 @@ approximate the log-determinant of the Hessian for random effects:
 
 ``` r
 # log-determinant using Lanczos
-Hv = make_Hv(pen)
-lanczos_logdet( Hv, k = 10, m = 3, n = length(pen$par) )
+Hq = make_Hq(pen)
+lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 #> [1] 44.4956 44.4956 44.4956
 
 # log-determinant for marginal likelihood
@@ -149,8 +149,8 @@ parameters. Here, we will sample the first three random effects
 
 ``` r
 samples = lanczos_sample(
-   Hv = Hv,
-   v = c( rep(1,3), rep(0,n-3) ),
+   Hq = Hq,
+   q = c( rep(1,3), rep(0,n-3) ),
    k = 30,
    n = 1000,
    orthogonalize = TRUE
@@ -184,8 +184,8 @@ errors:
 
 ``` r
 samples = lanczos_sample(
-   Hv = Hv,
-   v = grad,
+   Hq = Hq,
+   q = grad,
    k = 30,
    n = 1000,
    orthogonalize = TRUE
@@ -206,8 +206,8 @@ quantity using Lanczos within the delta method:
 ``` r
 # 
 Var = lanczos_variance(
-  Hv = Hv,
-  v = grad,
+  Hq = Hq,
+  q = grad,
   k = 3
 )
 
@@ -258,6 +258,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 2.95 secs
+Runtime for this vignette: 3.13 secs
 
 ## Works cited

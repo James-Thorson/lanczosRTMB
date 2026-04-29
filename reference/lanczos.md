@@ -5,14 +5,14 @@ Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 ## Usage
 
 ``` r
-lanczos(Hv, q1, k, orthogonalize = FALSE, tol = 1e-12)
+lanczos(Hq, q1, k, orthogonalize = FALSE, tol = 1e-12)
 ```
 
 ## Arguments
 
-- Hv:
+- Hq:
 
-  function that calculates the product `Hv`
+  function that calculates the product `H %*% q`
 
 - q1:
 
@@ -35,10 +35,10 @@ lanczos(Hv, q1, k, orthogonalize = FALSE, tol = 1e-12)
 
 ``` r
 H = diag(exp(rnorm(5)))
-v = rep(1,5)
-Hv = function(v) (H %*% v)[,1]
+q = rep(1,5)
+Hq = function(q) (H %*% q)[,1]
 
-L = lanczos(Hv, v, k = 5, ortho = TRUE)
+L = lanczos(Hq, q, k = 5, ortho = TRUE)
 T = tridiag(L$alpha, L$beta)
 
 # Should match H if and only if L$m = nrow(H)

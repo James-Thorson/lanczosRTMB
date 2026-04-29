@@ -46,8 +46,8 @@ without forming the Hessian matrix directly</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos_variance</span><span class="op">(</span></span>
-<span>  <span class="va">Hv</span>,</span>
-<span>  <span class="va">v</span>,</span>
+<span>  <span class="va">Hq</span>,</span>
+<span>  <span class="va">q</span>,</span>
 <span>  k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">30</span><span class="op">)</span>,</span>
 <span>  min_spectral_ratio <span class="op">=</span> <span class="fl">1e-10</span>,</span>
 <span>  orthogonalize <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -58,13 +58,8 @@ without forming the Hessian matrix directly</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-hv">Hv<a class="anchor" aria-label="anchor" href="#arg-hv"></a></dt>
-<dd><p>function that calculates the product <code>Hv</code></p></dd>
-
-
-<dt id="arg-v">v<a class="anchor" aria-label="anchor" href="#arg-v"></a></dt>
-<dd><p>vector to use when calculating variance, either an indicator for a single
-parameter, or a gradient evaluated at the MLE for a derived quantity</p></dd>
+<dl><dt id="arg-hq">Hq<a class="anchor" aria-label="anchor" href="#arg-hq"></a></dt>
+<dd><p>function that calculates the product <code>H %*% q</code></p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -80,6 +75,11 @@ where values &lt; minimum are truncated to minimum
 <dt id="arg-orthogonalize">orthogonalize<a class="anchor" aria-label="anchor" href="#arg-orthogonalize"></a></dt>
 <dd><p>Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)</p></dd>
+
+
+<dt id="arg-v">v<a class="anchor" aria-label="anchor" href="#arg-v"></a></dt>
+<dd><p>vector to use when calculating variance, either an indicator for a single
+parameter, or a gradient evaluated at the MLE for a derived quantity</p></dd>
 
 </dl></div>
 

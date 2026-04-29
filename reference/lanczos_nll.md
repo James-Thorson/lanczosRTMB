@@ -7,7 +7,7 @@ approximation
 ## Usage
 
 ``` r
-lanczos_nll(obj, k, m, Hv, seed = NULL)
+lanczos_nll(obj, k, m, Hq, seed = NULL)
 ```
 
 ## Arguments
@@ -26,9 +26,9 @@ lanczos_nll(obj, k, m, Hv, seed = NULL)
   number of probe-vectors to use for approximating average and standard
   deviation of log-determinant
 
-- Hv:
+- Hq:
 
-  function that calculates the product `Hv`
+  function that calculates the product `H %*% q`
 
 - seed:
 
@@ -191,11 +191,10 @@ newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #> outer mgc:  1.461054e-13 
-Hv = make_Hv( pen )
 
 # Compare determinant
-Hv = make_Hv(pen)
-lanczos_logdet( Hv, k = 10, m = 3, n = length(pen$par) )
+Hq = make_Hq(pen)
+lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 #> [1] 44.53951 44.53951 44.53951
 Matrix::determinant( H )
 #> $modulus

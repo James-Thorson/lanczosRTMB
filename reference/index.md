@@ -19,8 +19,8 @@ Helper tools, used for components of an analysis
 
 - [`lanczos()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos.md)
   : Assemble tri-diagonal matrix
-- [`make_Hv()`](https://james-thorson.github.io/lanczosRTMB/reference/make_Hv.md)
-  : Make function to calculate H %\*% v
+- [`make_Hq()`](https://james-thorson.github.io/lanczosRTMB/reference/make_Hq.md)
+  : Make function to calculate H %\*% q
 
 ## Experimental and development
 

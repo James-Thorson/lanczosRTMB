@@ -42,15 +42,15 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos</span><span class="op">(</span><span class="va">Hv</span>, <span class="va">q1</span>, <span class="va">k</span>, orthogonalize <span class="op">=</span> <span class="cn">FALSE</span>, tol <span class="op">=</span> <span class="fl">1e-12</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos</span><span class="op">(</span><span class="va">Hq</span>, <span class="va">q1</span>, <span class="va">k</span>, orthogonalize <span class="op">=</span> <span class="cn">FALSE</span>, tol <span class="op">=</span> <span class="fl">1e-12</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-hv">Hv<a class="anchor" aria-label="anchor" href="#arg-hv"></a></dt>
-<dd><p>function that calculates the product <code>Hv</code></p></dd>
+<dl><dt id="arg-hq">Hq<a class="anchor" aria-label="anchor" href="#arg-hq"></a></dt>
+<dd><p>function that calculates the product <code>H %*% q</code></p></dd>
 
 
 <dt id="arg-q-">q1<a class="anchor" aria-label="anchor" href="#arg-q-"></a></dt>
@@ -74,10 +74,10 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">H</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">v</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">Hv</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="op">(</span><span class="va">H</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">v</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">q</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">q</span><span class="op">)</span> <span class="op">(</span><span class="va">H</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">q</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">L</span> <span class="op">=</span> <span class="fu">lanczos</span><span class="op">(</span><span class="va">Hv</span>, <span class="va">v</span>, k <span class="op">=</span> <span class="fl">5</span>, ortho <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">L</span> <span class="op">=</span> <span class="fu">lanczos</span><span class="op">(</span><span class="va">Hq</span>, <span class="va">q</span>, k <span class="op">=</span> <span class="fl">5</span>, ortho <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="cn">T</span> <span class="op">=</span> <span class="fu"><a href="tridiag.html">tridiag</a></span><span class="op">(</span><span class="va">L</span><span class="op">$</span><span class="va">alpha</span>, <span class="va">L</span><span class="op">$</span><span class="va">beta</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Should match H if and only if L$m = nrow(H)</span></span></span>

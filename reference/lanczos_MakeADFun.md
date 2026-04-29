@@ -13,7 +13,8 @@ lanczos_MakeADFun(
   k,
   profile = NULL,
   m = 3,
-  seed = 123
+  seed = 123,
+  do_grad = FALSE
 )
 ```
 
@@ -59,7 +60,7 @@ An object (list) of class `tinyVAST`. Elements include:
 
   environment of local variables
 
-- Hv:
+- Hq:
 
   function that returns the Hessian-vector product (for use in
   debugging)
@@ -185,5 +186,5 @@ opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 #> iter: 1  mgc: 9.829915e-13 
 opt$par - opt2$par
 #>            mu         logsd         logcv 
-#> -2.380471e-05  4.309889e-05 -9.203910e-05 
+#>  3.931741e-05 -5.483657e-05  1.143543e-04 
 ```

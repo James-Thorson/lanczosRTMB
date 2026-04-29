@@ -6,14 +6,22 @@ approximation
 ## Usage
 
 ``` r
-lanczos_logdet(Hv, k, m, n, seed = NULL, orthogonalize = TRUE)
+lanczos_logdet(
+  Hq,
+  k,
+  m,
+  n,
+  seed = NULL,
+  orthogonalize = TRUE,
+  return_extra = FALSE
+)
 ```
 
 ## Arguments
 
-- Hv:
+- Hq:
 
-  function that calculates the product `Hv`
+  function that calculates the product `H %*% q`
 
 - k:
 

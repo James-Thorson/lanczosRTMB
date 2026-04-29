@@ -45,15 +45,15 @@ matrix</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos_sample</span><span class="op">(</span><span class="va">Hv</span>, <span class="va">v</span>, <span class="va">k</span>, nsamp <span class="op">=</span> <span class="fl">1</span>, orthogonalize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos_sample</span><span class="op">(</span><span class="va">Hq</span>, <span class="va">q</span>, <span class="va">k</span>, nsamp <span class="op">=</span> <span class="fl">1</span>, orthogonalize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-hv">Hv<a class="anchor" aria-label="anchor" href="#arg-hv"></a></dt>
-<dd><p>function that calculates the product <code>Hv</code></p></dd>
+<dl><dt id="arg-hq">Hq<a class="anchor" aria-label="anchor" href="#arg-hq"></a></dt>
+<dd><p>function that calculates the product <code>H %*% q</code></p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -224,7 +224,7 @@ matrix</p>
 <span class="r-in"><span><span class="va">pen</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> <span class="va">nll</span>, <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">parList</span><span class="op">(</span><span class="op">)</span>, map <span class="op">=</span> <span class="va">newmap</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">opt_pen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">pen</span><span class="op">$</span><span class="va">par</span>, <span class="va">pen</span><span class="op">$</span><span class="va">fn</span>, <span class="va">pen</span><span class="op">$</span><span class="va">gr</span> <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> outer mgc:  1.461054e-13 </span>
-<span class="r-in"><span><span class="va">Hv</span> <span class="op">=</span> <span class="fu"><a href="make_Hv.html">make_Hv</a></span><span class="op">(</span> <span class="va">pen</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="va">pen</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Gradient-based Lanczos sampling</span></span></span>
 <span class="r-in"><span><span class="va">what</span> <span class="op">=</span> <span class="st">"sumexpu"</span></span></span>
@@ -233,13 +233,13 @@ matrix</p>
 <span class="r-in"><span><span class="va">what</span> <span class="op">=</span> <span class="st">"jnll"</span></span></span>
 <span class="r-in"><span><span class="va">sample_x</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">{</span> <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>; <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span> <span class="va">x</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">}</span></span></span>
 <span class="r-in"><span><span class="va">samples</span> <span class="op">=</span> <span class="fu">lanczos_sample</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  Hv <span class="op">=</span> <span class="va">Hv</span>,</span></span>
+<span class="r-in"><span>  Hq <span class="op">=</span> <span class="va">Hq</span>,</span></span>
 <span class="r-in"><span>  v <span class="op">=</span> <span class="va">grad</span>,</span></span>
 <span class="r-in"><span>  k <span class="op">=</span> <span class="fl">30</span>,</span></span>
 <span class="r-in"><span>  n <span class="op">=</span> <span class="fl">1000</span>,</span></span>
 <span class="r-in"><span>  orthogonalize <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'grad' not found</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in lanczos_sample(Hq = Hq, v = grad, k = 30, n = 1000, orthogonalize = TRUE):</span> unused argument (v = grad)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Samples from Lanczos for parameters that contribute to derived quantity</span></span></span>
 <span class="r-in"><span><span class="va">samples</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span> <span class="va">samples</span>, MARGIN <span class="op">=</span> <span class="fl">1</span>, FUN <span class="op">=</span> <span class="st">"+"</span>, STAT <span class="op">=</span> <span class="va">opt</span><span class="op">$</span><span class="va">par</span> <span class="op">)</span></span></span>

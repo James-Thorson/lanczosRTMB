@@ -6,14 +6,14 @@ Hessian matrix
 ## Usage
 
 ``` r
-lanczos_sample(Hv, v, k, nsamp = 1, orthogonalize = FALSE)
+lanczos_sample(Hq, q, k, nsamp = 1, orthogonalize = FALSE)
 ```
 
 ## Arguments
 
-- Hv:
+- Hq:
 
-  function that calculates the product `Hv`
+  function that calculates the product `H %*% q`
 
 - k:
 
@@ -182,7 +182,7 @@ newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #> outer mgc:  1.461054e-13 
-Hv = make_Hv( pen )
+Hq = make_Hq( pen )
 
 # Gradient-based Lanczos sampling
 what = "sumexpu"
@@ -191,13 +191,13 @@ grad = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )$gr( opt$par )[1,]
 what = "jnll"
 sample_x = function(n){ x = rnorm(n); return( x / sqrt(sum(x^2))) }
 samples = lanczos_sample(
-  Hv = Hv,
+  Hq = Hq,
   v = grad,
   k = 30,
   n = 1000,
   orthogonalize = TRUE
 )
-#> Error: object 'grad' not found
+#> Error in lanczos_sample(Hq = Hq, v = grad, k = 30, n = 1000, orthogonalize = TRUE): unused argument (v = grad)
 
 # Samples from Lanczos for parameters that contribute to derived quantity
 samples = sweep( samples, MARGIN = 1, FUN = "+", STAT = opt$par )
