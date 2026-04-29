@@ -54,10 +54,9 @@ H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-Hq = make_Hv( pen )
 
 # Compare determinant
-Hq = make_Hv(pen)
+Hq = make_Hq(pen)
 lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 Matrix::determinant( H )
 

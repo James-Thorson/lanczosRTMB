@@ -434,10 +434,9 @@ function( Hq,
 #' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 #' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-#' Hq = make_Hv( pen )
 #'
 #' # Compare determinant
-#' Hq = make_Hv(pen)
+#' Hq = make_Hq(pen)
 #' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 #' Matrix::determinant( H )
 #'
@@ -546,7 +545,7 @@ function( func,
     "c" <- ADoverload("c")
     "[<-" <- ADoverload("[<-")
     x = DataEval(fetch_x)
-    x[which(names(par_vec) %in% parnames)] = vec
+    x[which(names(vec) %in% parnames)] = vec
     parlist = parameters
     for(i in seq_along(parlist)){
       parlist[[i]][] = x[which(names(vec)==names(parameters)[i])]
@@ -614,7 +613,7 @@ function( func,
     dfdpu$force.update()
 
     if( is.null(env$inner_start) ){
-      env$puhat = env$x[names(env$par_vec) %in% c(random,profile)]
+      env$puhat = env$x[names(env$v) %in% c(random,profile)]
       env$best = Inf
     }
 
