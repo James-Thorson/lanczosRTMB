@@ -106,8 +106,8 @@ We can then use stochastic trace estimation and the Lanczos method to approximat
 
 ```{r}
 # log-determinant using Lanczos
-Hv = make_Hv(pen)
-lanczos_logdet( Hv, k = 10, m = 3, n = length(pen$par) )
+Hq = make_Hq(pen)
+lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 
 # log-determinant for marginal likelihood
 H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
@@ -129,8 +129,8 @@ Alternatively, we can apply Lanczos methods to standard errors for parameters.  
 
 ```{r}
 samples = lanczos_sample(
-   Hv = Hv,
-   v = c( rep(1,3), rep(0,n-3) ),
+   Hq = Hq,
+   q = c( rep(1,3), rep(0,n-3) ),
    k = 30,
    n = 1000,
    orthogonalize = TRUE
@@ -157,8 +157,8 @@ We can then use this gradient to approximate samples from the Hessian matrix and
 
 ```{r}
 samples = lanczos_sample(
-   Hv = Hv,
-   v = grad,
+   Hq = Hq,
+   q = grad,
    k = 30,
    n = 1000,
    orthogonalize = TRUE
@@ -175,8 +175,8 @@ Alternatively, we can calculate the standard error for a derived quantity using 
 ```{r}
 # 
 Var = lanczos_variance(
-  Hv = Hv,
-  v = grad,
+  Hq = Hq,
+  q = grad,
   k = 3
 )
 

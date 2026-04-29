@@ -120,8 +120,8 @@ function( obj,
 
   # Make environment for passing v without retaping
   env <- new.env(parent = emptyenv())
-  env$uhat = par
-  env$q = 0 * par
+  env$uhat = uhat
+  env$q = 0 * uhat
   fetch_q = function() env$q
 
   # grad
@@ -334,7 +334,7 @@ function( Hq,
     quad = Tinv[1, 1]
 
     # final variance estimate
-    (norm_v^2) * quad
+    (norm_q^2) * quad
   }
   sapply( X = k, FUN = fn )
 }
@@ -382,7 +382,7 @@ function( Hq,
     eig = eigen(Tri, symmetric = TRUE)
     which_pos = which( eig$values > 0 )
     log_quad = sum(log(eig$values[which_pos]) * eig$vectors[1, which_pos]^2)
-    logdet[mindex] = log_quad * length(v)
+    logdet[mindex] = log_quad * n
   }
 
   #
