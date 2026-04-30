@@ -28,7 +28,6 @@
 #' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
 #' @importFrom Matrix sparseMatrix Diagonal Matrix t
 #' @importFrom stats optim rnorm sd
-#' @importFrom mvtnorm rmvnorm
 #'
 #' @export
 lanczos <-
