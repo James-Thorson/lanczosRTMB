@@ -45,14 +45,14 @@ nll = function(p){
   if(what == "jnll") return(jnll)
   if(what == "sumexpu") return(sumexpu)
 }
-obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u" )
+obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 opt = nlminb( obj$par, obj$fn, obj$gr )
 sdrep = sdreport(obj, bias.correct = TRUE )
 H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 
 # Re-do as penalized likelihood
 newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
-pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
+pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 
 # Compare determinant

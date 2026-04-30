@@ -106,7 +106,7 @@ function( Hq,
 #' u = rnorm(100)
 #' y = rpois(length(u), exp(u))
 #' nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
-#' obj = RTMB::MakeADFun( nll, list(u=u) )
+#' obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
 #' Hq = make_Hq( obj )
 #' # Confirm
 #' q = rnorm( length(obj$par) )
@@ -215,20 +215,20 @@ function( alpha,
 #'   if(what == "jnll") return(jnll)
 #'   if(what == "sumexpu") return(sumexpu)
 #' }
-#' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u" )
+#' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 #' opt = nlminb( obj$par, obj$fn, obj$gr )
 #' sdrep = sdreport(obj, bias.correct = TRUE )
 #' H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 #'
 #' # Re-do as penalized likelihood
 #' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
-#' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
+#' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #' Hq = make_Hq( pen )
 #'
 #' # Gradient-based Lanczos sampling
 #' what = "sumexpu"
-#' grad = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )$gr( opt$par )[1,]
+#' grad = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )$gr( opt_pen$par )[1,]
 #' what = "jnll"
 #' sample_x = function(n){ x = rnorm(n); return( x / sqrt(sum(x^2))) }
 #' samples = lanczos_sample(
@@ -425,14 +425,14 @@ function( Hq,
 #'   if(what == "jnll") return(jnll)
 #'   if(what == "sumexpu") return(sumexpu)
 #' }
-#' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u" )
+#' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 #' opt = nlminb( obj$par, obj$fn, obj$gr )
 #' sdrep = sdreport(obj, bias.correct = TRUE )
 #' H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 #'
 #' # Re-do as penalized likelihood
 #' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
-#' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap )
+#' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #'
 #' # Compare determinant
@@ -507,7 +507,7 @@ function( obj,
 #' opt = nlminb( obj$par, obj$fn )
 #'
 #' # Compare with RTMB
-#' obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u" )
+#' obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 #' opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 #' opt$par - opt2$par
 #'
