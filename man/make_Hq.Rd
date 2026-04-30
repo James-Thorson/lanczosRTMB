@@ -4,14 +4,15 @@
 \alias{make_Hq}
 \title{Make function to calculate H \%*\% q}
 \usage{
-make_Hq(obj, uhat = obj$env$last.par.best, tape)
+make_Hq(tape, x, which_random = seq_along(x))
 }
 \arguments{
-\item{obj}{TMB object (output from \code{TMB::MakeADFun})}
-
-\item{uhat}{parameter vector \code{u} used when evaluating \code{H}}
-
 \item{tape}{Alternative to specifying \code{obj}}
+
+\item{x}{parameter vector \code{x} (or list coersed to vector) used when evaluating \code{H}}
+
+\item{which_random}{integer-vector indicating which elements of \code{x} correspond to random effects,
+where the probe \code{q} then has length \code{length(which_random)}}
 }
 \description{
 Given a TMB object, make a function that efficiently calculates
@@ -19,14 +20,50 @@ Given a TMB object, make a function that efficiently calculates
 given function f(x) that returns the negative log-likelihood given \code{x = u} with fixed \code{v}.  This can
 then be used e.g. in Lanczos methods when H is too large to construct explicitly
 }
+\details{
+The output \code{Hq = make_Hq( tape, x )} takes as argument a probe \eqn{\mathbf{q}} and outputs
+\eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
+assign a new value to \code{attr(Hq,"env")$x}.  RTMB then does a \code{force.update()} to update
+the tape based on that new value.
+
+\code{qprime} is defined internally where \code{qprime[which_random] = q} and
+\code{qprime[!which_random] = 0}, where \code{length(qprime)} is equal to \code{length(x)}
+}
 \examples{
-u = rnorm(100)
-y = rpois(length(u), exp(u))
-nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
-obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
-Hq = make_Hq( obj )
-# Confirm
-q = rnorm( length(obj$par) )
-all.equal( Hq(q)[1,], (obj$he()\%*\%q)[,1] )
+# Simulate lognormal-gamma process
+set.seed(123)
+library(RTMB)
+n = 30
+n_sum = 3
+u = 0 + rnorm(n)
+y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
+
+# Fit as GLMM
+nll = function(p){
+  nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
+  nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+  jnll = -1 * ( sum(nll1) + sum(nll2) )
+  return(jnll)
+}
+
+# Build with RTMB
+params = list(u=u, mu = 0, logsd = 0, logcv = 0)
+obj = MakeADFun( nll, params, random = "u", silent = TRUE )
+
+# Build with Lanczos
+tape = MakeTape( nll, params )
+which_random = 1:30
+Hq = make_Hq(
+  tape,
+  x = params,
+  which_random = which_random
+)
+
+# Compare them
+q = rnorm(length(which_random))
+all.equal(
+  Hq(q),
+  (obj$env$spHess(random=TRUE) \%*\% q)[,1]
+)
 
 }

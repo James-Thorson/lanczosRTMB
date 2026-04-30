@@ -14,6 +14,10 @@
 #'        (much slower)
 #' @param tol numerical tolerance for stopping algorithm given that no more terms are identifiable
 #'
+#' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
+#' @importFrom Matrix sparseMatrix Diagonal Matrix t
+#' @importFrom stats optim rnorm sd
+#'
 #' @examples
 #' H = diag(exp(rnorm(5)))
 #' q = rep(1,5)
@@ -24,10 +28,6 @@
 #'
 #' # Should match H if and only if L$m = nrow(H)
 #' range(L$Q %*% T %*% t(L$Q) - H)
-#'
-#' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
-#' @importFrom Matrix sparseMatrix Diagonal Matrix t
-#' @importFrom stats optim rnorm sd
 #'
 #' @export
 lanczos <-
@@ -100,59 +100,102 @@ function( Hq,
 #'   given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`.  This can
 #'   then be used e.g. in Lanczos methods when H is too large to construct explicitly
 #'
-#' @param obj TMB object (output from `TMB::MakeADFun`)
-#' @param uhat parameter vector `u` used when evaluating `H`
+#' @details
+#' The output `Hq = make_Hq( tape, x )` takes as argument a probe \eqn{\mathbf{q}} and outputs
+#' \eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
+#' assign a new value to `attr(Hq,"env")$x`.  RTMB then does a `force.update()` to update
+#' the tape based on that new value.
+#'
+#' @param x parameter vector `x` (or list coersed to vector) used when evaluating `H`
 #' @param tape Alternative to specifying `obj`
+#' @param which_random integer-vector indicating which elements of `x` correspond to random effects,
+#'        where the probe `q` then has length `length(which_random)`
+#'
+#' @details
+#' `qprime` is defined internally where `qprime[which_random] = q` and
+#' `qprime[!which_random] = 0`, where `length(qprime)` is equal to `length(x)`
+#'
 #'
 #' @examples
-#' u = rnorm(100)
-#' y = rpois(length(u), exp(u))
-#' nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
-#' obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
-#' Hq = make_Hq( obj )
-#' # Confirm
-#' q = rnorm( length(obj$par) )
-#' all.equal( Hq(q)[1,], (obj$he()%*%q)[,1] )
+#' # Simulate lognormal-gamma process
+#' set.seed(123)
+#' library(RTMB)
+#' n = 30
+#' n_sum = 3
+#' u = 0 + rnorm(n)
+#' y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
+#'
+#' # Fit as GLMM
+#' nll = function(p){
+#'   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
+#'   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+#'   jnll = -1 * ( sum(nll1) + sum(nll2) )
+#'   return(jnll)
+#' }
+#'
+#' # Build with RTMB
+#' params = list(u=u, mu = 0, logsd = 0, logcv = 0)
+#' obj = MakeADFun( nll, params, random = "u", silent = TRUE )
+#'
+#' # Build with Lanczos
+#' tape = MakeTape( nll, params )
+#' which_random = 1:30
+#' Hq = make_Hq(
+#'   tape,
+#'   x = params,
+#'   which_random = which_random
+#' )
+#'
+#' # Compare them
+#' q = rnorm(length(which_random))
+#' all.equal(
+#'   Hq(q),
+#'   (obj$env$spHess(random=TRUE) %*% q)[,1]
+#' )
 #'
 #' @export
 make_Hq <-
-function( obj,
-          uhat = obj$env$last.par.best,
-          tape ){
+function( tape,
+          x,
+          which_random = seq_along(x) ){
 
-  # Make environment for passing v without retaping
+# @param live_x whether to pass `x` explicitly so that it can be taped.
+#        This is only necessary when computing the derivative of a log-determinant
+
+  # Make environment for passing qprime without retaping
+  # qprime[which_random] = q, where q is the probe passed by users
   env <- new.env(parent = emptyenv())
-  env$uhat = uhat
-  env$q = 0 * uhat
-  fetch_q = function() env$q
+  env$x = unlist(x)
+  env$qprime = 0 * unlist(x)
+  env$which_random = which_random
+  fetch_qprime = function() env$qprime
 
   # grad
-  if(missing(tape)) tape = GetTape(obj)
   dfdu = tape$jacfun()
   dfdu$simplify()
 
-  # grad * v
-  dfdu_q = function(u){
-    q = DataEval(fetch_q)
-    dfdu(u) %*% q
+  # grad * qprime
+  dfdu_qprime = function(u){
+    qprime = DataEval(fetch_qprime)
+    sum(dfdu(u)[which_random] * qprime[which_random])
   }
-  tape_dfdu_q = MakeTape(
-    f = dfdu_q,
-    x = uhat
+  tape_dfdu_qprime = MakeTape(
+    f = dfdu_qprime,
+    x = x
   )
-  tape_dfdu_q$simplify()
-  tape_dfdu_q$reorder()
+  tape_dfdu_qprime$simplify()
+  tape_dfdu_qprime$reorder()
 
   # grad( grad * v )
-  d2fdu2_q = tape_dfdu_q$jacfun()
-  d2fdu2_q$simplify()
-  d2fdu2_q$reorder()
+  d2fdu2_qprime = tape_dfdu_qprime$jacfun()
+  d2fdu2_qprime$simplify()
+  d2fdu2_qprime$reorder()
 
   # Function to supply v for grad( grad * v )
   Hq <- function(q) {
-    env$q = q
-    d2fdu2_q$force.update()
-    return(d2fdu2_q(env$uhat))
+    env$qprime[which_random] = q
+    d2fdu2_qprime$force.update()
+    return(d2fdu2_qprime(env$x)[which_random])
   }
 
   # bundle with environment
@@ -226,7 +269,7 @@ function( alpha,
 #' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 #' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-#' Hq = make_Hq( pen )
+#' Hq = make_Hq( GetTape(pen), opt_pen$par )
 #'
 #' # Gradient-based Lanczos sampling
 #' what = "sumexpu"
@@ -242,7 +285,7 @@ function( alpha,
 #' )
 #'
 #' # Samples from Lanczos for parameters that contribute to derived quantity
-#' samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt$par )
+#' samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt_pen$par )
 #' apply( samples, MARGIN = 1, FUN = sd )
 #'
 #' # Samples from full Hessian should approximately match
@@ -361,6 +404,42 @@ function( Hq,
 #' For a model with independent random effects, the variance of stochastic
 #' trace estimation should be zero
 #'
+#' @examples
+#' # Simulate lognormal-gamma process
+#' set.seed(123)
+#' library(RTMB)
+#' n = 30
+#' n_sum = 3
+#' u = 0 + rnorm(n)
+#' y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
+#'
+#' # Fit as GLMM
+#' what = "jnll"
+#' nll = function(p){
+#'   sumexpu = sum(exp(p$u[seq_len(n_sum)]))
+#'   ADREPORT( sumexpu )
+#'   REPORT( sumexpu )
+#'   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
+#'   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+#'   jnll = -1 * ( sum(nll1) + sum(nll2) )
+#'   if(what == "jnll") return(jnll)
+#'   if(what == "sumexpu") return(sumexpu)
+#' }
+#' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
+#' opt = nlminb( obj$par, obj$fn, obj$gr )
+#' sdrep = sdreport(obj, bias.correct = TRUE )
+#' H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
+#'
+#' # Re-do as penalized likelihood
+#' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
+#' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
+#' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
+#'
+#' # Compare determinant
+#' Hq = make_Hq( GetTape(pen), opt_pen$par )
+#' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
+#' Matrix::determinant( H )$modulus
+#'
 #' @export
 lanczos_logdet <-
 function( Hq,
@@ -403,9 +482,16 @@ function( Hq,
 #' Estimate log-marginal likelihood using Laplace approximation, but replacing
 #'    exact calculation of log-determinant with a stochastic approximation
 #'
+#' @details
+#' This function is only intended when integrating across all parameters, e.g.,
+#' when supplying a penalized likelihood model with fixed effects mapped off at
+#' a prior estimate.  For more control over which parameters to estimate, use
+#' [lanczos_MakeADFun]
+#'
 #' @inheritParams lanczos
 #' @inheritParams lanczos_logdet
 #' @inheritParams make_Hq
+#' @param obj output from `TMB::MakeADFun` when using penalized likelihood
 #'
 #' @examples
 #' # Simulate lognormal-gamma process
@@ -419,14 +505,10 @@ function( Hq,
 #' # Fit as GLMM
 #' what = "jnll"
 #' nll = function(p){
-#'   sumexpu = sum(exp(p$u[seq_len(n_sum)]))
-#'   ADREPORT( sumexpu )
-#'   REPORT( sumexpu )
 #'   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
 #'   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
 #'   jnll = -1 * ( sum(nll1) + sum(nll2) )
-#'   if(what == "jnll") return(jnll)
-#'   if(what == "sumexpu") return(sumexpu)
+#'   return(jnll)
 #' }
 #' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 #' opt = nlminb( obj$par, obj$fn, obj$gr )
@@ -438,11 +520,6 @@ function( Hq,
 #' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #'
-#' # Compare determinant
-#' Hq = make_Hq(pen)
-#' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-#' Matrix::determinant( H )
-#'
 #' # Compare marginal likelihoods
 #' lanczos_nll( pen, k = 10, m = 10 )
 #' opt$obj
@@ -450,19 +527,15 @@ function( Hq,
 #' @export
 lanczos_nll <-
 function( obj,
+          x = obj$env$last.par.best,
           k,
           m,
-          Hq,
           seed = NULL ) {
 
-  if( missing(Hq) ){
-    Hq = make_Hq( obj )
-  }
-
   #
-  inner_par = obj$env$last.par.best
-  logdet = lanczos_logdet( Hq, k, m, n = length(inner_par), seed = seed )
-  nll = obj$env$f(inner_par) - (0.5*length(inner_par)*log(2*pi)) + 0.5*mean(logdet)
+  Hq = make_Hq( GetTape(obj), x )
+  logdet = lanczos_logdet( Hq, k, m, n = length(x), seed = seed )
+  nll = obj$env$f(x) - (0.5*length(x)*log(2*pi)) + 0.5*mean(logdet)
   sd_nll = 0.5 * sd(logdet)
   return( c(nll = nll, sd_nll = sd_nll) )
 }
@@ -598,7 +671,7 @@ function( func,
   tape_u$reorder()
   Hq = make_Hq(
     tape = tape_u,
-    uhat = unlist(parameters[names(parameters) %in% random])
+    x = unlist(parameters[names(parameters) %in% random])
   )
 
   # Experiment
@@ -640,14 +713,14 @@ function( func,
     # Have to assign into env(Hq)$mle to evaluate at right point
     which_random = which( names(out$par) %in% random )
     if( length(which_random) > 0 ){
-      attr(Hq,"env")$uhat = out$par[which_random]
+      attr(Hq,"env")$x = out$par[which_random]
       env$logdet1_m = lanczos_logdet(
         Hq = Hq,
         k = k,
         m = m,
         n = length(which_random),
-        seed = seed,
-        return_extra = do_grad
+        return_extra = FALSE,
+        seed = seed
       )
     }else{
       env$logdet1_m = rep(0, m)
@@ -657,11 +730,11 @@ function( func,
     jnll = tape_pu( out$par )
 
     # Assemble laplace
-    if(isTRUE(do_grad)){
-      neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m$logdet)
-    }else{
+    #if(isTRUE(do_grad)){
+    #  neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m$logdet)
+    #}else{
       neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m)
-    }
+    #}
 
     #
     #if( isTRUE(do_grad) ){

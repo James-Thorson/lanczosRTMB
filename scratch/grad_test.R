@@ -1,5 +1,6 @@
 
 library(lanczosRTMB)
+library(Matrix)
 
 ##############
 # Run script for testing locally
@@ -122,23 +123,32 @@ do_grad = FALSE
   )
   tape_u$simplify()
   tape_u$reorder()
+  #Hq = make_Hq(
+  #  tape = tape_u,
+  #  x = unlist(parameters[names(parameters) %in% random])
+  #)
+  #Hq( unlist(parameters[names(parameters) %in% random]) )
+
+  tape_x = MakeTape( nll, parameters )
   Hq = make_Hq(
-    tape = tape_u,
-    uhat = unlist(parameters[names(parameters) %in% random])
+    tape = tape_x,
+    x = unlist(parameters),
+    which_random = which(names(env$x) %in% random)
   )
+  Hq( unlist(parameters[names(parameters) %in% random]) )
 
 ###########
 # new code
 ###########
 
 #
-tape_x = MakeTape( nll, parameters )
+#tape_x = MakeTape( nll, parameters )
 x = env$x
 fetch_x = function() env$x
 which_random = which( names(env$x) %in% random )
 which_fixed = which( names(env$x) %in% fixed )
 
-Hq = obj$Hq
+#Hq = obj$Hq
 # attr(Hq,"env")$uhat   _should match_  env$x
 L = lanczos_logdet( Hq, k = 10, m = 1, n = length(which_random), return_extra = TRUE )
 
@@ -282,14 +292,25 @@ grad_logdet <- tape_logdet$jacfun()
 # Compare log-det
 #########
 
-Hq = make_Hq( tape = tape_x, uhat = unlist(parameters) )
-lanczos_logdet( Hq, k = 10, m = 1, n = length(unlist(parameters)), which_random = which_random )
+# TMB log-det at MLE
+determinant(obj2$env$spHess(par = obj2$env$last.par.best, random=TRUE))$modulus
 
-get_logdet = function(v, ... ){
-  attr(Hq,"env")[which_fixed]
-  out = lanczos_logdet(Hq, ...)
-}
-get_logdet( v = )
+# Lanczos log-det at MLE
+Hq = make_Hq(
+  tape = tape_x,
+  x = obj2$env$last.par.best,
+  which_random = which(names(env$x) %in% random)
+)
+lanczos_logdet( Hq, k = 10, m = 1, n = sum(names(env$x) %in% random) )
+
+#
+logdet_wrt_v( unlist(parameters[fixed]) )
+
+#get_logdet = function(v, ... ){
+#  attr(Hq,"env")[which_fixed]
+#  out = lanczos_logdet(Hq, ...)
+#}
+#get_logdet( v = )
 
 #########
 # Compare grad and FD Test ... seems right

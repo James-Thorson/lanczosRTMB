@@ -4,17 +4,17 @@
 \alias{lanczos_nll}
 \title{Estimate log-marginal likelihood using Lanczos method}
 \usage{
-lanczos_nll(obj, k, m, Hq, seed = NULL)
+lanczos_nll(obj, x = obj$env$last.par.best, k, m, seed = NULL)
 }
 \arguments{
-\item{obj}{TMB object (output from \code{TMB::MakeADFun})}
+\item{obj}{output from \code{TMB::MakeADFun} when using penalized likelihood}
+
+\item{x}{parameter vector \code{x} (or list coersed to vector) used when evaluating \code{H}}
 
 \item{k}{dimension for Kyrlov subspace}
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
-
-\item{Hq}{function that calculates the product \code{H \%*\% q}}
 
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
@@ -23,6 +23,12 @@ lower variance using a fixed seed.}
 \description{
 Estimate log-marginal likelihood using Laplace approximation, but replacing
 exact calculation of log-determinant with a stochastic approximation
+}
+\details{
+This function is only intended when integrating across all parameters, e.g.,
+when supplying a penalized likelihood model with fixed effects mapped off at
+a prior estimate.  For more control over which parameters to estimate, use
+\link{lanczos_MakeADFun}
 }
 \examples{
 # Simulate lognormal-gamma process
@@ -36,14 +42,10 @@ y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
 # Fit as GLMM
 what = "jnll"
 nll = function(p){
-  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
-  ADREPORT( sumexpu )
-  REPORT( sumexpu )
   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
   jnll = -1 * ( sum(nll1) + sum(nll2) )
-  if(what == "jnll") return(jnll)
-  if(what == "sumexpu") return(sumexpu)
+  return(jnll)
 }
 obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 opt = nlminb( obj$par, obj$fn, obj$gr )
@@ -54,11 +56,6 @@ H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-
-# Compare determinant
-Hq = make_Hq(pen)
-lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-Matrix::determinant( H )
 
 # Compare marginal likelihoods
 lanczos_nll( pen, k = 10, m = 10 )
