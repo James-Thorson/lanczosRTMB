@@ -9,8 +9,6 @@ lanczos_nll(obj, uhat = obj$env$last.par.best, k, m, seed = NULL)
 \arguments{
 \item{obj}{output from \code{TMB::MakeADFun} when using penalized likelihood}
 
-\item{uhat}{parameter vector \code{u} used when evaluating \code{H}}
-
 \item{k}{dimension for Kyrlov subspace}
 
 \item{m}{number of probe-vectors to use for approximating average and standard

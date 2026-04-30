@@ -106,7 +106,7 @@ function( Hq,
 #' assign a new value to `attr(Hq,"env")$uhat`.  RTMB then does a `force.update()` to update
 #' the tape based on that new value.
 #'
-#' @param uhat parameter vector `u` used when evaluating `H`
+#' @param x parameter vector `x` used when evaluating `H`
 #' @param tape Alternative to specifying `obj`
 #'
 #' @examples
@@ -122,7 +122,7 @@ function( Hq,
 #' @export
 make_Hq <-
 function( tape,
-          uhat ){
+          x ){
 
 # @param live_uhat whether to pass `uhat` explicitly so that it can be taped.
 #        This is only necessary when computing the derivative of a log-determinant

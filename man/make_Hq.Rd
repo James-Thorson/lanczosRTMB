@@ -4,12 +4,12 @@
 \alias{make_Hq}
 \title{Make function to calculate H \%*\% q}
 \usage{
-make_Hq(tape, uhat)
+make_Hq(tape, x)
 }
 \arguments{
 \item{tape}{Alternative to specifying \code{obj}}
 
-\item{uhat}{parameter vector \code{u} used when evaluating \code{H}}
+\item{x}{parameter vector \code{x} used when evaluating \code{H}}
 }
 \description{
 Given a TMB object, make a function that efficiently calculates
