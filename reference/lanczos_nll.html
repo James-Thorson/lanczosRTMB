@@ -9,7 +9,7 @@ exact calculation of log-determinant with a stochastic approximation"></head><bo
 
     <a class="navbar-brand me-2" href="../index.html">lanczosRTMB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,7 @@ exact calculation of log-determinant with a stochastic approximation"></head><bo
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Estimate log-marginal likelihood using Lanczos method</h1>
-      <small class="dont-index">Source: <a href="https://github.com/James-Thorson/lanczosRTMB/blob/main/R/lanczos.R" class="external-link"><code>R/lanczos.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/James-Thorson/lanczosRTMB/blob/dev/R/lanczos.R" class="external-link"><code>R/lanczos.R</code></a></small>
       <div class="d-none name"><code>lanczos_nll.Rd</code></div>
     </div>
 
@@ -45,7 +45,7 @@ exact calculation of log-determinant with a stochastic approximation</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos_nll</span><span class="op">(</span><span class="va">obj</span>, <span class="va">k</span>, <span class="va">m</span>, <span class="va">Hq</span>, seed <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos_nll</span><span class="op">(</span><span class="va">obj</span>, uhat <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="va">last.par.best</span>, <span class="va">k</span>, <span class="va">m</span>, seed <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -53,7 +53,11 @@ exact calculation of log-determinant with a stochastic approximation</p>
 
 
 <dl><dt id="arg-obj">obj<a class="anchor" aria-label="anchor" href="#arg-obj"></a></dt>
-<dd><p>TMB object (output from <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun</a></code>)</p></dd>
+<dd><p>output from <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun</a></code> when using penalized likelihood</p></dd>
+
+
+<dt id="arg-uhat">uhat<a class="anchor" aria-label="anchor" href="#arg-uhat"></a></dt>
+<dd><p>parameter vector <code>u</code> used when evaluating <code>H</code></p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -63,10 +67,6 @@ exact calculation of log-determinant with a stochastic approximation</p>
 <dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
 <dd><p>number of probe-vectors to use for approximating average and standard
 deviation of log-determinant</p></dd>
-
-
-<dt id="arg-hq">Hq<a class="anchor" aria-label="anchor" href="#arg-hq"></a></dt>
-<dd><p>function that calculates the product <code>H %*% q</code></p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -108,26 +108,9 @@ lower variance using a fixed seed.</p></dd>
 <span class="r-in"><span><span class="va">pen</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> <span class="va">nll</span>, <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">parList</span><span class="op">(</span><span class="op">)</span>, map <span class="op">=</span> <span class="va">newmap</span>, silent <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">opt_pen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">pen</span><span class="op">$</span><span class="va">par</span>, <span class="va">pen</span><span class="op">$</span><span class="va">fn</span>, <span class="va">pen</span><span class="op">$</span><span class="va">gr</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Compare determinant</span></span></span>
-<span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="make_Hq.html">make_Hq</a></span><span class="op">(</span><span class="va">pen</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="lanczos_logdet.html">lanczos_logdet</a></span><span class="op">(</span> <span class="va">Hq</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">3</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pen</span><span class="op">$</span><span class="va">par</span><span class="op">)</span> <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 44.53951 44.53951 44.53951</span>
-<span class="r-in"><span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu">determinant</span><span class="op">(</span> <span class="va">H</span> <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $modulus</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 44.4956</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"logarithm")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $sign</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "det"</span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare marginal likelihoods</span></span></span>
-<span class="r-in"><span><span class="fu">lanczos_nll</span><span class="op">(</span> <span class="va">pen</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      nll   sd_nll </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36.46908  0.00000 </span>
+<span class="r-in"><span><span class="fu">lanczos_nll</span><span class="op">(</span> <span class="va">Hq</span>, uhat <span class="op">=</span> <span class="va">opt_pen</span><span class="op">$</span><span class="va">par</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'Hq' not found</span>
 <span class="r-in"><span><span class="va">opt</span><span class="op">$</span><span class="va">obj</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 36.46907</span>
 <span class="r-in"><span></span></span>

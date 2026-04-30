@@ -122,7 +122,7 @@ approximate the log-determinant of the Hessian for random effects:
 ``` r
 
 # log-determinant using Lanczos
-Hq = make_Hq(pen)
+Hq = make_Hq( GetTape(pen), opt_pen$par )
 lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 #> [1] 44.4956 44.4956 44.4956
 
@@ -264,12 +264,12 @@ sdrep = sdreport( obj, bias.correct = TRUE )
 #
 (nll_hi['nll'] - nll_mid['nll']) / (phat$eps)
 #>      nll 
-#> 4.733928
+#> 4.733913
 summary(sdrep)['sumexpu',]
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 2.93 secs
+Runtime for this vignette: 2.71 secs
 
 ## Works cited

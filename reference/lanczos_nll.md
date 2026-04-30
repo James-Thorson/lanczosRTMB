@@ -7,15 +7,20 @@ approximation
 ## Usage
 
 ``` r
-lanczos_nll(obj, k, m, Hq, seed = NULL)
+lanczos_nll(obj, uhat = obj$env$last.par.best, k, m, seed = NULL)
 ```
 
 ## Arguments
 
 - obj:
 
-  TMB object (output from
-  [`TMB::MakeADFun`](https://rdrr.io/pkg/TMB/man/MakeADFun.html))
+  output from
+  [`TMB::MakeADFun`](https://rdrr.io/pkg/TMB/man/MakeADFun.html) when
+  using penalized likelihood
+
+- uhat:
+
+  parameter vector `u` used when evaluating `H`
 
 - k:
 
@@ -25,10 +30,6 @@ lanczos_nll(obj, k, m, Hq, seed = NULL)
 
   number of probe-vectors to use for approximating average and standard
   deviation of log-determinant
-
-- Hq:
-
-  function that calculates the product `H %*% q`
 
 - seed:
 
@@ -69,26 +70,9 @@ newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 
-# Compare determinant
-Hq = make_Hq(pen)
-lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-#> [1] 44.53951 44.53951 44.53951
-Matrix::determinant( H )
-#> $modulus
-#> [1] 44.4956
-#> attr(,"logarithm")
-#> [1] TRUE
-#> 
-#> $sign
-#> [1] 1
-#> 
-#> attr(,"class")
-#> [1] "det"
-
 # Compare marginal likelihoods
-lanczos_nll( pen, k = 10, m = 10 )
-#>      nll   sd_nll 
-#> 36.46908  0.00000 
+lanczos_nll( Hq, uhat = opt_pen$par, k = 10, m = 10 )
+#> Error: object 'Hq' not found
 opt$obj
 #> [1] 36.46907
 ```

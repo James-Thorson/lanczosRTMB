@@ -9,23 +9,23 @@ in Lanczos methods when H is too large to construct explicitly
 ## Usage
 
 ``` r
-make_Hq(obj, uhat = obj$env$last.par.best, tape)
+make_Hq(tape, uhat)
 ```
 
 ## Arguments
 
-- obj:
+- tape:
 
-  TMB object (output from
-  [`TMB::MakeADFun`](https://rdrr.io/pkg/TMB/man/MakeADFun.html))
+  Alternative to specifying `obj`
 
 - uhat:
 
   parameter vector `u` used when evaluating `H`
 
-- tape:
+- obj:
 
-  Alternative to specifying `obj`
+  TMB object (output from
+  [`TMB::MakeADFun`](https://rdrr.io/pkg/TMB/man/MakeADFun.html))
 
 ## Examples
 
@@ -34,7 +34,7 @@ u = rnorm(100)
 y = rpois(length(u), exp(u))
 nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
 obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
-Hq = make_Hq( obj )
+Hq = make_Hq( GetTape(obj), obj$par )
 # Confirm
 q = rnorm( length(obj$par) )
 all.equal( Hq(q)[1,], (obj$he()%*%q)[,1] )

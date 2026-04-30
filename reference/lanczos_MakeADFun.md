@@ -98,11 +98,11 @@ nll = function(p){
 # Build
 obj = lanczos_MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", k = 10 )
 opt = nlminb( obj$par, obj$fn )
-#> Error in objective(.par, ...): object 'do_grad' not found
 
 # Compare with RTMB
 obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
-#> Error: object 'opt' not found
+#>            mu         logsd         logcv 
+#> -7.430087e-06  9.183757e-06 -1.965893e-05 
 ```
