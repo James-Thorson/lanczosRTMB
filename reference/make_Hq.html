@@ -66,6 +66,13 @@ then be used e.g. in Lanczos methods when H is too large to construct explicitly
 <dd><p>parameter vector <code>u</code> used when evaluating <code>H</code></p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The output <code>Hq = make_Hq( tape, uhat )</code> takes as argument a probe \(\mathbf{q}\) and outputs
+\(\mathbf{Hq}\).  To change the point at which \(\mathbf{Hq}\) is evaluated,
+assign a new value to <code>attr(Hq,"env")$uhat</code>.  RTMB then does a <code>force.update()</code> to update
+the tape based on that new value.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

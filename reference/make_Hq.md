@@ -22,6 +22,14 @@ make_Hq(tape, uhat)
 
   parameter vector `u` used when evaluating `H`
 
+## Details
+
+The output `Hq = make_Hq( tape, uhat )` takes as argument a probe
+\\\mathbf{q}\\ and outputs \\\mathbf{Hq}\\. To change the point at which
+\\\mathbf{Hq}\\ is evaluated, assign a new value to
+`attr(Hq,"env")$uhat`. RTMB then does a `force.update()` to update the
+tape based on that new value.
+
 ## Examples
 
 ``` r

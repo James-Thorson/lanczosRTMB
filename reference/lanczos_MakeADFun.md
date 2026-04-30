@@ -104,5 +104,5 @@ obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", si
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
 #>            mu         logsd         logcv 
-#>  3.931741e-05 -5.483657e-05  1.143543e-04 
+#> -7.430087e-06  9.183757e-06 -1.965893e-05 
 ```
