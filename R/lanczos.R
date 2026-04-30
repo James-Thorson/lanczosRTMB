@@ -109,16 +109,15 @@ function( Hq,
 #' y = rpois(length(u), exp(u))
 #' nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
 #' obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
-#' Hq = make_Hq( obj )
+#' Hq = make_Hq( GetTape(obj), obj$par )
 #' # Confirm
 #' q = rnorm( length(obj$par) )
 #' all.equal( Hq(q)[1,], (obj$he()%*%q)[,1] )
 #'
 #' @export
 make_Hq <-
-function( obj,
-          uhat = obj$env$last.par.best,
-          tape ){
+function( tape,
+          uhat ){
 
   # Make environment for passing v without retaping
   env <- new.env(parent = emptyenv())
@@ -127,7 +126,6 @@ function( obj,
   fetch_q = function() env$q
 
   # grad
-  if(missing(tape)) tape = GetTape(obj)
   dfdu = tape$jacfun()
   dfdu$simplify()
 
@@ -226,7 +224,7 @@ function( alpha,
 #' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 #' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-#' Hq = make_Hq( pen )
+#' Hq = make_Hq( GetTape(pen), opt_pen$par )
 #'
 #' # Gradient-based Lanczos sampling
 #' what = "sumexpu"
@@ -439,7 +437,7 @@ function( Hq,
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #'
 #' # Compare determinant
-#' Hq = make_Hq(pen)
+#' Hq = make_Hq( GetTape(pen), opt_pen$par )
 #' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 #' Matrix::determinant( H )
 #'
@@ -449,15 +447,10 @@ function( Hq,
 #'
 #' @export
 lanczos_nll <-
-function( obj,
+function( Hq,
           k,
           m,
-          Hq,
           seed = NULL ) {
-
-  if( missing(Hq) ){
-    Hq = make_Hq( obj )
-  }
 
   #
   inner_par = obj$env$last.par.best

@@ -52,7 +52,7 @@ H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
 newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
-Hq = make_Hq( pen )
+Hq = make_Hq( GetTape(pen), opt_pen$par )
 
 # Gradient-based Lanczos sampling
 what = "sumexpu"
