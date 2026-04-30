@@ -25,6 +25,9 @@ deviation of log-determinant}
 
 \item{x}{parameter vector used when calculating the Hessian matrix}
 
+\item{which_random}{integer-vector indicating which elements of \code{x} correspond to random effects,
+where the probe \code{q} then has length \code{length(which_random)}}
+
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
 lower variance using a fixed seed.}

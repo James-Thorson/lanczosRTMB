@@ -411,6 +411,7 @@ function( Hq,
 #' Estimate log-determinant of inner Hessian matrix with a stochastic approximation
 #'
 #' @inheritParams lanczos
+#' @inheritParams make_Hq
 #' @param m number of probe-vectors to use for approximating average and standard
 #'        deviation of log-determinant
 #' @param seed if not NULL, then sets the seed.  This is helfpul given that
@@ -693,7 +694,7 @@ function( func,
   tape_u$reorder()
   Hq = make_Hq(
     tape = tape_u,
-    x = unlist(parameters[names(parameters) %in% random])
+    x0 = unlist(parameters[names(parameters) %in% random])
   )
 
   # Experiment
