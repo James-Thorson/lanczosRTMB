@@ -106,7 +106,7 @@ We can then use stochastic trace estimation and the Lanczos method to approximat
 
 ```{r}
 # log-determinant using Lanczos
-Hq = make_Hq(pen)
+Hq = make_Hq( GetTape(pen), opt_pen$par )
 lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 
 # log-determinant for marginal likelihood
