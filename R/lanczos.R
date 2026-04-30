@@ -108,21 +108,52 @@ function( Hq,
 #'
 #' @param x parameter vector `x` used when evaluating `H`
 #' @param tape Alternative to specifying `obj`
+#' @param which_random integer-vector indicating which elements of `x` correspond to random effects,
+#'        where the probe `q` then has length `length(which_random)`
 #'
 #' @examples
-#' u = rnorm(100)
-#' y = rpois(length(u), exp(u))
-#' nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
-#' obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
-#' Hq = make_Hq( GetTape(obj), obj$par )
-#' # Confirm
-#' q = rnorm( length(obj$par) )
-#' all.equal( Hq(q)[1,], (obj$he()%*%q)[,1] )
+#' # Simulate lognormal-gamma process
+#' set.seed(123)
+#' library(RTMB)
+#' n = 30
+#' n_sum = 3
+#' u = 0 + rnorm(n)
+#' y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
+#'
+#' # Fit as GLMM
+#' what = "jnll"
+#' nll = function(p){
+#'   sumexpu = sum(exp(p$u[seq_len(n_sum)]))
+#'   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
+#'   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+#'   jnll = -1 * ( sum(nll1) + sum(nll2) )
+#'   return(jnll)
+#' }
+#'
+#' # Build with RTMB
+#' params = list(u=u, mu = 0, logsd = 0, logcv = 0)
+#' obj = MakeADFun( nll, params, random = "u", silent = TRUE )
+#'
+#' # Build with Lanczos
+#' tape = MakeTape( nll, params )
+#' which_random = 1:30
+#' Hq = make_Hq(
+#'   tape,
+#'   x = unlist(params),
+#'   which_random = which_random
+#' )
+#'
+#' # Compare them
+#' q = rnorm(length(unlist(params)))
+#' all.equal(
+#'   Hq(q),
+#'   (obj$env$spHess(random=TRUE)%*%q[which_random])[,1] )
 #'
 #' @export
 make_Hq <-
 function( tape,
-          x ){
+          x,
+          which_random = seq_along(x) ){
 
 # @param live_x whether to pass `x` explicitly so that it can be taped.
 #        This is only necessary when computing the derivative of a log-determinant
@@ -131,16 +162,17 @@ function( tape,
   env <- new.env(parent = emptyenv())
   env$x = x
   env$q = 0 * x
+  env$which_random = which_random
   fetch_q = function() env$q
 
   # grad
   dfdu = tape$jacfun()
   dfdu$simplify()
 
-  # grad * v
+  # grad * q
   dfdu_q = function(u){
     q = DataEval(fetch_q)
-    dfdu(u) %*% q
+    sum(dfdu(u)[which_random] * q[which_random])
   }
   tape_dfdu_q = MakeTape(
     f = dfdu_q,
@@ -158,7 +190,7 @@ function( tape,
   Hq <- function(q) {
     env$q = q
     d2fdu2_q$force.update()
-    return(d2fdu2_q(env$x))
+    return(d2fdu2_q(env$x)[which_random])
   }
 
   # bundle with environment
