@@ -264,12 +264,12 @@ sdrep = sdreport( obj, bias.correct = TRUE )
 #
 (nll_hi['nll'] - nll_mid['nll']) / (phat$eps)
 #>      nll 
-#> 4.733913
+#> 4.733928
 summary(sdrep)['sumexpu',]
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 2.75 secs
+Runtime for this vignette: 2.88 secs
 
 ## Works cited

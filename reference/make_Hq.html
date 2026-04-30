@@ -63,7 +63,7 @@ then be used e.g. in Lanczos methods when H is too large to construct explicitly
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>parameter vector <code>x</code> used when evaluating <code>H</code></p></dd>
+<dd><p>parameter vector <code>x</code> (or list coersed to vector) used when evaluating <code>H</code></p></dd>
 
 
 <dt id="arg-which-random">which_random<a class="anchor" aria-label="anchor" href="#arg-which-random"></a></dt>
@@ -77,6 +77,8 @@ where the probe <code>q</code> then has length <code>length(which_random)</code>
 \(\mathbf{Hq}\).  To change the point at which \(\mathbf{Hq}\) is evaluated,
 assign a new value to <code>attr(Hq,"env")$x</code>.  RTMB then does a <code>force.update()</code> to update
 the tape based on that new value.</p>
+<p><code>qprime</code> is defined internally where <code>qprime[which_random] = q</code> and
+<code>qprime[!which_random] = 0</code>, where <code>length(qprime)</code> is equal to <code>length(x)</code></p>
     </div>
 
     <div class="section level2">
@@ -90,9 +92,7 @@ the tape based on that new value.</p>
 <span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span> <span class="va">n</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">0.5</span><span class="op">^</span><span class="fl">2</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">u</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span><span class="op">^</span><span class="fl">2</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fit as GLMM</span></span></span>
-<span class="r-in"><span><span class="va">what</span> <span class="op">=</span> <span class="st">"jnll"</span></span></span>
 <span class="r-in"><span><span class="va">nll</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">sumexpu</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">u</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sum</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">nll1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">u</span>, mean<span class="op">=</span><span class="va">p</span><span class="op">$</span><span class="va">mu</span>, sd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">logsd</span><span class="op">)</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">nll2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span><span class="op">(</span><span class="va">y</span>, shape <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">p</span><span class="op">$</span><span class="va">logcv</span><span class="op">)</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">u</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">p</span><span class="op">$</span><span class="va">logcv</span><span class="op">)</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">jnll</span> <span class="op">=</span> <span class="op">-</span><span class="fl">1</span> <span class="op">*</span> <span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">nll1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">nll2</span><span class="op">)</span> <span class="op">)</span></span></span>
@@ -108,15 +108,16 @@ the tape based on that new value.</p>
 <span class="r-in"><span><span class="va">which_random</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">30</span></span></span>
 <span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu">make_Hq</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">tape</span>,</span></span>
-<span class="r-in"><span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">params</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  x <span class="op">=</span> <span class="va">params</span>,</span></span>
 <span class="r-in"><span>  which_random <span class="op">=</span> <span class="va">which_random</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare them</span></span></span>
-<span class="r-in"><span><span class="va">q</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">params</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">q</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">which_random</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu">Hq</span><span class="op">(</span><span class="va">q</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="op">(</span><span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">spHess</span><span class="op">(</span>random<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span><span class="va">q</span><span class="op">[</span><span class="va">which_random</span><span class="op">]</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">(</span><span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">spHess</span><span class="op">(</span>random<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">q</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

@@ -20,7 +20,8 @@ make_Hq(tape, x, which_random = seq_along(x))
 
 - x:
 
-  parameter vector `x` used when evaluating `H`
+  parameter vector `x` (or list coersed to vector) used when evaluating
+  `H`
 
 - which_random:
 
@@ -35,6 +36,10 @@ The output `Hq = make_Hq( tape, x )` takes as argument a probe
 RTMB then does a `force.update()` to update the tape based on that new
 value.
 
+`qprime` is defined internally where `qprime[which_random] = q` and
+`qprime[!which_random] = 0`, where `length(qprime)` is equal to
+`length(x)`
+
 ## Examples
 
 ``` r
@@ -47,9 +52,7 @@ u = 0 + rnorm(n)
 y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
 
 # Fit as GLMM
-what = "jnll"
 nll = function(p){
-  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
   jnll = -1 * ( sum(nll1) + sum(nll2) )
@@ -65,14 +68,15 @@ tape = MakeTape( nll, params )
 which_random = 1:30
 Hq = make_Hq(
   tape,
-  x = unlist(params),
+  x = params,
   which_random = which_random
 )
 
 # Compare them
-q = rnorm(length(unlist(params)))
+q = rnorm(length(which_random))
 all.equal(
   Hq(q),
-  (obj$env$spHess(random=TRUE)%*%q[which_random])[,1] )
+  (obj$env$spHess(random=TRUE) %*% q)[,1]
+)
 #> [1] TRUE
 ```

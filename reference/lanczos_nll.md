@@ -20,7 +20,8 @@ lanczos_nll(obj, x = obj$env$last.par.best, k, m, seed = NULL)
 
 - x:
 
-  parameter vector `x` used when evaluating `H`
+  parameter vector `x` (or list coersed to vector) used when evaluating
+  `H`
 
 - k:
 
