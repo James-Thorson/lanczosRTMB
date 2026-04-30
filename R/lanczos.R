@@ -639,8 +639,8 @@ function( func,
         k = k,
         m = m,
         n = length(which_random),
-        seed = seed,
-        return_extra = do_grad
+        return_extra = FALSE,
+        seed = seed
       )
     }else{
       env$logdet1_m = rep(0, m)
@@ -650,11 +650,11 @@ function( func,
     jnll = tape_pu( out$par )
 
     # Assemble laplace
-    if(isTRUE(do_grad)){
-      neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m$logdet)
-    }else{
+    #if(isTRUE(do_grad)){
+    #  neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m$logdet)
+    #}else{
       neglogmarglik = jnll - (0.5*length(out$par)*log(2*pi)) + 0.5*mean(env$logdet1_m)
-    }
+    #}
 
     #
     #if( isTRUE(do_grad) ){
