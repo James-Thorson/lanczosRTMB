@@ -101,9 +101,9 @@ function( Hq,
 #'   then be used e.g. in Lanczos methods when H is too large to construct explicitly
 #'
 #' @details
-#' The output `Hq = make_Hq( tape, uhat )` takes as argument a probe \eqn{\mathbf{q}} and outputs
+#' The output `Hq = make_Hq( tape, x )` takes as argument a probe \eqn{\mathbf{q}} and outputs
 #' \eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
-#' assign a new value to `attr(Hq,"env")$uhat`.  RTMB then does a `force.update()` to update
+#' assign a new value to `attr(Hq,"env")$x`.  RTMB then does a `force.update()` to update
 #' the tape based on that new value.
 #'
 #' @param x parameter vector `x` used when evaluating `H`
@@ -124,13 +124,13 @@ make_Hq <-
 function( tape,
           x ){
 
-# @param live_uhat whether to pass `uhat` explicitly so that it can be taped.
+# @param live_x whether to pass `x` explicitly so that it can be taped.
 #        This is only necessary when computing the derivative of a log-determinant
 
   # Make environment for passing v without retaping
   env <- new.env(parent = emptyenv())
-  env$uhat = uhat
-  env$q = 0 * uhat
+  env$x = x
+  env$q = 0 * x
   fetch_q = function() env$q
 
   # grad
@@ -144,7 +144,7 @@ function( tape,
   }
   tape_dfdu_q = MakeTape(
     f = dfdu_q,
-    x = uhat
+    x = x
   )
   tape_dfdu_q$simplify()
   tape_dfdu_q$reorder()
@@ -158,7 +158,7 @@ function( tape,
   Hq <- function(q) {
     env$q = q
     d2fdu2_q$force.update()
-    return(d2fdu2_q(env$uhat))
+    return(d2fdu2_q(env$x))
   }
 
   # bundle with environment
@@ -494,15 +494,15 @@ function( Hq,
 #' @export
 lanczos_nll <-
 function( obj,
-          uhat = obj$env$last.par.best,
+          x = obj$env$last.par.best,
           k,
           m,
           seed = NULL ) {
 
   #
-  Hq = make_Hq( GetTape(obj), uhat )
-  logdet = lanczos_logdet( Hq, k, m, n = length(uhat), seed = seed )
-  nll = obj$env$f(uhat) - (0.5*length(uhat)*log(2*pi)) + 0.5*mean(logdet)
+  Hq = make_Hq( GetTape(obj), x )
+  logdet = lanczos_logdet( Hq, k, m, n = length(x), seed = seed )
+  nll = obj$env$f(x) - (0.5*length(x)*log(2*pi)) + 0.5*mean(logdet)
   sd_nll = 0.5 * sd(logdet)
   return( c(nll = nll, sd_nll = sd_nll) )
 }
@@ -638,7 +638,7 @@ function( func,
   tape_u$reorder()
   Hq = make_Hq(
     tape = tape_u,
-    uhat = unlist(parameters[names(parameters) %in% random])
+    x = unlist(parameters[names(parameters) %in% random])
   )
 
   # Experiment
@@ -680,7 +680,7 @@ function( func,
     # Have to assign into env(Hq)$mle to evaluate at right point
     which_random = which( names(out$par) %in% random )
     if( length(which_random) > 0 ){
-      attr(Hq,"env")$uhat = out$par[which_random]
+      attr(Hq,"env")$x = out$par[which_random]
       env$logdet1_m = lanczos_logdet(
         Hq = Hq,
         k = k,
