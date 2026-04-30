@@ -9,6 +9,8 @@ lanczos_sample(Hq, q, k, nsamp = 1, orthogonalize = FALSE)
 \arguments{
 \item{Hq}{function that calculates the product \code{H \%*\% q}}
 
+\item{q}{initial vector used for defining a Kyrlov subspace}
+
 \item{k}{dimension for Kyrlov subspace}
 
 \item{nsamp}{number of samples}
@@ -66,7 +68,7 @@ samples = lanczos_sample(
 )
 
 # Samples from Lanczos for parameters that contribute to derived quantity
-samples = sweep( samples, MARGIN = 1, FUN = "+", STAT = opt$par )
+samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt$par )
 apply( samples, MARGIN = 1, FUN = sd )
 
 # Samples from full Hessian should approximately match

@@ -11,8 +11,7 @@ lanczos_MakeADFun(
   k,
   profile = NULL,
   m = 3,
-  seed = 123,
-  do_grad = FALSE
+  seed = 123
 )
 }
 \arguments{
@@ -20,7 +19,11 @@ lanczos_MakeADFun(
 
 \item{parameters}{Parameter list (or parameter vector) used by \code{func}.}
 
+\item{random}{Character vector defining the random effect parameters. See also \code{regexp}.}
+
 \item{k}{dimension for Kyrlov subspace}
+
+\item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}

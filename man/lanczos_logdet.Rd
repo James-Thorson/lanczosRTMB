@@ -30,6 +30,8 @@ lower variance using a fixed seed.}
 
 \item{orthogonalize}{Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)}
+
+\item{return_extra}{whether to return probes and other internal constructions.}
 }
 \description{
 Estimate log-determinant of inner Hessian matrix with a stochastic approximation

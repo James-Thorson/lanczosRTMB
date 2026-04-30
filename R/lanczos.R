@@ -8,7 +8,7 @@
 #' Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 #'
 #' @param Hq function that calculates the product `H %*% q`
-#' @param q1 initial vector used for defining a Kyrlov subspace
+#' @param q initial vector used for defining a Kyrlov subspace
 #' @param k dimension for Kyrlov subspace
 #' @param orthogonalize Whether to do two-pass Gram-Schmidt re-normalization
 #'        (much slower)
@@ -25,23 +25,25 @@
 #' # Should match H if and only if L$m = nrow(H)
 #' range(L$Q %*% T %*% t(L$Q) - H)
 #'
-#' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval
+#' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
 #' @importFrom Matrix sparseMatrix Diagonal Matrix t
+#' @importFrom stats optim rnorm sd
+#' @importFrom mvtnorm rmvnorm
 #'
 #' @export
 lanczos <-
 function( Hq,
-          q1,
+          q,
           k,
           orthogonalize = FALSE,
           tol = 1e-12 ) {
 
-  n = length(q1)
+  n = length(q)
   Q = matrix(0, n, k)
   alpha = numeric(k)
   beta  = numeric(k-1)
 
-  q = q1 / sqrt(sum(q1*q1))
+  q = q / sqrt(sum(q*q))
   Q[,1] = q
   q_prev = rep(0, n)
   m = k   # actual number of Lanczos steps performed
@@ -101,6 +103,7 @@ function( Hq,
 #'
 #' @param obj TMB object (output from `TMB::MakeADFun`)
 #' @param uhat parameter vector `u` used when evaluating `H`
+#' @param tape Alternative to specifying `obj`
 #'
 #' @examples
 #' u = rnorm(100)
@@ -240,7 +243,7 @@ function( alpha,
 #' )
 #'
 #' # Samples from Lanczos for parameters that contribute to derived quantity
-#' samples = sweep( samples, MARGIN = 1, FUN = "+", STAT = opt$par )
+#' samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt$par )
 #' apply( samples, MARGIN = 1, FUN = sd )
 #'
 #' # Samples from full Hessian should approximately match
@@ -282,7 +285,7 @@ function( Hq,
 
   # sample in Krylov space
   xi = matrix( rnorm(length(D)*nsamp), ncol = nsamp )
-  y  = V %*% sweep(xi, MARGIN = 1, FUN = "/", STAT = sqrt(D))
+  y  = V %*% sweep(xi, MARGIN = 1, FUN = "/", STATS = sqrt(D))
 
   # lift to full space
   z = L$Q %*% y        # norm_v *
@@ -353,6 +356,7 @@ function( Hq,
 #' @param seed if not NULL, then sets the seed.  This is helfpul given that
 #'    the Hutchinson probe vectors are randomly sampled, and comparisons have
 #'    lower variance using a fixed seed.
+#' @param return_extra whether to return probes and other internal constructions.
 #'
 #' @details
 #' For a model with independent random effects, the variance of stochastic
@@ -473,6 +477,7 @@ function( obj,
 #'
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
+#' @inheritParams TMB::MakeADFun
 #'
 #' @return
 #' An object (list) of class `tinyVAST`. Elements include:
@@ -519,8 +524,8 @@ function( func,
           k,
           profile = NULL,
           m = 3,
-          seed = 123,
-          do_grad = FALSE ){
+          #do_grad = FALSE,
+          seed = 123 ){
 
   # vectors
   #  p = profile
@@ -562,22 +567,22 @@ function( func,
   tape_pu$simplify()
   tape_pu$reorder()
 
-  if( isTRUE(do_grad) ){
-    # get tape w.r.t. fixed given random effects
-    tape_v = MakeTape(
-      f = cmb( jnll_vec, func = func, parnames = fixed ),
-      x = unlist(parameters[names(parameters) %in% fixed])
-    )
-    tape_v$simplify()
-    tape_v$reorder()
-    grad_v = tape_v$jacfun()
+  #if( isTRUE(do_grad) ){
+  #  # get tape w.r.t. fixed given random effects
+  #  tape_v = MakeTape(
+  #    f = cmb( jnll_vec, func = func, parnames = fixed ),
+  #    x = unlist(parameters[names(parameters) %in% fixed])
+  #  )
+  #  tape_v$simplify()
+  #  tape_v$reorder()
+  #  grad_v = tape_v$jacfun()
 
-    #Hq_q = make_Hv_phi(
-    #  obj_phi = tape_phi,
-    #  par_phi = unlist(parameters[names(parameters) %in% fixed]),
-    #  u_hat = unlist(parameters[names(parameters) %in% c(random, profile)])
-    #)
-  }
+  #  Hq_q = make_Hv_phi(
+  #    obj_phi = tape_phi,
+  #    par_phi = unlist(parameters[names(parameters) %in% fixed]),
+  #    u_hat = unlist(parameters[names(parameters) %in% c(random, profile)])
+  #  )
+  #}
 
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
   dfdpu = tape_pu$jacfun()
@@ -598,12 +603,12 @@ function( func,
   )
 
   # Experiment
-  if( FALSE ){
-    tape_joint = MakeTape(
-      f = func,
-      x = parameters
-    )
-  }
+  #if( FALSE ){
+  #  tape_joint = MakeTape(
+  #    f = func,
+  #    x = parameters
+  #  )
+  #}
 
   # Objective function
   nll = function(v){
@@ -660,11 +665,11 @@ function( func,
     }
 
     #
-    if( isTRUE(do_grad) ){
-      # Gradient of joint likelihood w.r.t. fixed effects
-      grad_phi$force.update()
-      grad1 = grad_phi(fixedvec)
-    }
+    #if( isTRUE(do_grad) ){
+    #  # Gradient of joint likelihood w.r.t. fixed effects
+    #  grad_phi$force.update()
+    #  grad1 = grad_phi(fixedvec)
+    #}
 
     # Assign best and return
     if( neglogmarglik < env$best ){

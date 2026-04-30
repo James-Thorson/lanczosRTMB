@@ -18,11 +18,12 @@ Depends:
     R (>= 4.1.0),
     RTMB (>= 1.5.0),
 Imports:
-    TMB,
     Matrix,
 Suggests:
     knitr,
+    TMB,
     rmarkdown,
+    mvtnorm,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

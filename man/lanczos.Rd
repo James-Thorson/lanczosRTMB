@@ -4,12 +4,12 @@
 \alias{lanczos}
 \title{Assemble tri-diagonal matrix}
 \usage{
-lanczos(Hq, q1, k, orthogonalize = FALSE, tol = 1e-12)
+lanczos(Hq, q, k, orthogonalize = FALSE, tol = 1e-12)
 }
 \arguments{
 \item{Hq}{function that calculates the product \code{H \%*\% q}}
 
-\item{q1}{initial vector used for defining a Kyrlov subspace}
+\item{q}{initial vector used for defining a Kyrlov subspace}
 
 \item{k}{dimension for Kyrlov subspace}
 
