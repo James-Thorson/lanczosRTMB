@@ -9,7 +9,7 @@ in Lanczos methods when H is too large to construct explicitly
 ## Usage
 
 ``` r
-make_Hq(tape, x)
+make_Hq(tape, x, which_random = seq_along(x))
 ```
 
 ## Arguments
@@ -22,6 +22,11 @@ make_Hq(tape, x)
 
   parameter vector `x` used when evaluating `H`
 
+- which_random:
+
+  integer-vector indicating which elements of `x` correspond to random
+  effects, where the probe `q` then has length `length(which_random)`
+
 ## Details
 
 The output `Hq = make_Hq( tape, x )` takes as argument a probe
@@ -33,13 +38,41 @@ value.
 ## Examples
 
 ``` r
-u = rnorm(100)
-y = rpois(length(u), exp(u))
-nll = function(p) -1 * ( sum(dnorm(p$u,log=TRUE)) + sum(dpois(y,exp(p$u),log=TRUE)) )
-obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
-Hq = make_Hq( GetTape(obj), obj$par )
-# Confirm
-q = rnorm( length(obj$par) )
-all.equal( Hq(q)[1,], (obj$he()%*%q)[,1] )
+# Simulate lognormal-gamma process
+set.seed(123)
+library(RTMB)
+n = 30
+n_sum = 3
+u = 0 + rnorm(n)
+y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
+
+# Fit as GLMM
+what = "jnll"
+nll = function(p){
+  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
+  nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
+  nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+  jnll = -1 * ( sum(nll1) + sum(nll2) )
+  return(jnll)
+}
+
+# Build with RTMB
+params = list(u=u, mu = 0, logsd = 0, logcv = 0)
+obj = MakeADFun( nll, params, random = "u", silent = TRUE )
+
+# Build with Lanczos
+tape = MakeTape( nll, params )
+which_random = 1:30
+Hq = make_Hq(
+  tape,
+  x = unlist(params),
+  which_random = which_random
+)
+
+# Compare them
+q = rnorm(length(unlist(params)))
+all.equal(
+  Hq(q),
+  (obj$env$spHess(random=TRUE)%*%q[which_random])[,1] )
 #> [1] TRUE
 ```
