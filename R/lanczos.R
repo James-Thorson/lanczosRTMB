@@ -359,6 +359,42 @@ function( Hq,
 #' For a model with independent random effects, the variance of stochastic
 #' trace estimation should be zero
 #'
+#' @examples
+#' # Simulate lognormal-gamma process
+#' set.seed(123)
+#' library(RTMB)
+#' n = 30
+#' n_sum = 3
+#' u = 0 + rnorm(n)
+#' y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
+#'
+#' # Fit as GLMM
+#' what = "jnll"
+#' nll = function(p){
+#'   sumexpu = sum(exp(p$u[seq_len(n_sum)]))
+#'   ADREPORT( sumexpu )
+#'   REPORT( sumexpu )
+#'   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
+#'   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
+#'   jnll = -1 * ( sum(nll1) + sum(nll2) )
+#'   if(what == "jnll") return(jnll)
+#'   if(what == "sumexpu") return(sumexpu)
+#' }
+#' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
+#' opt = nlminb( obj$par, obj$fn, obj$gr )
+#' sdrep = sdreport(obj, bias.correct = TRUE )
+#' H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
+#'
+#' # Re-do as penalized likelihood
+#' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
+#' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
+#' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
+#'
+#' # Compare determinant
+#' Hq = make_Hq( GetTape(pen), opt_pen$par )
+#' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
+#' Matrix::determinant( H )
+#'
 #' @export
 lanczos_logdet <-
 function( Hq,
@@ -404,6 +440,7 @@ function( Hq,
 #' @inheritParams lanczos
 #' @inheritParams lanczos_logdet
 #' @inheritParams make_Hq
+#' @param obj output from `TMB::MakeADFun` when using penalized likelihood
 #'
 #' @examples
 #' # Simulate lognormal-gamma process
@@ -436,26 +473,22 @@ function( Hq,
 #' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #'
-#' # Compare determinant
-#' Hq = make_Hq( GetTape(pen), opt_pen$par )
-#' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-#' Matrix::determinant( H )
-#'
 #' # Compare marginal likelihoods
-#' lanczos_nll( pen, k = 10, m = 10 )
+#' lanczos_nll( Hq, uhat = opt_pen$par, k = 10, m = 10 )
 #' opt$obj
 #'
 #' @export
 lanczos_nll <-
-function( Hq,
+function( obj,
+          uhat = obj$env$last.par.best,
           k,
           m,
           seed = NULL ) {
 
   #
-  inner_par = obj$env$last.par.best
-  logdet = lanczos_logdet( Hq, k, m, n = length(inner_par), seed = seed )
-  nll = obj$env$f(inner_par) - (0.5*length(inner_par)*log(2*pi)) + 0.5*mean(logdet)
+  Hq = make_Hq( GetTape(obj), uhat )
+  logdet = lanczos_logdet( Hq, k, m, n = length(uhat), seed = seed )
+  nll = obj$env$f(uhat) - (0.5*length(uhat)*log(2*pi)) + 0.5*mean(logdet)
   sd_nll = 0.5 * sd(logdet)
   return( c(nll = nll, sd_nll = sd_nll) )
 }

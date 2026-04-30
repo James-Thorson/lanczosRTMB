@@ -4,10 +4,12 @@
 \alias{lanczos_nll}
 \title{Estimate log-marginal likelihood using Lanczos method}
 \usage{
-lanczos_nll(Hq, k, m, seed = NULL)
+lanczos_nll(obj, uhat = obj$env$last.par.best, k, m, seed = NULL)
 }
 \arguments{
-\item{Hq}{function that calculates the product \code{H \%*\% q}}
+\item{obj}{output from \code{TMB::MakeADFun} when using penalized likelihood}
+
+\item{uhat}{parameter vector \code{u} used when evaluating \code{H}}
 
 \item{k}{dimension for Kyrlov subspace}
 
@@ -53,13 +55,8 @@ newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
 pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 
-# Compare determinant
-Hq = make_Hq( GetTape(pen), opt_pen$par )
-lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-Matrix::determinant( H )
-
 # Compare marginal likelihoods
-lanczos_nll( pen, k = 10, m = 10 )
+lanczos_nll( Hq, uhat = opt_pen$par, k = 10, m = 10 )
 opt$obj
 
 }
