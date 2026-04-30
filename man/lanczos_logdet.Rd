@@ -8,21 +8,25 @@ lanczos_logdet(
   Hq,
   k,
   m,
-  n,
+  x = attr(Hq, "env")$x0,
+  which_random = attr(Hq, "env")$which_random,
   seed = NULL,
   orthogonalize = TRUE,
   return_extra = FALSE
 )
 }
 \arguments{
-\item{Hq}{function that calculates the product \code{H \%*\% q}}
+\item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
 
 \item{k}{dimension for Kyrlov subspace}
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
 
-\item{n}{length of parameters (and necessary probe-vector)}
+\item{x}{parameter vector used when calculating the Hessian matrix}
+
+\item{which_random}{integer-vector indicating which elements of \code{x} correspond to random effects,
+where the probe \code{q} then has length \code{length(which_random)}}
 
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
@@ -52,28 +56,30 @@ y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
 # Fit as GLMM
 what = "jnll"
 nll = function(p){
-  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
-  ADREPORT( sumexpu )
-  REPORT( sumexpu )
   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
   jnll = -1 * ( sum(nll1) + sum(nll2) )
-  if(what == "jnll") return(jnll)
-  if(what == "sumexpu") return(sumexpu)
+  return(jnll)
 }
-obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
-opt = nlminb( obj$par, obj$fn, obj$gr )
-sdrep = sdreport(obj, bias.correct = TRUE )
-H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
+params = list(u=u, mu = 0, logsd = 0, logcv = 0)
 
-# Re-do as penalized likelihood
-newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
-pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
-opt_pen = nlminb( pen$par, pen$fn, pen$gr )
+# Make RTMB object
+obj = RTMB::MakeADFun( nll, params, random = "u", silent = TRUE )
 
-# Compare determinant
-Hq = make_Hq( GetTape(pen), opt_pen$par )
-lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-Matrix::determinant( H )$modulus
+# Make Lanczos object
+tape = MakeTape( nll, params )
+Hq = make_Hq( tape, unlist(params), which_random = 1:30 )
+
+# Compare determinant at start values
+lanczos_logdet( Hq, k = 10, m = 3 )
+H = obj$env$spHess(par = obj$env$par, random = TRUE)
+sum(log(eigen(H)$values))
+
+# Compare determinant at new values
+x_new = unlist(params)
+  x_new['logsd'] = 1
+lanczos_logdet( Hq, x = x_new, k = 10, m = 3 )
+H = obj$env$spHess(par = x_new, random = TRUE)
+sum(log(eigen(H)$values))
 
 }

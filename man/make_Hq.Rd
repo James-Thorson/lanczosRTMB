@@ -4,15 +4,22 @@
 \alias{make_Hq}
 \title{Make function to calculate H \%*\% q}
 \usage{
-make_Hq(tape, x, which_random = seq_along(x))
+make_Hq(tape, x0, which_random = seq_along(x0))
 }
 \arguments{
 \item{tape}{Alternative to specifying \code{obj}}
 
-\item{x}{parameter vector \code{x} (or list coersed to vector) used when evaluating \code{H}}
+\item{x0}{parameter vector \code{x} (or list coersed to vector) used as default when evaluating \code{H}}
 
 \item{which_random}{integer-vector indicating which elements of \code{x} correspond to random effects,
 where the probe \code{q} then has length \code{length(which_random)}}
+}
+\value{
+A function with two arguments:
+\itemize{
+\item q a probe vector with length \code{length(which_random)}
+\item a vector with length \code{length(x0)}, where the Hessian is calculated
+}
 }
 \description{
 Given a TMB object, make a function that efficiently calculates
@@ -63,7 +70,15 @@ Hq = make_Hq(
 q = rnorm(length(which_random))
 all.equal(
   Hq(q),
-  (obj$env$spHess(random=TRUE) \%*\% q)[,1]
+  (obj$env$spHess(par = unlist(params), random=TRUE) \%*\% q)[,1]
+)
+
+# Compare them when passing new value
+x_new = unlist(params)
+  x_new['logsd'] = 1
+all.equal(
+  Hq(q, x_new),
+  (obj$env$spHess(par = x_new, random=TRUE) \%*\% q)[,1]
 )
 
 }
