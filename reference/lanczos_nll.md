@@ -7,7 +7,7 @@ approximation
 ## Usage
 
 ``` r
-lanczos_nll(obj, uhat = obj$env$last.par.best, k, m, seed = NULL)
+lanczos_nll(obj, x = obj$env$last.par.best, k, m, seed = NULL)
 ```
 
 ## Arguments
@@ -18,9 +18,9 @@ lanczos_nll(obj, uhat = obj$env$last.par.best, k, m, seed = NULL)
   [`TMB::MakeADFun`](https://rdrr.io/pkg/TMB/man/MakeADFun.html) when
   using penalized likelihood
 
-- uhat:
+- x:
 
-  parameter vector `u` used when evaluating `H`
+  parameter vector `x` used when evaluating `H`
 
 - k:
 

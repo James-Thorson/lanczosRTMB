@@ -51,7 +51,7 @@ then be used e.g. in Lanczos methods when H is too large to construct explicitly
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_Hq</span><span class="op">(</span><span class="va">tape</span>, <span class="va">uhat</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">make_Hq</span><span class="op">(</span><span class="va">tape</span>, <span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,15 +62,15 @@ then be used e.g. in Lanczos methods when H is too large to construct explicitly
 <dd><p>Alternative to specifying <code>obj</code></p></dd>
 
 
-<dt id="arg-uhat">uhat<a class="anchor" aria-label="anchor" href="#arg-uhat"></a></dt>
-<dd><p>parameter vector <code>u</code> used when evaluating <code>H</code></p></dd>
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>parameter vector <code>x</code> used when evaluating <code>H</code></p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The output <code>Hq = make_Hq( tape, uhat )</code> takes as argument a probe \(\mathbf{q}\) and outputs
+    <p>The output <code>Hq = make_Hq( tape, x )</code> takes as argument a probe \(\mathbf{q}\) and outputs
 \(\mathbf{Hq}\).  To change the point at which \(\mathbf{Hq}\) is evaluated,
-assign a new value to <code>attr(Hq,"env")$uhat</code>.  RTMB then does a <code>force.update()</code> to update
+assign a new value to <code>attr(Hq,"env")$x</code>.  RTMB then does a <code>force.update()</code> to update
 the tape based on that new value.</p>
     </div>
 

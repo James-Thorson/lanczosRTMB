@@ -9,7 +9,7 @@ in Lanczos methods when H is too large to construct explicitly
 ## Usage
 
 ``` r
-make_Hq(tape, uhat)
+make_Hq(tape, x)
 ```
 
 ## Arguments
@@ -18,17 +18,17 @@ make_Hq(tape, uhat)
 
   Alternative to specifying `obj`
 
-- uhat:
+- x:
 
-  parameter vector `u` used when evaluating `H`
+  parameter vector `x` used when evaluating `H`
 
 ## Details
 
-The output `Hq = make_Hq( tape, uhat )` takes as argument a probe
+The output `Hq = make_Hq( tape, x )` takes as argument a probe
 \\\mathbf{q}\\ and outputs \\\mathbf{Hq}\\. To change the point at which
-\\\mathbf{Hq}\\ is evaluated, assign a new value to
-`attr(Hq,"env")$uhat`. RTMB then does a `force.update()` to update the
-tape based on that new value.
+\\\mathbf{Hq}\\ is evaluated, assign a new value to `attr(Hq,"env")$x`.
+RTMB then does a `force.update()` to update the tape based on that new
+value.
 
 ## Examples
 
