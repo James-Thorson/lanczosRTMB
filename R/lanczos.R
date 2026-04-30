@@ -106,10 +106,15 @@ function( Hq,
 #' assign a new value to `attr(Hq,"env")$x`.  RTMB then does a `force.update()` to update
 #' the tape based on that new value.
 #'
-#' @param x parameter vector `x` used when evaluating `H`
+#' @param x parameter vector `x` (or list coersed to vector) used when evaluating `H`
 #' @param tape Alternative to specifying `obj`
 #' @param which_random integer-vector indicating which elements of `x` correspond to random effects,
 #'        where the probe `q` then has length `length(which_random)`
+#'
+#' @details
+#' `qprime` is defined internally where `qprime[which_random] = q` and
+#' `qprime[!which_random] = 0`, where `length(qprime)` is equal to `length(x)`
+#'
 #'
 #' @examples
 #' # Simulate lognormal-gamma process
@@ -121,9 +126,7 @@ function( Hq,
 #' y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
 #'
 #' # Fit as GLMM
-#' what = "jnll"
 #' nll = function(p){
-#'   sumexpu = sum(exp(p$u[seq_len(n_sum)]))
 #'   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
 #'   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
 #'   jnll = -1 * ( sum(nll1) + sum(nll2) )
@@ -139,15 +142,16 @@ function( Hq,
 #' which_random = 1:30
 #' Hq = make_Hq(
 #'   tape,
-#'   x = unlist(params),
+#'   x = params,
 #'   which_random = which_random
 #' )
 #'
 #' # Compare them
-#' q = rnorm(length(unlist(params)))
+#' q = rnorm(length(which_random))
 #' all.equal(
 #'   Hq(q),
-#'   (obj$env$spHess(random=TRUE)%*%q[which_random])[,1] )
+#'   (obj$env$spHess(random=TRUE) %*% q)[,1]
+#' )
 #'
 #' @export
 make_Hq <-
@@ -158,39 +162,40 @@ function( tape,
 # @param live_x whether to pass `x` explicitly so that it can be taped.
 #        This is only necessary when computing the derivative of a log-determinant
 
-  # Make environment for passing v without retaping
+  # Make environment for passing qprime without retaping
+  # qprime[which_random] = q, where q is the probe passed by users
   env <- new.env(parent = emptyenv())
-  env$x = x
-  env$q = 0 * x
+  env$x = unlist(x)
+  env$qprime = 0 * x
   env$which_random = which_random
-  fetch_q = function() env$q
+  fetch_qprime = function() env$qprime
 
   # grad
   dfdu = tape$jacfun()
   dfdu$simplify()
 
-  # grad * q
-  dfdu_q = function(u){
-    q = DataEval(fetch_q)
-    sum(dfdu(u)[which_random] * q[which_random])
+  # grad * qprime
+  dfdu_qprime = function(u){
+    qprime = DataEval(fetch_qprime)
+    sum(dfdu(u)[which_random] * qprime[which_random])
   }
-  tape_dfdu_q = MakeTape(
-    f = dfdu_q,
+  tape_dfdu_qprime = MakeTape(
+    f = dfdu_qprime,
     x = x
   )
-  tape_dfdu_q$simplify()
-  tape_dfdu_q$reorder()
+  tape_dfdu_qprime$simplify()
+  tape_dfdu_qprime$reorder()
 
   # grad( grad * v )
-  d2fdu2_q = tape_dfdu_q$jacfun()
-  d2fdu2_q$simplify()
-  d2fdu2_q$reorder()
+  d2fdu2_qprime = tape_dfdu_qprime$jacfun()
+  d2fdu2_qprime$simplify()
+  d2fdu2_qprime$reorder()
 
   # Function to supply v for grad( grad * v )
-  Hq <- function(q) {
-    env$q = q
-    d2fdu2_q$force.update()
-    return(d2fdu2_q(env$x)[which_random])
+  Hqprime <- function(q) {
+    env$qprime[which_random] = q
+    d2fdu2_qprime$force.update()
+    return(d2fdu2_qprime(env$x)[which_random])
   }
 
   # bundle with environment

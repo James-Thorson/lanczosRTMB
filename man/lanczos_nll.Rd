@@ -9,7 +9,7 @@ lanczos_nll(obj, x = obj$env$last.par.best, k, m, seed = NULL)
 \arguments{
 \item{obj}{output from \code{TMB::MakeADFun} when using penalized likelihood}
 
-\item{x}{parameter vector \code{x} used when evaluating \code{H}}
+\item{x}{parameter vector \code{x} (or list coersed to vector) used when evaluating \code{H}}
 
 \item{k}{dimension for Kyrlov subspace}
 

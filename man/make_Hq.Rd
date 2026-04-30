@@ -9,7 +9,7 @@ make_Hq(tape, x, which_random = seq_along(x))
 \arguments{
 \item{tape}{Alternative to specifying \code{obj}}
 
-\item{x}{parameter vector \code{x} used when evaluating \code{H}}
+\item{x}{parameter vector \code{x} (or list coersed to vector) used when evaluating \code{H}}
 
 \item{which_random}{integer-vector indicating which elements of \code{x} correspond to random effects,
 where the probe \code{q} then has length \code{length(which_random)}}
@@ -25,6 +25,9 @@ The output \code{Hq = make_Hq( tape, x )} takes as argument a probe \eqn{\mathbf
 \eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
 assign a new value to \code{attr(Hq,"env")$x}.  RTMB then does a \code{force.update()} to update
 the tape based on that new value.
+
+\code{qprime} is defined internally where \code{qprime[which_random] = q} and
+\code{qprime[!which_random] = 0}, where \code{length(qprime)} is equal to \code{length(x)}
 }
 \examples{
 # Simulate lognormal-gamma process
@@ -36,9 +39,7 @@ u = 0 + rnorm(n)
 y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
 
 # Fit as GLMM
-what = "jnll"
 nll = function(p){
-  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
   jnll = -1 * ( sum(nll1) + sum(nll2) )
@@ -54,14 +55,15 @@ tape = MakeTape( nll, params )
 which_random = 1:30
 Hq = make_Hq(
   tape,
-  x = unlist(params),
+  x = params,
   which_random = which_random
 )
 
 # Compare them
-q = rnorm(length(unlist(params)))
+q = rnorm(length(which_random))
 all.equal(
   Hq(q),
-  (obj$env$spHess(random=TRUE)\%*\%q[which_random])[,1] )
+  (obj$env$spHess(random=TRUE) \%*\% q)[,1]
+)
 
 }

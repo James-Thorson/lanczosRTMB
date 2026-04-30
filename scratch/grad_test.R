@@ -122,10 +122,18 @@ do_grad = FALSE
   )
   tape_u$simplify()
   tape_u$reorder()
+  #Hq = make_Hq(
+  #  tape = tape_u,
+  #  x = unlist(parameters[names(parameters) %in% random])
+  #)
+
+  tape_x = MakeTape( nll, parameters )
   Hq = make_Hq(
-    tape = tape_u,
-    uhat = unlist(parameters[names(parameters) %in% random])
+    tape = tape_x,
+    x = unlist(parameters),
+    which_random = which(names(env$x) %in% random)
   )
+  Hq( unlist(parameters) )
 
 ###########
 # new code
