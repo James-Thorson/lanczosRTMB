@@ -68,18 +68,20 @@ what = "jnll"
 sample_x = function(n){ x = rnorm(n); return( x / sqrt(sum(x^2))) }
 samples = lanczos_sample(
   Hq = Hq,
-  v = grad,
+  q = grad,
   k = 30,
   n = 1000,
   orthogonalize = TRUE
 )
-#> Error in lanczos_sample(Hq = Hq, v = grad, k = 30, n = 1000, orthogonalize = TRUE): unused argument (v = grad)
 
 # Samples from Lanczos for parameters that contribute to derived quantity
 samples = sweep( samples, MARGIN = 1, FUN = "+", STAT = opt$par )
-#> Error: object 'samples' not found
 apply( samples, MARGIN = 1, FUN = sd )
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'X' in selecting a method for function 'apply': object 'samples' not found
+#>  [1] 0.4785608 0.4843596 0.4114760 0.0000000 0.0000000 0.0000000 0.0000000
+#>  [8] 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+#> [15] 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+#> [22] 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+#> [29] 0.0000000 0.0000000
 
 # Samples from full Hessian should approximately match
 samp2 = t(mvtnorm::rmvnorm( n = 1000, sigma = as.matrix(solve(H)) ))
@@ -89,9 +91,8 @@ apply( samp2, MARGIN = 1, FUN = sd )
 
 # Compare bias-correction
 sumexpu_z = apply( samples, MARGIN = 2, FUN = \(x) pen$report(x)$sumexpu )
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'X' in selecting a method for function 'apply': object 'samples' not found
 mean(sumexpu_z)
-#> Error: object 'sumexpu_z' not found
+#> [1] 2.58272
 summary(sdrep)['sumexpu',]
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
 #>            4.064121            1.625808            4.734025                  NA 
