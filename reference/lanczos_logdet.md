@@ -10,7 +10,8 @@ lanczos_logdet(
   Hq,
   k,
   m,
-  n,
+  x = attr(Hq, "env")$x0,
+  which_random = attr(Hq, "env")$which_random,
   seed = NULL,
   orthogonalize = TRUE,
   return_extra = FALSE
@@ -21,7 +22,8 @@ lanczos_logdet(
 
 - Hq:
 
-  function that calculates the product `H %*% q`
+  function that calculates the product `H %*% q` given probe `q` and
+  parameters `x`
 
 - k:
 
@@ -32,9 +34,9 @@ lanczos_logdet(
   number of probe-vectors to use for approximating average and standard
   deviation of log-determinant
 
-- n:
+- x:
 
-  length of parameters (and necessary probe-vector)
+  parameter vector used when calculating the Hessian matrix
 
 - seed:
 
@@ -69,31 +71,33 @@ y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
 # Fit as GLMM
 what = "jnll"
 nll = function(p){
-  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
-  ADREPORT( sumexpu )
-  REPORT( sumexpu )
   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
   jnll = -1 * ( sum(nll1) + sum(nll2) )
-  if(what == "jnll") return(jnll)
-  if(what == "sumexpu") return(sumexpu)
+  return(jnll)
 }
-obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
-opt = nlminb( obj$par, obj$fn, obj$gr )
-sdrep = sdreport(obj, bias.correct = TRUE )
-H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
+params = list(u=u, mu = 0, logsd = 0, logcv = 0)
 
-# Re-do as penalized likelihood
-newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
-pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
-opt_pen = nlminb( pen$par, pen$fn, pen$gr )
+# Make RTMB object
+obj = RTMB::MakeADFun( nll, params, random = "u", silent = TRUE )
 
-# Compare determinant
-Hq = make_Hq( GetTape(pen), opt_pen$par )
-lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-#> [1] 44.53951 44.53951 44.53951
-Matrix::determinant( H )$modulus
-#> [1] 44.4956
-#> attr(,"logarithm")
-#> [1] TRUE
+# Make Lanczos object
+tape = MakeTape( nll, params )
+Hq = make_Hq( tape, unlist(params), which_random = 1:30 )
+
+# Compare determinant at start values
+lanczos_logdet( Hq, k = 10, m = 3 )
+#> [1] 18.43706 18.43706 18.43706
+H = obj$env$spHess(par = obj$env$par, random = TRUE)
+sum(log(eigen(H)$values))
+#> [1] 18.43706
+
+# Compare determinant at new values
+x_new = unlist(params)
+  x_new['logsd'] = 1
+lanczos_logdet( Hq, x = x_new, k = 10, m = 3 )
+#> [1] -1.454869 -1.454869 -1.454869
+H = obj$env$spHess(par = x_new, random = TRUE)
+sum(log(eigen(H)$values))
+#> [1] -1.454869
 ```

@@ -6,14 +6,22 @@ Hessian matrix
 ## Usage
 
 ``` r
-lanczos_sample(Hq, q, k, nsamp = 1, orthogonalize = FALSE)
+lanczos_sample(
+  Hq,
+  q,
+  k,
+  x = attr(Hq, "env")$x0,
+  nsamp = 1,
+  orthogonalize = FALSE
+)
 ```
 
 ## Arguments
 
 - Hq:
 
-  function that calculates the product `H %*% q`
+  function that calculates the product `H %*% q` given probe `q` and
+  parameters `x`
 
 - q:
 
@@ -22,6 +30,10 @@ lanczos_sample(Hq, q, k, nsamp = 1, orthogonalize = FALSE)
 - k:
 
   dimension for Kyrlov subspace
+
+- x:
+
+  parameter vector used when calculating the Hessian matrix
 
 - nsamp:
 

@@ -48,6 +48,7 @@ without forming the Hessian matrix directly</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos_variance</span><span class="op">(</span></span>
 <span>  <span class="va">Hq</span>,</span>
 <span>  <span class="va">q</span>,</span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">Hq</span>, <span class="st">"env"</span><span class="op">)</span><span class="op">$</span><span class="va">x0</span>,</span>
 <span>  k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">25</span>, <span class="fl">30</span><span class="op">)</span>,</span>
 <span>  min_spectral_ratio <span class="op">=</span> <span class="fl">1e-10</span>,</span>
 <span>  orthogonalize <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -59,12 +60,16 @@ without forming the Hessian matrix directly</p>
 
 
 <dl><dt id="arg-hq">Hq<a class="anchor" aria-label="anchor" href="#arg-hq"></a></dt>
-<dd><p>function that calculates the product <code>H %*% q</code></p></dd>
+<dd><p>function that calculates the product <code>H %*% q</code> given probe <code>q</code> and parameters <code>x</code></p></dd>
 
 
 <dt id="arg-q">q<a class="anchor" aria-label="anchor" href="#arg-q"></a></dt>
 <dd><p>vector to use when calculating variance, either an indicator for a single
 parameter, or a gradient evaluated at the MLE for a derived quantity</p></dd>
+
+
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>parameter vector used when calculating the Hessian matrix</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>

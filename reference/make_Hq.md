@@ -9,7 +9,7 @@ in Lanczos methods when H is too large to construct explicitly
 ## Usage
 
 ``` r
-make_Hq(tape, x, which_random = seq_along(x))
+make_Hq(tape, x0, which_random = seq_along(x0))
 ```
 
 ## Arguments
@@ -18,15 +18,23 @@ make_Hq(tape, x, which_random = seq_along(x))
 
   Alternative to specifying `obj`
 
-- x:
+- x0:
 
-  parameter vector `x` (or list coersed to vector) used when evaluating
-  `H`
+  parameter vector `x` (or list coersed to vector) used as default when
+  evaluating `H`
 
 - which_random:
 
   integer-vector indicating which elements of `x` correspond to random
   effects, where the probe `q` then has length `length(which_random)`
+
+## Value
+
+A function with two arguments:
+
+- q a probe vector with length `length(which_random)`
+
+- a vector with length `length(x0)`, where the Hessian is calculated
 
 ## Details
 
@@ -76,7 +84,16 @@ Hq = make_Hq(
 q = rnorm(length(which_random))
 all.equal(
   Hq(q),
-  (obj$env$spHess(random=TRUE) %*% q)[,1]
+  (obj$env$spHess(par = unlist(params), random=TRUE) %*% q)[,1]
+)
+#> [1] TRUE
+
+# Compare them when passing new value
+x_new = unlist(params)
+  x_new['logsd'] = 1
+all.equal(
+  Hq(q, x_new),
+  (obj$env$spHess(par = x_new, random=TRUE) %*% q)[,1]
 )
 #> [1] TRUE
 ```

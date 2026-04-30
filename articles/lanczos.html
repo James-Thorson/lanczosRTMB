@@ -170,7 +170,7 @@ approximate the log-determinant of the Hessian for random effects:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># log-determinant using Lanczos</span></span>
 <span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="../reference/make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/pkg/RTMB/man/Tape.html" class="external-link">GetTape</a></span><span class="op">(</span><span class="va">pen</span><span class="op">)</span>, <span class="va">opt_pen</span><span class="op">$</span><span class="va">par</span> <span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/lanczos_logdet.html">lanczos_logdet</a></span><span class="op">(</span> <span class="va">Hq</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">3</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pen</span><span class="op">$</span><span class="va">par</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/lanczos_logdet.html">lanczos_logdet</a></span><span class="op">(</span> <span class="va">Hq</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">3</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 44.4956 44.4956 44.4956</span></span>
 <span></span>
 <span><span class="co"># log-determinant for marginal likelihood</span></span>
@@ -295,7 +295,7 @@ to a dummy variable epsilon to correct for retransformation bias:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sdrep</span><span class="op">)</span><span class="op">[</span><span class="st">'sumexpu'</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
 <span><span class="co">#&gt;            4.064121            1.625808            4.734025                  NA</span></span></code></pre></div>
-<p>Runtime for this vignette: 3 secs</p>
+<p>Runtime for this vignette: 3.1 secs</p>
 </div>
 <div class="section level2">
 <h2 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>

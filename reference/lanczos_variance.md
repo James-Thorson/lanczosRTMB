@@ -9,6 +9,7 @@ quantity without forming the Hessian matrix directly
 lanczos_variance(
   Hq,
   q,
+  x = attr(Hq, "env")$x0,
   k = c(25, 30),
   min_spectral_ratio = 1e-10,
   orthogonalize = FALSE
@@ -19,13 +20,18 @@ lanczos_variance(
 
 - Hq:
 
-  function that calculates the product `H %*% q`
+  function that calculates the product `H %*% q` given probe `q` and
+  parameters `x`
 
 - q:
 
   vector to use when calculating variance, either an indicator for a
   single parameter, or a gradient evaluated at the MLE for a derived
   quantity
+
+- x:
+
+  parameter vector used when calculating the Hessian matrix
 
 - k:
 

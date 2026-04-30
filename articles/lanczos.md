@@ -123,7 +123,7 @@ approximate the log-determinant of the Hessian for random effects:
 
 # log-determinant using Lanczos
 Hq = make_Hq( GetTape(pen), opt_pen$par )
-lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
+lanczos_logdet( Hq, k = 10, m = 3 )
 #> [1] 44.4956 44.4956 44.4956
 
 # log-determinant for marginal likelihood
@@ -270,6 +270,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 3 secs
+Runtime for this vignette: 3.1 secs
 
 ## Works cited
