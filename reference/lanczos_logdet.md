@@ -38,6 +38,11 @@ lanczos_logdet(
 
   parameter vector used when calculating the Hessian matrix
 
+- which_random:
+
+  integer-vector indicating which elements of `x` correspond to random
+  effects, where the probe `q` then has length `length(which_random)`
+
 - seed:
 
   if not NULL, then sets the seed. This is helfpul given that the
