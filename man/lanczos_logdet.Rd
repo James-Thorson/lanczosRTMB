@@ -6,23 +6,23 @@
 \usage{
 lanczos_logdet(
   Hq,
+  x,
   k,
   m,
-  n,
   seed = NULL,
   orthogonalize = TRUE,
   return_extra = FALSE
 )
 }
 \arguments{
-\item{Hq}{function that calculates the product \code{H \%*\% q}}
+\item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
+
+\item{x}{parameter vector used when calculating the Hessian matrix}
 
 \item{k}{dimension for Kyrlov subspace}
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
-
-\item{n}{length of parameters (and necessary probe-vector)}
 
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
@@ -73,7 +73,7 @@ opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 
 # Compare determinant
 Hq = make_Hq( GetTape(pen), opt_pen$par )
-lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
+lanczos_logdet( Hq, k = 10, m = 3 )
 Matrix::determinant( H )$modulus
 
 }

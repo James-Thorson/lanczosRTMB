@@ -4,10 +4,12 @@
 \alias{lanczos_sample}
 \title{Sample from Lanczos method}
 \usage{
-lanczos_sample(Hq, q, k, nsamp = 1, orthogonalize = FALSE)
+lanczos_sample(Hq, x, q, k, nsamp = 1, orthogonalize = FALSE)
 }
 \arguments{
-\item{Hq}{function that calculates the product \code{H \%*\% q}}
+\item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
+
+\item{x}{parameter vector used when calculating the Hessian matrix}
 
 \item{q}{initial vector used for defining a Kyrlov subspace}
 

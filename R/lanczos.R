@@ -7,7 +7,8 @@
 #' @description
 #' Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 #'
-#' @param Hq function that calculates the product `H %*% q`
+#' @param Hq function that calculates the product `H %*% q` given probe `q` and parameters `x`
+#' @param x parameter vector used when calculating the Hessian matrix
 #' @param q initial vector used for defining a Kyrlov subspace
 #' @param k dimension for Kyrlov subspace
 #' @param orthogonalize Whether to do two-pass Gram-Schmidt re-normalization
@@ -21,9 +22,9 @@
 #' @examples
 #' H = diag(exp(rnorm(5)))
 #' q = rep(1,5)
-#' Hq = function(q) (H %*% q)[,1]
+#' Hq = function(q, x) (H %*% q)[,1]
 #'
-#' L = lanczos(Hq, q, k = 5, ortho = TRUE)
+#' L = lanczos(Hq, x = NULL, q, k = 5, ortho = TRUE)
 #' T = tridiag(L$alpha, L$beta)
 #'
 #' # Should match H if and only if L$m = nrow(H)
@@ -32,11 +33,13 @@
 #' @export
 lanczos <-
 function( Hq,
+          x,
           q,
           k,
           orthogonalize = FALSE,
           tol = 1e-12 ) {
 
+  if(missing(x)) x = attr(Hq,"env")$x0
   n = length(q)
   Q = matrix(0, n, k)
   alpha = numeric(k)
@@ -48,7 +51,7 @@ function( Hq,
   m = k   # actual number of Lanczos steps performed
 
   for (j in 1:k) {
-    w = Hq(q)
+    w = Hq(q, x)
     alpha[j] = sum(q * w)
 
     if (j > 1) {
@@ -106,7 +109,7 @@ function( Hq,
 #' assign a new value to `attr(Hq,"env")$x`.  RTMB then does a `force.update()` to update
 #' the tape based on that new value.
 #'
-#' @param x parameter vector `x` (or list coersed to vector) used when evaluating `H`
+#' @param x0 parameter vector `x` (or list coersed to vector) used as default when evaluating `H`
 #' @param tape Alternative to specifying `obj`
 #' @param which_random integer-vector indicating which elements of `x` correspond to random effects,
 #'        where the probe `q` then has length `length(which_random)`
@@ -115,6 +118,12 @@ function( Hq,
 #' `qprime` is defined internally where `qprime[which_random] = q` and
 #' `qprime[!which_random] = 0`, where `length(qprime)` is equal to `length(x)`
 #'
+#' @return
+#' A function with two arguments:
+#' \itemize{
+#'  \item q a probe vector with length `length(which_random)`
+#'  \item a vector with length `length(x0)`, where the Hessian is calculated
+#' }
 #'
 #' @examples
 #' # Simulate lognormal-gamma process
@@ -150,13 +159,21 @@ function( Hq,
 #' q = rnorm(length(which_random))
 #' all.equal(
 #'   Hq(q),
-#'   (obj$env$spHess(random=TRUE) %*% q)[,1]
+#'   (obj$env$spHess(par = unlist(params), random=TRUE) %*% q)[,1]
+#' )
+#'
+#' # Compare them when passing new value
+#' x_new = unlist(params)
+#'   x_new['logsd'] = 1
+#' all.equal(
+#'   Hq(q, x_new),
+#'   (obj$env$spHess(par = x_new, random=TRUE) %*% q)[,1]
 #' )
 #'
 #' @export
 make_Hq <-
 function( tape,
-          x,
+          x0,
           which_random = seq_along(x) ){
 
 # @param live_x whether to pass `x` explicitly so that it can be taped.
@@ -165,37 +182,37 @@ function( tape,
   # Make environment for passing qprime without retaping
   # qprime[which_random] = q, where q is the probe passed by users
   env <- new.env(parent = emptyenv())
-  env$x = unlist(x)
-  env$qprime = 0 * unlist(x)
+  env$x0 = unlist(x0)
+  env$qprime = 0 * unlist(x0)
   env$which_random = which_random
   fetch_qprime = function() env$qprime
 
   # grad
-  dfdu = tape$jacfun()
-  dfdu$simplify()
+  dfdx = tape$jacfun()
+  dfdx$simplify()
 
   # grad * qprime
-  dfdu_qprime = function(u){
+  dfdx_qprime = function(x){
     qprime = DataEval(fetch_qprime)
-    sum(dfdu(u)[which_random] * qprime[which_random])
+    sum(dfdx(x)[which_random] * qprime[which_random])
   }
-  tape_dfdu_qprime = MakeTape(
-    f = dfdu_qprime,
-    x = x
+  tape_dfdx_qprime = MakeTape(
+    f = dfdx_qprime,
+    x = x0
   )
-  tape_dfdu_qprime$simplify()
-  tape_dfdu_qprime$reorder()
+  tape_dfdx_qprime$simplify()
+  tape_dfdx_qprime$reorder()
 
   # grad( grad * v )
-  d2fdu2_qprime = tape_dfdu_qprime$jacfun()
-  d2fdu2_qprime$simplify()
-  d2fdu2_qprime$reorder()
+  d2fdx2_qprime = tape_dfdx_qprime$jacfun()
+  d2fdx2_qprime$simplify()
+  d2fdx2_qprime$reorder()
 
   # Function to supply v for grad( grad * v )
-  Hq <- function(q) {
+  Hq <- function(q, x = x0) {
     env$qprime[which_random] = q
-    d2fdu2_qprime$force.update()
-    return(d2fdu2_qprime(env$x)[which_random])
+    d2fdx2_qprime$force.update()
+    return(d2fdx2_qprime(x)[which_random])
   }
 
   # bundle with environment
@@ -217,6 +234,7 @@ function( tape,
 tridiag <-
 function( alpha,
           beta ) {
+
   k = length(alpha)
   Tri = Matrix(0, k, k)
   diag(Tri) = alpha
@@ -300,16 +318,18 @@ function( alpha,
 #' @export
 lanczos_sample <-
 function( Hq,
+          x,
           q,
           k,
           nsamp = 1,
           orthogonalize = FALSE) {
 
+  if(missing(x)) x = attr(Hq,"env")$x0
   norm_q = sqrt(sum(q^2))
   q = q / norm_q
 
   #
-  L = lanczos(Hq, q, k, orthogonalize = orthogonalize)
+  L = lanczos(Hq, x = x, q = q, k = k, orthogonalize = orthogonalize)
   T = tridiag(L$alpha, L$beta)
   if( FALSE ){
     L$Q %*% T %*% t(L$Q) # SHOULD MATCH H
@@ -353,14 +373,16 @@ function( Hq,
 #' @export
 lanczos_variance <-
 function( Hq,
+          x,
           q,
           k = c(25,30),
           min_spectral_ratio = 1e-10,
           orthogonalize = FALSE ) {
 
+  if(missing(x)) x = attr(Hq,"env")$x0
   norm_q = sqrt(sum(q^2))
   q = q / norm_q
-  L = lanczos( Hq, q, max(k), orthogonalize = orthogonalize )
+  L = lanczos( Hq, x = x, q = q, k = max(k), orthogonalize = orthogonalize )
   Tri = tridiag(L$alpha, L$beta)
 
   fn = function( dim ){
@@ -394,7 +416,6 @@ function( Hq,
 #' @inheritParams lanczos
 #' @param m number of probe-vectors to use for approximating average and standard
 #'        deviation of log-determinant
-#' @param n length of parameters (and necessary probe-vector)
 #' @param seed if not NULL, then sets the seed.  This is helfpul given that
 #'    the Hutchinson probe vectors are randomly sampled, and comparisons have
 #'    lower variance using a fixed seed.
@@ -437,15 +458,15 @@ function( Hq,
 #'
 #' # Compare determinant
 #' Hq = make_Hq( GetTape(pen), opt_pen$par )
-#' lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
+#' lanczos_logdet( Hq, k = 10, m = 3 )
 #' Matrix::determinant( H )$modulus
 #'
 #' @export
 lanczos_logdet <-
 function( Hq,
+          x,
           k,
           m,
-          n,
           seed = NULL,
           orthogonalize = TRUE,
           return_extra = FALSE ) {
@@ -453,6 +474,8 @@ function( Hq,
   if( !is.null(seed) ){
     set.seed(seed)
   }
+  if(missing(x)) x = attr(Hq,"env")$x0
+  n = length(x)
   q_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
   logdet = numeric(m)
   which_pos = Tri = eig = L = vector("list", length = m)
@@ -534,7 +557,7 @@ function( obj,
 
   #
   Hq = make_Hq( GetTape(obj), x )
-  logdet = lanczos_logdet( Hq, k, m, n = length(x), seed = seed )
+  logdet = lanczos_logdet( Hq, x = x, k = k, m = m, seed = seed )
   nll = obj$env$f(x) - (0.5*length(x)*log(2*pi)) + 0.5*mean(logdet)
   sd_nll = 0.5 * sd(logdet)
   return( c(nll = nll, sd_nll = sd_nll) )
@@ -713,12 +736,13 @@ function( func,
     # Have to assign into env(Hq)$mle to evaluate at right point
     which_random = which( names(out$par) %in% random )
     if( length(which_random) > 0 ){
-      attr(Hq,"env")$x = out$par[which_random]
+      #attr(Hq,"env")$x = out$par[which_random]
+      env$x = out$par[which_random]
       env$logdet1_m = lanczos_logdet(
         Hq = Hq,
+        x = env$x,
         k = k,
         m = m,
-        n = length(which_random),
         return_extra = FALSE,
         seed = seed
       )

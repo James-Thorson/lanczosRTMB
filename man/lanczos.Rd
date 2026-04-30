@@ -4,10 +4,12 @@
 \alias{lanczos}
 \title{Assemble tri-diagonal matrix}
 \usage{
-lanczos(Hq, q, k, orthogonalize = FALSE, tol = 1e-12)
+lanczos(Hq, x, q, k, orthogonalize = FALSE, tol = 1e-12)
 }
 \arguments{
-\item{Hq}{function that calculates the product \code{H \%*\% q}}
+\item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
+
+\item{x}{parameter vector used when calculating the Hessian matrix}
 
 \item{q}{initial vector used for defining a Kyrlov subspace}
 
@@ -24,9 +26,9 @@ Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 \examples{
 H = diag(exp(rnorm(5)))
 q = rep(1,5)
-Hq = function(q) (H \%*\% q)[,1]
+Hq = function(q, x) (H \%*\% q)[,1]
 
-L = lanczos(Hq, q, k = 5, ortho = TRUE)
+L = lanczos(Hq, x = NULL, q, k = 5, ortho = TRUE)
 T = tridiag(L$alpha, L$beta)
 
 # Should match H if and only if L$m = nrow(H)
