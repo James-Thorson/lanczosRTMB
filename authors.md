@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/James-Thorson/lanczosRTMB/blob/dev/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/James-Thorson/lanczosRTMB/blob/main/DESCRIPTION)
 
 Thorson JT (2026). *lanczosRTMB: Lanczos methods for mixed-effects
 models in RTMB*. R package version 0.1.0,
