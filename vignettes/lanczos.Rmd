@@ -117,7 +117,7 @@ Using this log-determinant, we can also compare the log-marginal likelihood usin
 
 ```{r}
 # Marginal likelihoods using Lanczos
-lanczos_nll( Hq, k = 10, m = 10 )
+lanczos_nll( pen, k = 10, m = 10 )
 
 # Marginal likelihood using Laplace
 opt$obj
