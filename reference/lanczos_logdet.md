@@ -92,15 +92,8 @@ opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 Hq = make_Hq( GetTape(pen), opt_pen$par )
 lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
 #> [1] 44.53951 44.53951 44.53951
-Matrix::determinant( H )
-#> $modulus
+Matrix::determinant( H )$modulus
 #> [1] 44.4956
 #> attr(,"logarithm")
 #> [1] TRUE
-#> 
-#> $sign
-#> [1] 1
-#> 
-#> attr(,"class")
-#> [1] "det"
 ```

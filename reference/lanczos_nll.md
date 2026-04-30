@@ -60,14 +60,10 @@ y = rgamma( n, shape = 1/0.5^2, scale = exp(u) * 0.5^2 )
 # Fit as GLMM
 what = "jnll"
 nll = function(p){
-  sumexpu = sum(exp(p$u[seq_len(n_sum)]))
-  ADREPORT( sumexpu )
-  REPORT( sumexpu )
   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
   jnll = -1 * ( sum(nll1) + sum(nll2) )
-  if(what == "jnll") return(jnll)
-  if(what == "sumexpu") return(sumexpu)
+  return(jnll)
 }
 obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 opt = nlminb( obj$par, obj$fn, obj$gr )

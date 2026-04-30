@@ -131,17 +131,10 @@ trace estimation should be zero</p>
 <span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/pkg/RTMB/man/Tape.html" class="external-link">GetTape</a></span><span class="op">(</span><span class="va">pen</span><span class="op">)</span>, <span class="va">opt_pen</span><span class="op">$</span><span class="va">par</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">lanczos_logdet</span><span class="op">(</span> <span class="va">Hq</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">3</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pen</span><span class="op">$</span><span class="va">par</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 44.53951 44.53951 44.53951</span>
-<span class="r-in"><span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu">determinant</span><span class="op">(</span> <span class="va">H</span> <span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $modulus</span>
+<span class="r-in"><span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu">determinant</span><span class="op">(</span> <span class="va">H</span> <span class="op">)</span><span class="op">$</span><span class="va">modulus</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 44.4956</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"logarithm")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $sign</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "det"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

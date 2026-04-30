@@ -79,7 +79,7 @@ samples = lanczos_sample(
 )
 
 # Samples from Lanczos for parameters that contribute to derived quantity
-samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt$par )
+samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt_pen$par )
 apply( samples, MARGIN = 1, FUN = sd )
 #>  [1] 0.4785608 0.4843596 0.4114760 0.0000000 0.0000000 0.0000000 0.0000000
 #>  [8] 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
@@ -99,7 +99,7 @@ apply( samp2, MARGIN = 1, FUN = sd )
 # Compare bias-correction
 sumexpu_z = apply( samples, MARGIN = 2, FUN = \(x) pen$report(x)$sumexpu )
 mean(sumexpu_z)
-#> [1] 2.58272
+#> [1] 4.473128
 summary(sdrep)['sumexpu',]
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
 #>            4.064121            1.625808            4.734025                  NA 
