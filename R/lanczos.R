@@ -375,13 +375,13 @@ function( Hq,
   if( !is.null(seed) ){
     set.seed(seed)
   }
-  q1_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
+  q_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
   logdet = numeric(m)
   which_pos = Tri = eig = L = vector("list", length = m)
 
   for (mi in 1:m) {
-    q1 = q1_m[,mi]
-    L[[mi]] = lanczos( Hq = Hq, q1 = q1, k = max(k), orthogonalize = orthogonalize )
+    q = q_m[,mi]
+    L[[mi]] = lanczos( Hq = Hq, q = q, k = max(k), orthogonalize = orthogonalize )
     Tri[[mi]] = tridiag(L[[mi]]$alpha, L[[mi]]$beta)
     eig[[mi]] = eigen(Tri[[mi]], symmetric = TRUE)
     which_pos[[mi]] = which( eig[[mi]]$values > 0 )
@@ -393,7 +393,7 @@ function( Hq,
   if( isFALSE(return_extra) ){
     return( logdet )
   }else{
-    return( list(logdet = logdet, q1_m = q1_m, L = L, Tri = Tri, eig = eig, which_pos = which_pos) )
+    return( list(logdet = logdet, q_m = q_m, L = L, Tri = Tri, eig = eig, which_pos = which_pos) )
   }
 }
 
