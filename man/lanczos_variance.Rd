@@ -15,6 +15,9 @@ lanczos_variance(
 \arguments{
 \item{Hq}{function that calculates the product \code{H \%*\% q}}
 
+\item{q}{vector to use when calculating variance, either an indicator for a single
+parameter, or a gradient evaluated at the MLE for a derived quantity}
+
 \item{k}{can be a vector}
 
 \item{min_spectral_ratio}{is the ratio of minimum to maximum ratio,
@@ -23,9 +26,6 @@ where values < minimum are truncated to minimum
 
 \item{orthogonalize}{Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)}
-
-\item{v}{vector to use when calculating variance, either an indicator for a single
-parameter, or a gradient evaluated at the MLE for a derived quantity}
 }
 \description{
 Estimate squared standard error (variance) for a parameter or derived quantity

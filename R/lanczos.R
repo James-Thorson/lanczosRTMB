@@ -100,7 +100,7 @@ function( Hq,
 #'   then be used e.g. in Lanczos methods when H is too large to construct explicitly
 #'
 #' @param obj TMB object (output from `TMB::MakeADFun`)
-#' @param par parameter vector `u` used when evaluating `H`
+#' @param uhat parameter vector `u` used when evaluating `H`
 #'
 #' @examples
 #' u = rnorm(100)
@@ -110,7 +110,7 @@ function( Hq,
 #' Hq = make_Hq( obj )
 #' # Confirm
 #' q = rnorm( length(obj$par) )
-#' all.equal( Hq(q)[1,], (obj$he()%*%v)[,1] )
+#' all.equal( Hq(q)[1,], (obj$he()%*%q)[,1] )
 #'
 #' @export
 make_Hq <-
@@ -298,7 +298,7 @@ function( Hq,
 #'    without forming the Hessian matrix directly
 #'
 #' @inheritParams lanczos
-#' @param v vector to use when calculating variance, either an indicator for a single
+#' @param q vector to use when calculating variance, either an indicator for a single
 #'    parameter, or a gradient evaluated at the MLE for a derived quantity
 #' @param k can be a vector
 #' @param min_spectral_ratio is the ratio of minimum to maximum ratio,

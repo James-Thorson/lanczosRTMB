@@ -9,7 +9,7 @@ make_Hq(obj, uhat = obj$env$last.par.best, tape)
 \arguments{
 \item{obj}{TMB object (output from \code{TMB::MakeADFun})}
 
-\item{par}{parameter vector \code{u} used when evaluating \code{H}}
+\item{uhat}{parameter vector \code{u} used when evaluating \code{H}}
 }
 \description{
 Given a TMB object, make a function that efficiently calculates
@@ -25,6 +25,6 @@ obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
 Hq = make_Hq( obj )
 # Confirm
 q = rnorm( length(obj$par) )
-all.equal( Hq(q)[1,], (obj$he()\%*\%v)[,1] )
+all.equal( Hq(q)[1,], (obj$he()\%*\%q)[,1] )
 
 }
