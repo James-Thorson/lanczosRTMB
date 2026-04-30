@@ -33,13 +33,12 @@
 #' @export
 lanczos <-
 function( Hq,
-          x,
           q,
           k,
+          x = attr(Hq,"env")$x0,
           orthogonalize = FALSE,
           tol = 1e-12 ) {
 
-  if(missing(x)) x = attr(Hq,"env")$x0
   n = length(q)
   Q = matrix(0, n, k)
   alpha = numeric(k)
@@ -318,13 +317,12 @@ function( alpha,
 #' @export
 lanczos_sample <-
 function( Hq,
-          x,
           q,
           k,
+          x = attr(Hq,"env")$x0,
           nsamp = 1,
           orthogonalize = FALSE) {
 
-  if(missing(x)) x = attr(Hq,"env")$x0
   norm_q = sqrt(sum(q^2))
   q = q / norm_q
 
@@ -373,13 +371,12 @@ function( Hq,
 #' @export
 lanczos_variance <-
 function( Hq,
-          x,
           q,
+          x = attr(Hq,"env")$x0,
           k = c(25,30),
           min_spectral_ratio = 1e-10,
           orthogonalize = FALSE ) {
 
-  if(missing(x)) x = attr(Hq,"env")$x0
   norm_q = sqrt(sum(q^2))
   q = q / norm_q
   L = lanczos( Hq, x = x, q = q, k = max(k), orthogonalize = orthogonalize )
@@ -448,24 +445,28 @@ function( Hq,
 #' obj = RTMB::MakeADFun( nll, params, random = "u", silent = TRUE )
 #'
 #' # Make Lanczos object
-#' Hq = make_Hq( GetTape(pen), unlist(params), which_random = 1:30 )
+#' tape = MakeTape( nll, params )
+#' Hq = make_Hq( tape, unlist(params), which_random = 1:30 )
 #'
 #' # Compare determinant at start values
 #' lanczos_logdet( Hq, k = 10, m = 3 )
 #' H = obj$env$spHess(par = obj$env$par, random = TRUE)
-#' Matrix::determinant( H )$modulus
+#' sum(log(eigen(H)$values))
 #'
 #' # Compare determinant at new values
-#' lanczos_logdet( Hq, x = unlist(params) + 1, k = 10, m = 3 )
-#' H = obj$env$spHess(par = obj$env$par + 1, random = TRUE)
-#' Matrix::determinant( H )$modulus
+#' x_new = unlist(params)
+#'   x_new['logsd'] = 1
+#' lanczos_logdet( Hq, x = x_new, k = 10, m = 3 )
+#' H = obj$env$spHess(par = x_new, random = TRUE)
+#' sum(log(eigen(H)$values))
 #'
 #' @export
 lanczos_logdet <-
 function( Hq,
-          x,
           k,
           m,
+          x = attr(Hq,"env")$x0,
+          which_random = attr(Hq,"env")$which_random,
           seed = NULL,
           orthogonalize = TRUE,
           return_extra = FALSE ) {
@@ -473,8 +474,7 @@ function( Hq,
   if( !is.null(seed) ){
     set.seed(seed)
   }
-  if(missing(x)) x = attr(Hq,"env")$x0
-  n = length(x)
+  n = length(which_random)
   q_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
   logdet = numeric(m)
   which_pos = Tri = eig = L = vector("list", length = m)

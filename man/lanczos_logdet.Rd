@@ -6,9 +6,10 @@
 \usage{
 lanczos_logdet(
   Hq,
-  x,
   k,
   m,
+  x = attr(Hq, "env")$x0,
+  which_random = attr(Hq, "env")$which_random,
   seed = NULL,
   orthogonalize = TRUE,
   return_extra = FALSE
@@ -17,12 +18,12 @@ lanczos_logdet(
 \arguments{
 \item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
 
-\item{x}{parameter vector used when calculating the Hessian matrix}
-
 \item{k}{dimension for Kyrlov subspace}
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
+
+\item{x}{parameter vector used when calculating the Hessian matrix}
 
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
@@ -63,16 +64,19 @@ params = list(u=u, mu = 0, logsd = 0, logcv = 0)
 obj = RTMB::MakeADFun( nll, params, random = "u", silent = TRUE )
 
 # Make Lanczos object
-Hq = make_Hq( GetTape(pen), unlist(params), which_random = 1:30 )
+tape = MakeTape( nll, params )
+Hq = make_Hq( tape, unlist(params), which_random = 1:30 )
 
 # Compare determinant at start values
 lanczos_logdet( Hq, k = 10, m = 3 )
 H = obj$env$spHess(par = obj$env$par, random = TRUE)
-Matrix::determinant( H )$modulus
+sum(log(eigen(H)$values))
 
 # Compare determinant at new values
-lanczos_logdet( Hq, x = unlist(params) + 1, k = 10, m = 3 )
-H = obj$env$spHess(par = obj$env$par + 1, random = TRUE)
-Matrix::determinant( H )$modulus
+x_new = unlist(params)
+  x_new['logsd'] = 1
+lanczos_logdet( Hq, x = x_new, k = 10, m = 3 )
+H = obj$env$spHess(par = x_new, random = TRUE)
+sum(log(eigen(H)$values))
 
 }

@@ -4,16 +4,16 @@
 \alias{lanczos}
 \title{Assemble tri-diagonal matrix}
 \usage{
-lanczos(Hq, x, q, k, orthogonalize = FALSE, tol = 1e-12)
+lanczos(Hq, q, k, x = attr(Hq, "env")$x0, orthogonalize = FALSE, tol = 1e-12)
 }
 \arguments{
 \item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
 
-\item{x}{parameter vector used when calculating the Hessian matrix}
-
 \item{q}{initial vector used for defining a Kyrlov subspace}
 
 \item{k}{dimension for Kyrlov subspace}
+
+\item{x}{parameter vector used when calculating the Hessian matrix}
 
 \item{orthogonalize}{Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)}
