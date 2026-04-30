@@ -23,6 +23,10 @@ make_Hq(obj, uhat = obj$env$last.par.best, tape)
 
   parameter vector `u` used when evaluating `H`
 
+- tape:
+
+  Alternative to specifying `obj`
+
 ## Examples
 
 ``` r

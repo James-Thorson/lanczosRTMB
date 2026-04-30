@@ -15,6 +15,10 @@ lanczos_sample(Hq, q, k, nsamp = 1, orthogonalize = FALSE)
 
   function that calculates the product `H %*% q`
 
+- q:
+
+  initial vector used for defining a Kyrlov subspace
+
 - k:
 
   dimension for Kyrlov subspace
@@ -75,7 +79,7 @@ samples = lanczos_sample(
 )
 
 # Samples from Lanczos for parameters that contribute to derived quantity
-samples = sweep( samples, MARGIN = 1, FUN = "+", STAT = opt$par )
+samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt$par )
 apply( samples, MARGIN = 1, FUN = sd )
 #>  [1] 0.4785608 0.4843596 0.4114760 0.0000000 0.0000000 0.0000000 0.0000000
 #>  [8] 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
@@ -85,9 +89,12 @@ apply( samples, MARGIN = 1, FUN = sd )
 
 # Samples from full Hessian should approximately match
 samp2 = t(mvtnorm::rmvnorm( n = 1000, sigma = as.matrix(solve(H)) ))
-#> Error in loadNamespace(x): there is no package called ‘mvtnorm’
 apply( samp2, MARGIN = 1, FUN = sd )
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'X' in selecting a method for function 'apply': object 'samp2' not found
+#>  [1] 0.4909493 0.4696421 0.4120659 0.4423042 0.4643884 0.3977407 0.4334791
+#>  [8] 0.5479412 0.5325241 0.4876392 0.4092560 0.4274928 0.4818361 0.4363509
+#> [15] 0.5039307 0.3924580 0.4678129 0.6049901 0.4369197 0.5336944 0.5921870
+#> [22] 0.4993766 0.5171501 0.4881900 0.5038213 0.5131423 0.4787957 0.4439222
+#> [29] 0.5402735 0.4108968
 
 # Compare bias-correction
 sumexpu_z = apply( samples, MARGIN = 2, FUN = \(x) pen$report(x)$sumexpu )

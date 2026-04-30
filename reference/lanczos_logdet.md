@@ -46,6 +46,10 @@ lanczos_logdet(
 
   Whether to do two-pass Gram-Schmidt re-normalization (much slower)
 
+- return_extra:
+
+  whether to return probes and other internal constructions.
+
 ## Details
 
 For a model with independent random effects, the variance of stochastic

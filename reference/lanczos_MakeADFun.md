@@ -13,8 +13,7 @@ lanczos_MakeADFun(
   k,
   profile = NULL,
   m = 3,
-  seed = 123,
-  do_grad = FALSE
+  seed = 123
 )
 ```
 
@@ -28,9 +27,19 @@ lanczos_MakeADFun(
 
   Parameter list (or parameter vector) used by `func`.
 
+- random:
+
+  Character vector defining the random effect parameters. See also
+  `regexp`.
+
 - k:
 
   dimension for Kyrlov subspace
+
+- profile:
+
+  Parameters to profile out of the likelihood (this subset will be
+  appended to `random` with Laplace approximation disabled).
 
 - m:
 
@@ -89,11 +98,11 @@ nll = function(p){
 # Build
 obj = lanczos_MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", k = 10 )
 opt = nlminb( obj$par, obj$fn )
+#> Error in objective(.par, ...): object 'do_grad' not found
 
 # Compare with RTMB
 obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
-#>            mu         logsd         logcv 
-#> -7.430087e-06  9.183757e-06 -1.965893e-05 
+#> Error: object 'opt' not found
 ```

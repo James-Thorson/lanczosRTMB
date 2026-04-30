@@ -5,7 +5,7 @@ Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 ## Usage
 
 ``` r
-lanczos(Hq, q1, k, orthogonalize = FALSE, tol = 1e-12)
+lanczos(Hq, q, k, orthogonalize = FALSE, tol = 1e-12)
 ```
 
 ## Arguments
@@ -14,7 +14,7 @@ lanczos(Hq, q1, k, orthogonalize = FALSE, tol = 1e-12)
 
   function that calculates the product `H %*% q`
 
-- q1:
+- q:
 
   initial vector used for defining a Kyrlov subspace
 
