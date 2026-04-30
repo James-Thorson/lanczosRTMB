@@ -166,7 +166,7 @@ function( tape,
   # qprime[which_random] = q, where q is the probe passed by users
   env <- new.env(parent = emptyenv())
   env$x = unlist(x)
-  env$qprime = 0 * x
+  env$qprime = 0 * unlist(x)
   env$which_random = which_random
   fetch_qprime = function() env$qprime
 
@@ -192,7 +192,7 @@ function( tape,
   d2fdu2_qprime$reorder()
 
   # Function to supply v for grad( grad * v )
-  Hqprime <- function(q) {
+  Hq <- function(q) {
     env$qprime[which_random] = q
     d2fdu2_qprime$force.update()
     return(d2fdu2_qprime(env$x)[which_random])
