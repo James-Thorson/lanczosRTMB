@@ -24,6 +24,12 @@ lower variance using a fixed seed.}
 Estimate log-marginal likelihood using Laplace approximation, but replacing
 exact calculation of log-determinant with a stochastic approximation
 }
+\details{
+This function is only intended when integrating across all parameters, e.g.,
+when supplying a penalized likelihood model with fixed effects mapped off at
+a prior estimate.  For more control over which parameters to estimate, use
+\link{lanczos_MakeADFun}
+}
 \examples{
 # Simulate lognormal-gamma process
 set.seed(123)
@@ -56,7 +62,7 @@ pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 
 # Compare marginal likelihoods
-lanczos_nll( Hq, uhat = opt_pen$par, k = 10, m = 10 )
+lanczos_nll( pen, k = 10, m = 10 )
 opt$obj
 
 }

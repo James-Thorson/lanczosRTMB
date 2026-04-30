@@ -100,7 +100,6 @@ function( Hq,
 #'   given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`.  This can
 #'   then be used e.g. in Lanczos methods when H is too large to construct explicitly
 #'
-#' @param obj TMB object (output from `TMB::MakeADFun`)
 #' @param uhat parameter vector `u` used when evaluating `H`
 #' @param tape Alternative to specifying `obj`
 #'
@@ -437,6 +436,12 @@ function( Hq,
 #' Estimate log-marginal likelihood using Laplace approximation, but replacing
 #'    exact calculation of log-determinant with a stochastic approximation
 #'
+#' @details
+#' This function is only intended when integrating across all parameters, e.g.,
+#' when supplying a penalized likelihood model with fixed effects mapped off at
+#' a prior estimate.  For more control over which parameters to estimate, use
+#' [lanczos_MakeADFun]
+#'
 #' @inheritParams lanczos
 #' @inheritParams lanczos_logdet
 #' @inheritParams make_Hq
@@ -474,7 +479,7 @@ function( Hq,
 #' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 #'
 #' # Compare marginal likelihoods
-#' lanczos_nll( Hq, uhat = opt_pen$par, k = 10, m = 10 )
+#' lanczos_nll( pen, k = 10, m = 10 )
 #' opt$obj
 #'
 #' @export

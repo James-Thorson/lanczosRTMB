@@ -10,8 +10,6 @@ make_Hq(tape, uhat)
 \item{tape}{Alternative to specifying \code{obj}}
 
 \item{uhat}{parameter vector \code{u} used when evaluating \code{H}}
-
-\item{obj}{TMB object (output from \code{TMB::MakeADFun})}
 }
 \description{
 Given a TMB object, make a function that efficiently calculates
