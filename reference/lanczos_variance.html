@@ -62,6 +62,11 @@ without forming the Hessian matrix directly</p>
 <dd><p>function that calculates the product <code>H %*% q</code></p></dd>
 
 
+<dt id="arg-q">q<a class="anchor" aria-label="anchor" href="#arg-q"></a></dt>
+<dd><p>vector to use when calculating variance, either an indicator for a single
+parameter, or a gradient evaluated at the MLE for a derived quantity</p></dd>
+
+
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
 <dd><p>can be a vector</p></dd>
 
@@ -75,11 +80,6 @@ where values &lt; minimum are truncated to minimum
 <dt id="arg-orthogonalize">orthogonalize<a class="anchor" aria-label="anchor" href="#arg-orthogonalize"></a></dt>
 <dd><p>Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)</p></dd>
-
-
-<dt id="arg-v">v<a class="anchor" aria-label="anchor" href="#arg-v"></a></dt>
-<dd><p>vector to use when calculating variance, either an indicator for a single
-parameter, or a gradient evaluated at the MLE for a derived quantity</p></dd>
 
 </dl></div>
 

@@ -19,7 +19,7 @@ make_Hq(obj, uhat = obj$env$last.par.best, tape)
   TMB object (output from
   [`TMB::MakeADFun`](https://rdrr.io/pkg/TMB/man/MakeADFun.html))
 
-- par:
+- uhat:
 
   parameter vector `u` used when evaluating `H`
 
@@ -33,6 +33,6 @@ obj = RTMB::MakeADFun( nll, list(u=u), silent = TRUE )
 Hq = make_Hq( obj )
 # Confirm
 q = rnorm( length(obj$par) )
-all.equal( Hq(q)[1,], (obj$he()%*%v)[,1] )
-#> Error: object 'v' not found
+all.equal( Hq(q)[1,], (obj$he()%*%q)[,1] )
+#> [1] TRUE
 ```

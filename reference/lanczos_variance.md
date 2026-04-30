@@ -21,6 +21,12 @@ lanczos_variance(
 
   function that calculates the product `H %*% q`
 
+- q:
+
+  vector to use when calculating variance, either an indicator for a
+  single parameter, or a gradient evaluated at the MLE for a derived
+  quantity
+
 - k:
 
   can be a vector
@@ -33,9 +39,3 @@ lanczos_variance(
 - orthogonalize:
 
   Whether to do two-pass Gram-Schmidt re-normalization (much slower)
-
-- v:
-
-  vector to use when calculating variance, either an indicator for a
-  single parameter, or a gradient evaluated at the MLE for a derived
-  quantity

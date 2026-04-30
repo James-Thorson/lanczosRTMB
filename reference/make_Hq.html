@@ -62,7 +62,7 @@ then be used e.g. in Lanczos methods when H is too large to construct explicitly
 <dd><p>TMB object (output from <code><a href="https://rdrr.io/pkg/TMB/man/MakeADFun.html" class="external-link">TMB::MakeADFun</a></code>)</p></dd>
 
 
-<dt id="arg-par">par<a class="anchor" aria-label="anchor" href="#arg-par"></a></dt>
+<dt id="arg-uhat">uhat<a class="anchor" aria-label="anchor" href="#arg-uhat"></a></dt>
 <dd><p>parameter vector <code>u</code> used when evaluating <code>H</code></p></dd>
 
 </dl></div>
@@ -76,8 +76,8 @@ then be used e.g. in Lanczos methods when H is too large to construct explicitly
 <span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu">make_Hq</span><span class="op">(</span> <span class="va">obj</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Confirm</span></span></span>
 <span class="r-in"><span><span class="va">q</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">obj</span><span class="op">$</span><span class="va">par</span><span class="op">)</span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span> <span class="fu">Hq</span><span class="op">(</span><span class="va">q</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, <span class="op">(</span><span class="va">obj</span><span class="op">$</span><span class="fu">he</span><span class="op">(</span><span class="op">)</span><span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span><span class="va">v</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'v' not found</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span> <span class="fu">Hq</span><span class="op">(</span><span class="va">q</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, <span class="op">(</span><span class="va">obj</span><span class="op">$</span><span class="fu">he</span><span class="op">(</span><span class="op">)</span><span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span><span class="va">q</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
