@@ -17,6 +17,12 @@ Given a TMB object, make a function that efficiently calculates
 given function f(x) that returns the negative log-likelihood given \code{x = u} with fixed \code{v}.  This can
 then be used e.g. in Lanczos methods when H is too large to construct explicitly
 }
+\details{
+The output \code{Hq = make_Hq( tape, uhat )} takes as argument a probe \eqn{\mathbf{q}} and outputs
+\eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
+assign a new value to \code{attr(Hq,"env")$uhat}.  RTMB then does a \code{force.update()} to update
+the tape based on that new value.
+}
 \examples{
 u = rnorm(100)
 y = rpois(length(u), exp(u))

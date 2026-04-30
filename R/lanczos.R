@@ -14,6 +14,10 @@
 #'        (much slower)
 #' @param tol numerical tolerance for stopping algorithm given that no more terms are identifiable
 #'
+#' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
+#' @importFrom Matrix sparseMatrix Diagonal Matrix t
+#' @importFrom stats optim rnorm sd
+#'
 #' @examples
 #' H = diag(exp(rnorm(5)))
 #' q = rep(1,5)
@@ -24,10 +28,6 @@
 #'
 #' # Should match H if and only if L$m = nrow(H)
 #' range(L$Q %*% T %*% t(L$Q) - H)
-#'
-#' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
-#' @importFrom Matrix sparseMatrix Diagonal Matrix t
-#' @importFrom stats optim rnorm sd
 #'
 #' @export
 lanczos <-
@@ -100,6 +100,12 @@ function( Hq,
 #'   given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`.  This can
 #'   then be used e.g. in Lanczos methods when H is too large to construct explicitly
 #'
+#' @details
+#' The output `Hq = make_Hq( tape, uhat )` takes as argument a probe \eqn{\mathbf{q}} and outputs
+#' \eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
+#' assign a new value to `attr(Hq,"env")$uhat`.  RTMB then does a `force.update()` to update
+#' the tape based on that new value.
+#'
 #' @param uhat parameter vector `u` used when evaluating `H`
 #' @param tape Alternative to specifying `obj`
 #'
@@ -117,6 +123,9 @@ function( Hq,
 make_Hq <-
 function( tape,
           uhat ){
+
+# @param live_uhat whether to pass `uhat` explicitly so that it can be taped.
+#        This is only necessary when computing the derivative of a log-determinant
 
   # Make environment for passing v without retaping
   env <- new.env(parent = emptyenv())
