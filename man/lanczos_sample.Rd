@@ -68,7 +68,7 @@ samples = lanczos_sample(
 )
 
 # Samples from Lanczos for parameters that contribute to derived quantity
-samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt$par )
+samples = sweep( samples, MARGIN = 1, FUN = "+", STATS = opt_pen$par )
 apply( samples, MARGIN = 1, FUN = sd )
 
 # Samples from full Hessian should approximately match

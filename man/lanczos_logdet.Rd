@@ -74,6 +74,6 @@ opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 # Compare determinant
 Hq = make_Hq( GetTape(pen), opt_pen$par )
 lanczos_logdet( Hq, k = 10, m = 3, n = length(pen$par) )
-Matrix::determinant( H )
+Matrix::determinant( H )$modulus
 
 }
