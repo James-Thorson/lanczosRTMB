@@ -373,23 +373,23 @@ function( Hq,
   }
   q1_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
   logdet = numeric(m)
-  L = vector("list", length = m)
+  which_pos = Tri = eig = L = vector("list", length = m)
 
-  for (mindex in 1:m) {
-    q1 = q1_m[,mindex]
-    L[[mindex]] = lanczos( Hq = Hq, q1 = q1, k = max(k), orthogonalize = orthogonalize )
-    Tri = tridiag(L[[mindex]]$alpha, L[[mindex]]$beta)
-    eig = eigen(Tri, symmetric = TRUE)
-    which_pos = which( eig$values > 0 )
-    log_quad = sum(log(eig$values[which_pos]) * eig$vectors[1, which_pos]^2)
-    logdet[mindex] = log_quad * n
+  for (mi in 1:m) {
+    q1 = q1_m[,mi]
+    L[[mi]] = lanczos( Hq = Hq, q1 = q1, k = max(k), orthogonalize = orthogonalize )
+    Tri[[mi]] = tridiag(L[[mi]]$alpha, L[[mi]]$beta)
+    eig[[mi]] = eigen(Tri[[mi]], symmetric = TRUE)
+    which_pos[[mi]] = which( eig[[mi]]$values > 0 )
+    log_quad = sum(log(eig[[mi]]$values[which_pos[[mi]]]) * eig[[mi]]$vectors[1, which_pos[[mi]]]^2)
+    logdet[mi] = log_quad * n
   }
 
   #
   if( isFALSE(return_extra) ){
     return( logdet )
   }else{
-    return( list(logdet = logdet, q1_m = q1_m, L = L) )
+    return( list(logdet = logdet, q1_m = q1_m, L = L, Tri = Tri, eig = eig, which_pos = which_pos) )
   }
 }
 
