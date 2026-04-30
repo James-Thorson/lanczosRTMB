@@ -59,7 +59,7 @@ what = "jnll"
 sample_x = function(n){ x = rnorm(n); return( x / sqrt(sum(x^2))) }
 samples = lanczos_sample(
   Hq = Hq,
-  v = grad,
+  q = grad,
   k = 30,
   n = 1000,
   orthogonalize = TRUE
