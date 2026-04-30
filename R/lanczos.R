@@ -174,7 +174,7 @@ function( Hq,
 make_Hq <-
 function( tape,
           x0,
-          which_random = seq_along(x) ){
+          which_random = seq_along(x0) ){
 
 # @param live_x whether to pass `x` explicitly so that it can be taped.
 #        This is only necessary when computing the derivative of a log-determinant
@@ -437,28 +437,27 @@ function( Hq,
 #' # Fit as GLMM
 #' what = "jnll"
 #' nll = function(p){
-#'   sumexpu = sum(exp(p$u[seq_len(n_sum)]))
-#'   ADREPORT( sumexpu )
-#'   REPORT( sumexpu )
 #'   nll1 = dnorm(p$u, mean=p$mu, sd=exp(p$logsd), log=TRUE)
 #'   nll2 = dgamma(y, shape = 1/exp(2*p$logcv), scale = exp(p$u) * exp(2*p$logcv), log=TRUE)
 #'   jnll = -1 * ( sum(nll1) + sum(nll2) )
-#'   if(what == "jnll") return(jnll)
-#'   if(what == "sumexpu") return(sumexpu)
+#'   return(jnll)
 #' }
-#' obj = RTMB::MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
-#' opt = nlminb( obj$par, obj$fn, obj$gr )
-#' sdrep = sdreport(obj, bias.correct = TRUE )
-#' H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
+#' params = list(u=u, mu = 0, logsd = 0, logcv = 0)
 #'
-#' # Re-do as penalized likelihood
-#' newmap = list(mu = factor(NA), logsd = factor(NA), logcv = factor(NA))
-#' pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
-#' opt_pen = nlminb( pen$par, pen$fn, pen$gr )
+#' # Make RTMB object
+#' obj = RTMB::MakeADFun( nll, params, random = "u", silent = TRUE )
 #'
-#' # Compare determinant
-#' Hq = make_Hq( GetTape(pen), opt_pen$par )
+#' # Make Lanczos object
+#' Hq = make_Hq( GetTape(pen), unlist(params), which_random = 1:30 )
+#'
+#' # Compare determinant at start values
 #' lanczos_logdet( Hq, k = 10, m = 3 )
+#' H = obj$env$spHess(par = obj$env$par, random = TRUE)
+#' Matrix::determinant( H )$modulus
+#'
+#' # Compare determinant at new values
+#' lanczos_logdet( Hq, x = unlist(params) + 1, k = 10, m = 3 )
+#' H = obj$env$spHess(par = obj$env$par + 1, random = TRUE)
 #' Matrix::determinant( H )$modulus
 #'
 #' @export
@@ -482,7 +481,7 @@ function( Hq,
 
   for (mi in 1:m) {
     q = q_m[,mi]
-    L[[mi]] = lanczos( Hq = Hq, q = q, k = max(k), orthogonalize = orthogonalize )
+    L[[mi]] = lanczos( Hq = Hq, x = x, q = q, k = max(k), orthogonalize = orthogonalize )
     Tri[[mi]] = tridiag(L[[mi]]$alpha, L[[mi]]$beta)
     eig[[mi]] = eigen(Tri[[mi]], symmetric = TRUE)
     which_pos[[mi]] = which( eig[[mi]]$values > 0 )
@@ -712,7 +711,7 @@ function( func,
     tape_pu$force.update()
     dfdpu$force.update()
 
-    if( is.null(env$inner_start) ){
+    if( is.null(env$puhat) ){
       env$puhat = env$x[names(env$x) %in% c(random,profile)]
       env$best = Inf
     }
@@ -737,10 +736,10 @@ function( func,
     which_random = which( names(out$par) %in% random )
     if( length(which_random) > 0 ){
       #attr(Hq,"env")$x = out$par[which_random]
-      env$x = out$par[which_random]
+      env$x[which_random] = out$par[which_random]
       env$logdet1_m = lanczos_logdet(
         Hq = Hq,
-        x = env$x,
+        x = env$x[which_random],
         k = k,
         m = m,
         return_extra = FALSE,

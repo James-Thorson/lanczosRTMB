@@ -4,7 +4,7 @@
 \alias{make_Hq}
 \title{Make function to calculate H \%*\% q}
 \usage{
-make_Hq(tape, x0, which_random = seq_along(x))
+make_Hq(tape, x0, which_random = seq_along(x0))
 }
 \arguments{
 \item{tape}{Alternative to specifying \code{obj}}
