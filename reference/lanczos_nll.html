@@ -75,6 +75,13 @@ the Hutchinson probe vectors are randomly sampled, and comparisons have
 lower variance using a fixed seed.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>This function is only intended when integrating across all parameters, e.g.,
+when supplying a penalized likelihood model with fixed effects mapped off at
+a prior estimate.  For more control over which parameters to estimate, use
+<a href="lanczos_MakeADFun.html">lanczos_MakeADFun</a></p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -109,8 +116,9 @@ lower variance using a fixed seed.</p></dd>
 <span class="r-in"><span><span class="va">opt_pen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">pen</span><span class="op">$</span><span class="va">par</span>, <span class="va">pen</span><span class="op">$</span><span class="va">fn</span>, <span class="va">pen</span><span class="op">$</span><span class="va">gr</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare marginal likelihoods</span></span></span>
-<span class="r-in"><span><span class="fu">lanczos_nll</span><span class="op">(</span> <span class="va">Hq</span>, uhat <span class="op">=</span> <span class="va">opt_pen</span><span class="op">$</span><span class="va">par</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'Hq' not found</span>
+<span class="r-in"><span><span class="fu">lanczos_nll</span><span class="op">(</span> <span class="va">pen</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      nll   sd_nll </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36.46908  0.00000 </span>
 <span class="r-in"><span><span class="va">opt</span><span class="op">$</span><span class="va">obj</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 36.46907</span>
 <span class="r-in"><span></span></span>

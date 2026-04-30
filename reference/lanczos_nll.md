@@ -37,6 +37,14 @@ lanczos_nll(obj, uhat = obj$env$last.par.best, k, m, seed = NULL)
   Hutchinson probe vectors are randomly sampled, and comparisons have
   lower variance using a fixed seed.
 
+## Details
+
+This function is only intended when integrating across all parameters,
+e.g., when supplying a penalized likelihood model with fixed effects
+mapped off at a prior estimate. For more control over which parameters
+to estimate, use
+[lanczos_MakeADFun](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_MakeADFun.md)
+
 ## Examples
 
 ``` r
@@ -71,8 +79,9 @@ pen = RTMB::MakeADFun( nll, obj$env$parList(), map = newmap, silent = TRUE )
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 
 # Compare marginal likelihoods
-lanczos_nll( Hq, uhat = opt_pen$par, k = 10, m = 10 )
-#> Error: object 'Hq' not found
+lanczos_nll( pen, k = 10, m = 10 )
+#>      nll   sd_nll 
+#> 36.46908  0.00000 
 opt$obj
 #> [1] 36.46907
 ```

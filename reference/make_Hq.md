@@ -22,11 +22,6 @@ make_Hq(tape, uhat)
 
   parameter vector `u` used when evaluating `H`
 
-- obj:
-
-  TMB object (output from
-  [`TMB::MakeADFun`](https://rdrr.io/pkg/TMB/man/MakeADFun.html))
-
 ## Examples
 
 ``` r
