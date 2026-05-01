@@ -624,6 +624,10 @@ function( obj,
 #' Make a function that returns the Lanczos-Laplace approximation for
 #'   a user-supplied joint likelihood and designated random effects
 #'
+#' @details
+#' The gradient uses a finite-difference applied to a fixed set of probes,
+#' inspired by Dong et al. (2017) and the `stochasticLQ` option in GPyTorch.
+#'
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
 #' @inheritParams TMB::MakeADFun
@@ -670,6 +674,10 @@ function( obj,
 #'   # And it ends at a slightly different estimator
 #' opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 #' opt3$par - opt2$par
+#'
+#' @references
+#' Dong, K., Eriksson, D., Nickisch, H., Bindel, D., & Wilson, A. G. (2017). Scalable log determinants for Gaussian process kernel learning. Advances in Neural Information Processing Systems, 30.
+#' <https://proceedings.neurips.cc/paper/2017/hash/976abf49974d4686f87192efa0513ae0-Abstract.html>
 #'
 #' @export
 lanczos_MakeADFun <-
