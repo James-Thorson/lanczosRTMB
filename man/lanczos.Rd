@@ -2,7 +2,7 @@
 % Please edit documentation in R/lanczos.R
 \name{lanczos}
 \alias{lanczos}
-\title{Assemble tri-diagonal matrix}
+\title{Calculate Lanczos approximation}
 \usage{
 lanczos(Hq, q, k, x = attr(Hq, "env")$x0, orthogonalize = FALSE, tol = 1e-12)
 }
@@ -21,7 +21,7 @@ lanczos(Hq, q, k, x = attr(Hq, "env")$x0, orthogonalize = FALSE, tol = 1e-12)
 \item{tol}{numerical tolerance for stopping algorithm given that no more terms are identifiable}
 }
 \description{
-Assemble tri-diagonal matrix from alpha and beta from Lanczos method
+Calculate Q, alpha and beta for Lanzos approximation
 }
 \examples{
 H = diag(exp(rnorm(5)))

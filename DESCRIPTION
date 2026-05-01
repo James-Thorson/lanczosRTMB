@@ -19,6 +19,7 @@ Depends:
     RTMB (>= 1.5.0),
 Imports:
     Matrix,
+    numDeriv
 Suggests:
     knitr,
     TMB,
