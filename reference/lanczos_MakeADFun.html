@@ -139,6 +139,14 @@ lower variance using a fixed seed.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            mu         logsd         logcv </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -2.380471e-05  4.309889e-05 -9.203910e-05 </span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Fit again using FD gradient for Lanczos method using fixed probe-recursion</span></span></span>
+<span class="r-in"><span>  <span class="co"># This requires an optimizer that is tolerant to small imprecision in the gradient</span></span></span>
+<span class="r-in"><span>  <span class="co"># And it ends at a slightly different estimator</span></span></span>
+<span class="r-in"><span><span class="va">opt3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span><span class="op">(</span> <span class="va">obj</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj</span><span class="op">$</span><span class="va">fn</span>, <span class="va">obj</span><span class="op">$</span><span class="va">gr</span>, method <span class="op">=</span> <span class="st">"BFGS"</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">opt3</span><span class="op">$</span><span class="va">par</span> <span class="op">-</span> <span class="va">opt2</span><span class="op">$</span><span class="va">par</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           mu        logsd        logcv </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.003816865 -0.005031017  0.010298147 </span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
