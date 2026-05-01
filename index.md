@@ -15,3 +15,15 @@ approximate:
 - Standard errors using a matrix-free delta method
 - The log-determinant of the Hessian using stochastic trace estimation
 - The log marginal likelihood using the Laplace approximation
+
+### Potential developments
+
+There’s many avenues for further improvement. These include:
+
+Adding a quasi-Newton inner optimizer using `Hq`, i.e., a variant of
+conjugate gradient;
+
+Moving the FD logic for the `obj$gr` to tape;
+
+Exploring a conjugate gradient algorithm for an implicit solution to the
+gradient of the log-determinant;
