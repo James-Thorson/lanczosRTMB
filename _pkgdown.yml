@@ -36,3 +36,4 @@ reference:
     Experimental tools, under development.
   contents:
   - lanczos_MakeADFun
+  - lanczos_fixedQ
