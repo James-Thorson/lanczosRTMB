@@ -697,14 +697,6 @@ function( func,
     x0 = unlist(parameters[names(parameters) %in% random])
   )
 
-  # Experiment
-  #if( FALSE ){
-  #  tape_joint = MakeTape(
-  #    f = func,
-  #    x = parameters
-  #  )
-  #}
-
   # Objective function
   nll = function(v){
     # Define fixed effects and assign to global environment
@@ -772,6 +764,7 @@ function( func,
       env$puhat = out$par
       env$best = neglogmarglik
     }
+    env$pulast = out$par
     return( neglogmarglik )
   }
 
