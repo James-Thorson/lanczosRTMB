@@ -665,6 +665,12 @@ function( obj,
 #' opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 #' opt$par - opt2$par
 #'
+#' # Fit again using FD gradient for Lanczos method using fixed probe-recursion
+#'   # This requires an optimizer that is tolerant to small imprecision in the gradient
+#'   # And it ends at a slightly different estimator
+#' opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
+#' opt3$par - opt2$par
+#'
 #' @export
 lanczos_MakeADFun <-
 function( func,
@@ -734,22 +740,9 @@ function( func,
   tape_v$reorder()
   grad_v = tape_v$jacfun()
 
-  #if( isTRUE(do_grad) ){
-  #  # get tape w.r.t. fixed given random effects
-  #  tape_v = MakeTape(
-  #    f = cmb( jnll_vec, func = func, parnames = fixed ),
-  #    x = unlist(parameters[names(parameters) %in% fixed])
-  #  )
-  #  tape_v$simplify()
-  #  tape_v$reorder()
-  #  grad_v = tape_v$jacfun()
-  #
-  #  Hq_q = make_Hv_phi(
-  #    obj_phi = tape_phi,
-  #    par_phi = unlist(parameters[names(parameters) %in% fixed]),
-  #    u_hat = unlist(parameters[names(parameters) %in% c(random, profile)])
-  #  )
-  #}
+  # Get cross-grad
+  tape_x = MakeTape( func, parameters )
+  dudv = tape_x$newton(random = x_random)$jacfun()
 
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
   grad_pu = tape_pu$jacfun()
@@ -824,20 +817,32 @@ function( func,
   }
 
   get_grad = function(v){
+    # Run to do inner optimizer
     get_nll(v)
+    pu = env$pu_last
     env$x[x_fixed] = v
-    env$x[-x_fixed] = env$pu_last
+    env$x[-x_fixed] = pu
     Q_list = lapply(env$L$L, \(x) x$Q )
 
-    #
+    # Get grad_jnll
     grad_v$force.update()
     grad_jnll = grad_v(v)
 
+    # Get projection for EB of u given FD change in v
+    dudv$force.update()
+    P = dudv(v)
+    x = env$x
+
     grad_logdet = grad(
-      function(v){
-        env$x[x_fixed] = v
-        get_nll( v ) # MUST INCLUDE!
-        env$x[-x_fixed] = env$pu_last
+      function(vnew){
+        env$x = x
+        env$x[x_fixed] = vnew
+        # Project based on central jacobian
+        env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
+        # Recompute exactly
+        #get_nll( vnew ) # MUST INCLUDE!
+        #env$x[-x_fixed] = env$pu_last
+        # Apply in log-det
         mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list))
       },
       x = v
@@ -850,7 +855,7 @@ function( func,
   out = list(
     par = env$x[x_fixed],
     fn = get_nll,
-    gr = get_grad,
+    gr_FD = get_grad,
     env = env
   )
   return(out)
