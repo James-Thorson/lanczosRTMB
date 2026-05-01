@@ -74,6 +74,18 @@ An object (list) of class `tinyVAST`. Elements include:
   function that returns the Hessian-vector product (for use in
   debugging)
 
+## Details
+
+The gradient uses a finite-difference applied to a fixed set of probes,
+inspired by Dong et al. (2017) and the `stochasticLQ` option in GPyTorch
+
+## References
+
+Dong, K., Eriksson, D., Nickisch, H., Bindel, D., & Wilson, A. G.
+(2017). Scalable log determinants for Gaussian process kernel learning.
+Advances in Neural Information Processing Systems, 30.
+<https://proceedings.neurips.cc/paper/2017/hash/976abf49974d4686f87192efa0513ae0-Abstract.html>
+
 ## Examples
 
 ``` r

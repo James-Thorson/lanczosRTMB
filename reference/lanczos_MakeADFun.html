@@ -34,7 +34,7 @@ a user-supplied joint likelihood and designated random effects"></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Approximate log-marginal likelihood using Lanczos method (EXPERIMENTAL)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/James-Thorson/lanczosRTMB/blob/main/R/lanczos.R" class="external-link"><code>R/lanczos.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/James-Thorson/lanczosRTMB/blob/dev/R/lanczos.R" class="external-link"><code>R/lanczos.R</code></a></small>
       <div class="d-none name"><code>lanczos_MakeADFun.Rd</code></div>
     </div>
 
@@ -107,6 +107,16 @@ lower variance using a fixed seed.</p></dd>
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The gradient uses a finite-difference applied to a fixed set of probes,
+inspired by Dong et al. (2017) and the <code>stochasticLQ</code> option in GPyTorch</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Dong, K., Eriksson, D., Nickisch, H., Bindel, D., &amp; Wilson, A. G. (2017). Scalable log determinants for Gaussian process kernel learning. Advances in Neural Information Processing Systems, 30.
+<a href="https://proceedings.neurips.cc/paper/2017/hash/976abf49974d4686f87192efa0513ae0-Abstract.html" class="external-link">https://proceedings.neurips.cc/paper/2017/hash/976abf49974d4686f87192efa0513ae0-Abstract.html</a></p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
