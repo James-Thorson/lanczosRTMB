@@ -827,7 +827,7 @@ function( func,
     get_nll(v)
     env$x[x_fixed] = v
     env$x[-x_fixed] = env$pu_last
-    Q_list = lapply(L$L, \(x) x$Q )
+    Q_list = lapply(env$L$L, \(x) x$Q )
 
     #
     grad_v$force.update()
