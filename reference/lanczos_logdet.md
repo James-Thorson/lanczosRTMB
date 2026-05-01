@@ -14,6 +14,7 @@ lanczos_logdet(
   which_random = attr(Hq, "env")$which_random,
   seed = NULL,
   orthogonalize = TRUE,
+  Q_list = NULL,
   return_extra = FALSE
 )
 ```
@@ -52,6 +53,11 @@ lanczos_logdet(
 - orthogonalize:
 
   Whether to do two-pass Gram-Schmidt re-normalization (much slower)
+
+- Q_list:
+
+  optional list of probes returned by a prior Lanczos run. This then
+  uses fixed probes to speed up evaluations during gradients.
 
 - return_extra:
 

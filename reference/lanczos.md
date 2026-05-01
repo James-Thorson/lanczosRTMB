@@ -1,6 +1,6 @@
-# Assemble tri-diagonal matrix
+# Calculate Lanczos approximation
 
-Assemble tri-diagonal matrix from alpha and beta from Lanczos method
+Calculate Q, alpha and beta for Lanzos approximation
 
 ## Usage
 

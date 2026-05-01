@@ -36,7 +36,7 @@ Core tools, using Lanczos to approximate model properties
 Helper tools, used for components of an analysis
 
 - [`lanczos()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos.md)
-  : Assemble tri-diagonal matrix
+  : Calculate Lanczos approximation
 - [`make_Hq()`](https://james-thorson.github.io/lanczosRTMB/reference/make_Hq.md)
   : Make function to calculate H %\*% q
 
@@ -47,6 +47,8 @@ Experimental tools, under development.
 - [`lanczos_MakeADFun()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_MakeADFun.md)
   : Approximate log-marginal likelihood using Lanczos method
   (EXPERIMENTAL)
+- [`lanczos_fixedQ()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_fixedQ.md)
+  : Calculate Lanczos approximation using fixed Q
 
 # Articles
 
