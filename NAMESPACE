@@ -2,6 +2,7 @@
 
 export(lanczos)
 export(lanczos_MakeADFun)
+export(lanczos_dgmrf)
 export(lanczos_fixedQ)
 export(lanczos_logdet)
 export(lanczos_nll)

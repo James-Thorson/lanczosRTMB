@@ -47,7 +47,7 @@ a user-supplied joint likelihood and designated random effects
 }
 \details{
 The gradient uses a finite-difference applied to a fixed set of probes,
-inspired by Dong et al. (2017) and the \code{stochasticLQ} option in GPyTorch
+inspired by Dong et al. (2017) and the \code{stochasticLQ} option in GPyTorch.
 }
 \examples{
 # Simulate lognormal-gamma process
