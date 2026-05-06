@@ -16,18 +16,6 @@ approximate:
 - The log-determinant of the Hessian using stochastic trace estimation
 - The log marginal likelihood using the Laplace approximation
 
-### Potential developments
-
-There’s many avenues for further improvement. These include:
-
-Adding a quasi-Newton inner optimizer using `Hq`, i.e., a variant of
-conjugate gradient;
-
-Moving the FD logic for the `obj$gr` to tape;
-
-Exploring a conjugate gradient algorithm for an implicit solution to the
-gradient of the log-determinant;
-
 # Package index
 
 ## Approximate properties
@@ -42,6 +30,8 @@ Core tools, using Lanczos to approximate model properties
   : Sample from Lanczos method
 - [`lanczos_variance()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_variance.md)
   : Estimate variance using Lanczos method
+- [`lanczos_dgmrf()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_dgmrf.md)
+  : Approximate the log-density of a GMRF using Lanczos
 
 ## Helper functions
 
