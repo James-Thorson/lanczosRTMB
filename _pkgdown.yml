@@ -23,6 +23,7 @@ reference:
   - lanczos_nll
   - lanczos_sample
   - lanczos_variance
+  - lanczos_dgmrf
 
 - title: 'Helper functions'
   desc: |
