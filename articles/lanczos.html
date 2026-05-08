@@ -165,9 +165,25 @@ likelihood, conditional upon fixed values for variance parameters:</p>
 <span></span>
 <span><span class="co"># Re-optimize</span></span>
 <span><span class="va">opt_pen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">pen</span><span class="op">$</span><span class="va">par</span>, <span class="va">pen</span><span class="op">$</span><span class="va">fn</span>, <span class="va">pen</span><span class="op">$</span><span class="va">gr</span> <span class="op">)</span></span></code></pre></div>
+<p>Alternatively, we provide a Newton optimizer using a truncated
+conjugate gradient, which operates using Hessian-vector products without
+ever forming the full Hessian matrix:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Extract tape and make Hessian-vector-product function</span></span>
+<span><span class="va">tape</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RTMB/man/Tape.html" class="external-link">GetTape</a></span><span class="op">(</span><span class="va">pen</span><span class="op">)</span></span>
+<span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="../reference/make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="va">tape</span>, <span class="va">pen</span><span class="op">$</span><span class="va">par</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># run Newton optimizer</span></span>
+<span><span class="va">opt_pen2</span> <span class="op">=</span> <span class="fu"><a href="../reference/newton_CG.html">newton_CG</a></span><span class="op">(</span></span>
+<span>  x0 <span class="op">=</span> <span class="va">pen</span><span class="op">$</span><span class="va">par</span>,</span>
+<span>  fn <span class="op">=</span> <span class="va">tape</span>,</span>
+<span>  gr <span class="op">=</span> <span class="va">tape</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  Hq <span class="op">=</span> <span class="va">Hq</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; value: 41.78943 mgc: 4.47975e-14</span></span></code></pre></div>
 <p>We can then use stochastic trace estimation and the Lanczos method to
 approximate the log-determinant of the Hessian for random effects:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># log-determinant using Lanczos</span></span>
 <span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="../reference/make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/pkg/RTMB/man/Tape.html" class="external-link">GetTape</a></span><span class="op">(</span><span class="va">pen</span><span class="op">)</span>, <span class="va">opt_pen</span><span class="op">$</span><span class="va">par</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/lanczos_logdet.html">lanczos_logdet</a></span><span class="op">(</span> <span class="va">Hq</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">3</span> <span class="op">)</span></span>
@@ -181,7 +197,7 @@ approximate the log-determinant of the Hessian for random effects:</p>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>Using this log-determinant, we can also compare the log-marginal
 likelihood using Lanczos with the full calculation:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Marginal likelihoods using Lanczos</span></span>
 <span><span class="fu"><a href="../reference/lanczos_nll.html">lanczos_nll</a></span><span class="op">(</span> <span class="va">pen</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span>
 <span><span class="co">#&gt;      nll   sd_nll </span></span>
@@ -196,7 +212,7 @@ likelihood using Lanczos with the full calculation:</p>
 </h2>
 <p>Alternatively, we can apply Lanczos methods to standard errors for
 parameters. Here, we will sample the first three random effects</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_sample.html">lanczos_sample</a></span><span class="op">(</span></span>
 <span>   Hq <span class="op">=</span> <span class="va">Hq</span>,</span>
 <span>   q <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">n</span><span class="op">-</span><span class="fl">3</span><span class="op">)</span> <span class="op">)</span>,</span>
@@ -214,7 +230,7 @@ parameters. Here, we will sample the first three random effects</p>
 <p>Alternatively, we can apply Lanczos methods to approximate the
 Hessian with respect to a derived quantity. This involves calculating
 the gradient for the derived quantity with respect to coefficients:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">what</span> <span class="op">=</span> <span class="st">"sumexpu"</span></span>
 <span><span class="va">grad</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> </span>
 <span>  <span class="va">nll</span>, </span>
@@ -225,7 +241,7 @@ the gradient for the derived quantity with respect to coefficients:</p>
 <p>We can then use this gradient to approximate samples from the Hessian
 matrix and use that to calculate a Monte Carlo estimator for standard
 errors:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_sample.html">lanczos_sample</a></span><span class="op">(</span></span>
 <span>   Hq <span class="op">=</span> <span class="va">Hq</span>,</span>
 <span>   q <span class="op">=</span> <span class="va">grad</span>,</span>
@@ -243,7 +259,7 @@ errors:</p>
 <span><span class="co">#&gt;   4.064121   1.194484</span></span></code></pre></div>
 <p>Alternatively, we can calculate the standard error for a derived
 quantity using Lanczos within the delta method:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># </span></span>
 <span><span class="va">Var</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_variance.html">lanczos_variance</a></span><span class="op">(</span></span>
 <span>  Hq <span class="op">=</span> <span class="va">Hq</span>,</span>
@@ -263,7 +279,7 @@ quantity using Lanczos within the delta method:</p>
 </h2>
 <p>Finally, we can use the gradient of the log-likelihood with respect
 to a dummy variable epsilon to correct for retransformation bias:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># One-sided finite difference</span></span>
 <span><span class="va">what</span> <span class="op">=</span> <span class="st">"biascorr"</span></span>
 <span><span class="va">phat</span> <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">parList</span><span class="op">(</span><span class="op">)</span></span>
@@ -295,7 +311,7 @@ to a dummy variable epsilon to correct for retransformation bias:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sdrep</span><span class="op">)</span><span class="op">[</span><span class="st">'sumexpu'</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
 <span><span class="co">#&gt;            4.064121            1.625808            4.734025                  NA</span></span></code></pre></div>
-<p>Runtime for this vignette: 3 secs</p>
+<p>Runtime for this vignette: 3.09 secs</p>
 </div>
 <div class="section level2">
 <h2 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>

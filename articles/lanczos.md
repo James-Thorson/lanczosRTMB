@@ -116,6 +116,26 @@ pen = RTMB::MakeADFun(
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
 ```
 
+Alternatively, we provide a Newton optimizer using a truncated conjugate
+gradient, which operates using Hessian-vector products without ever
+forming the full Hessian matrix:
+
+``` r
+
+# Extract tape and make Hessian-vector-product function
+tape = GetTape(pen)
+Hq = make_Hq( tape, pen$par )
+
+# run Newton optimizer
+opt_pen2 = newton_CG(
+  x0 = pen$par,
+  fn = tape,
+  gr = tape$jacfun(),
+  Hq = Hq
+)
+#> value: 41.78943 mgc: 4.47975e-14
+```
+
 We can then use stochastic trace estimation and the Lanczos method to
 approximate the log-determinant of the Hessian for random effects:
 
@@ -270,6 +290,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 3 secs
+Runtime for this vignette: 3.09 secs
 
 ## Works cited
