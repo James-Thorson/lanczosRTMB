@@ -95,6 +95,56 @@ Adapted from <code>mcmcsae::CG</code> under GPL-3 licence to use Hessian-vector 
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Settings</span></span></span>
+<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fl">4</span></span></span>
+<span class="r-in"><span><span class="va">rho</span> <span class="op">=</span> <span class="fl">0.99</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)</span></span></span>
+<span class="r-in"><span><span class="va">P</span> <span class="op">=</span> <span class="fu">bandSparse</span><span class="op">(</span> n <span class="op">=</span> <span class="va">n</span>, k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>, diagonals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in bandSparse(n = n, k = c(-1), diagonals = list(rep(1, n))):</span> could not find function "bandSparse"</span>
+<span class="r-in"><span><span class="va">Q</span> <span class="op">=</span> <span class="op">(</span><span class="fu">Diagonal</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">-</span> <span class="va">rho</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">P</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="fu">Diagonal</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">-</span> <span class="va">rho</span> <span class="op">*</span> <span class="va">P</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in Diagonal(n):</span> could not find function "Diagonal"</span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">:::</span><span class="fu">rgmrf0</span><span class="op">(</span> n<span class="op">=</span> <span class="fl">1</span>, Q <span class="op">=</span> <span class="va">Q</span> <span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'A' in selecting a method for function 'Cholesky': object 'Q' not found</span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="va">x</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'x' not found</span>
+<span class="r-in"><span><span class="va">which_seen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, size <span class="op">=</span> <span class="va">n</span><span class="op">/</span><span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span><span class="op">[</span><span class="op">-</span><span class="va">which_seen</span><span class="op">]</span> <span class="op">=</span> <span class="cn">NA</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'y' not found</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">nll</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="op">-</span><span class="fu">dgmrf</span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">x</span>, Q <span class="op">=</span> <span class="va">Q</span>, log <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">p</span><span class="op">$</span><span class="va">x</span>, sd <span class="op">=</span> <span class="fl">0.1</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">parlist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">tape</span> <span class="op">=</span> <span class="fu">MakeTape</span><span class="op">(</span><span class="va">nll</span>, <span class="va">parlist</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in f(x):</span> object 'Q' not found</span>
+<span class="r-in"><span><span class="va">gr</span> <span class="op">=</span> <span class="va">tape</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'tape' not found</span>
+<span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="va">tape</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'tape' not found</span>
+<span class="r-in"><span><span class="va">H</span> <span class="op">=</span> <span class="va">gr</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span>sparse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'gr' not found</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="va">b</span> <span class="op">=</span> <span class="fu">gr</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in gr(unlist(parlist)):</span> could not find function "gr"</span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span> <span class="fu">H</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span><span class="op">)</span>, <span class="va">b</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'a' in selecting a method for function 'solve': could not find function "H"</span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">=</span> <span class="fu">CG</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  b <span class="op">=</span> <span class="va">b</span>,</span></span>
+<span class="r-in"><span>  Hq <span class="op">=</span> <span class="va">Hq</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'b' not found</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">x</span>, <span class="va">out</span><span class="op">$</span><span class="va">x</span> <span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'x' not found</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
