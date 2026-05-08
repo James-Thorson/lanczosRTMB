@@ -13,6 +13,7 @@ lanczos_MakeADFun(
   m = 3,
   method = "newton_CG",
   seed = 123,
+  make_gr = TRUE,
   silent = TRUE
 )
 }
@@ -36,6 +37,9 @@ specifically "L-BFGS-B" in \link{optim} to optimize the inner problem}
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
 lower variance using a fixed seed.}
+
+\item{make_gr}{whether to make approximated gradient using fixed probes
+(slow for large models)}
 
 \item{silent}{Disable all tracing information?}
 }

@@ -633,6 +633,8 @@ function( obj,
 #' @inheritParams TMB::MakeADFun
 #' @param method whether to use [newton_CG] or a gradient-based low-memory option
 #'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
+#' @param make_gr whether to make approximated gradient using fixed probes
+#'   (slow for large models)
 #'
 #' @return
 #' An object (list) of class `tinyVAST`. Elements include:
@@ -692,6 +694,7 @@ function( func,
           #do_grad = FALSE,
           method = "newton_CG",
           seed = 123,
+          make_gr = TRUE,
           silent = TRUE ){
 
   # vectors
@@ -751,10 +754,6 @@ function( func,
   tape_v$simplify()
   tape_v$reorder()
   grad_v = tape_v$jacfun()
-
-  # Get cross-grad
-  tape_x = MakeTape( func, parameters )
-  dudv = tape_x$newton(random = x_random)$jacfun()
 
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
   grad_pu = tape_pu$jacfun()
@@ -842,39 +841,47 @@ function( func,
     return( nll )
   }
 
-  get_grad = function(v){
-    # Run to do inner optimizer
-    get_nll(v)
-    pu = env$pu_last
-    env$x[x_fixed] = v
-    env$x[-x_fixed] = pu
-    Q_list = lapply(env$L$L, \(x) x$Q )
+  if( isTRUE(make_gr) ){
+    # Get cross-grad
+    tape_x = MakeTape( func, parameters )
+    dudv = tape_x$newton(random = x_random)$jacfun()
 
-    # Get grad_jnll
-    grad_v$force.update()
-    grad_jnll = grad_v(v)
+    get_grad = function(v){
+      # Run to do inner optimizer
+      get_nll(v)
+      pu = env$pu_last
+      env$x[x_fixed] = v
+      env$x[-x_fixed] = pu
+      Q_list = lapply(env$L$L, \(x) x$Q )
 
-    # Get projection for EB of u given FD change in v
-    dudv$force.update()
-    P = dudv(v)
-    x = env$x
+      # Get grad_jnll
+      grad_v$force.update()
+      grad_jnll = grad_v(v)
 
-    grad_logdet = grad(
-      function(vnew){
-        env$x = x
-        env$x[x_fixed] = vnew
-        # Project based on central jacobian
-        env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
-        # Recompute exactly
-        #get_nll( vnew ) # MUST INCLUDE!
-        #env$x[-x_fixed] = env$pu_last
-        # Apply in log-det
-        mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list))
-      },
-      x = v
-    )
+      # Get projection for EB of u given FD change in v
+      dudv$force.update()
+      P = dudv(v)
+      x = env$x
 
-    return( grad_jnll + 0.5*grad_logdet )
+      grad_logdet = grad(
+        function(vnew){
+          env$x = x
+          env$x[x_fixed] = vnew
+          # Project based on central jacobian
+          env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
+          # Recompute exactly
+          #get_nll( vnew ) # MUST INCLUDE!
+          #env$x[-x_fixed] = env$pu_last
+          # Apply in log-det
+          mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list))
+        },
+        x = v
+      )
+
+      return( grad_jnll + 0.5*grad_logdet )
+    }
+  }else{
+    get_grad = NULL
   }
 
   #
