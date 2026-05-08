@@ -41,7 +41,7 @@
 #' Hq = make_Hq( tape, x = unlist(parlist) )
 #' H = gr$jacfun(sparse = TRUE)
 #'
-#' #
+#' # Test unregularized solution
 #' b = gr(unlist(parlist))[1,]
 #' Hess = H(unlist(parlist))
 #' x = solve( Hess, b)
@@ -49,8 +49,15 @@
 #'   b = b,
 #'   Hq = Hq
 #' )
+#' plot( x, out$x )
 #'
-#' #
+#' # Test trust-region regularization
+#' Hess2 = Hess + 2 * Diagonal(n=n)
+#' x2 = solve( Hess2, b)
+#' out = CG(
+#'   b = b,
+#'   Hq = \(b) Hq(b) + 2*b
+#' )
 #' plot( x, out$x )
 #'
 #' @export
