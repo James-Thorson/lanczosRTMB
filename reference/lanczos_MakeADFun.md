@@ -14,7 +14,8 @@ lanczos_MakeADFun(
   profile = NULL,
   m = 3,
   method = "newton_CG",
-  seed = 123
+  seed = 123,
+  silent = TRUE
 )
 ```
 
@@ -60,6 +61,10 @@ lanczos_MakeADFun(
   if not NULL, then sets the seed. This is helfpul given that the
   Hutchinson probe vectors are randomly sampled, and comparisons have
   lower variance using a fixed seed.
+
+- silent:
+
+  Disable all tracing information?
 
 ## Value
 

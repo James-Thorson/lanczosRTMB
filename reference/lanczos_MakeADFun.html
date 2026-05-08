@@ -53,7 +53,8 @@ a user-supplied joint likelihood and designated random effects</p>
 <span>  profile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  m <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"newton_CG"</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -95,6 +96,10 @@ specifically "L-BFGS-B" in <a href="https://rdrr.io/r/stats/optim.html" class="e
 <dd><p>if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
 lower variance using a fixed seed.</p></dd>
+
+
+<dt id="arg-silent">silent<a class="anchor" aria-label="anchor" href="#arg-silent"></a></dt>
+<dd><p>Disable all tracing information?</p></dd>
 
 </dl></div>
     <div class="section level2">
