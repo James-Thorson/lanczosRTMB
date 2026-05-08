@@ -61,7 +61,7 @@ function( b,
 #' for a Newton.
 #'
 #' @inheritParams CG
-#' @param x0 initial parameter vector
+#' @param par initial parameter vector
 #' @param fn function to evaluate negative log-likelihood
 #' @param gr function to evaluate gradient of negative log-likelihood
 #' @param gr_tol early stopping condition for gradient of Newton solver
@@ -74,20 +74,20 @@ function( b,
 #'
 #' @export
 newton_CG <-
-function( x0,
+function( par,
           fn,
           gr,
           Hq,
           gr_tol = 0.00001,
           e_ratio = 1,
           maxit_newton = 100,
-          maxit_CG = min(100,length(x0)),
+          maxit_CG = min(100,length(par)),
           c1 = 0.01,
           beta = 0.5,
           silent = FALSE ){
 
   start_time = Sys.time()
-  x = x0
+  x = par
   grad = gr(x)[,1]
   nll = fn(x)
   CG_iter = rep(NA, maxit_newton)
@@ -123,12 +123,15 @@ function( x0,
     if( isFALSE(silent) ){
       cat("value:", nll,"mgc:",max(abs(grad)),"\n")
     }
-    if( max(abs(grad)) < gr_tol ){
+    max_abs_grad = max(abs(grad))
+    if( max_abs_grad < gr_tol ){
       break
     }
   }
   out = list(
+    value = nll,
     par = x,
+    max_abs_grad = max_abs_grad,
     runtime = Sys.time() - start_time,
     newton_iter = newton_iter,
     CG_iter = na.omit(CG_iter)
@@ -176,7 +179,7 @@ if( FALSE ){
 
   # alternative option
   opt2 = newton_CG(
-    x0 = unlist(parlist), gr = gr, Hq = Hq
+    par = unlist(parlist), gr = gr, Hq = Hq
   )
 
   # Compare estimates and runtimes

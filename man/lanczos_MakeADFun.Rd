@@ -11,6 +11,7 @@ lanczos_MakeADFun(
   k,
   profile = NULL,
   m = 3,
+  method = "newton_CG",
   seed = 123
 )
 }
@@ -27,6 +28,9 @@ lanczos_MakeADFun(
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
+
+\item{method}{whether to use \link{newton_CG} or a gradient-based low-memory option
+specifically "L-BFGS-B" in \link{optim} to optimize the inner problem}
 
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have

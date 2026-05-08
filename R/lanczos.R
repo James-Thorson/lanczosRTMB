@@ -631,6 +631,8 @@ function( obj,
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
 #' @inheritParams TMB::MakeADFun
+#' @param method whether to use [newton_CG] or a gradient-based low-memory option
+#'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
 #'
 #' @return
 #' An object (list) of class `tinyVAST`. Elements include:
@@ -688,6 +690,7 @@ function( func,
           profile = NULL,
           m = 3,
           #do_grad = FALSE,
+          method = "newton_CG",
           seed = 123 ){
 
   # vectors
@@ -787,13 +790,22 @@ function( func,
     }
 
     # Run inner and assign pu to environment
-    inner_opt = optim(
-      par = env$pu_best,
-      fn = tape_pu,
-      gr = grad_pu,
-      method = "L-BFGS-B",
-      control = list(trace=0, maxit = 1e3, factr = 1e-2)
-    )
+    if( method == "newton_CG" ){
+      inner_opt = newton_CG(
+        par = env$pu_best,
+        fn = tape_pu,
+        gr = grad_pu,
+        Hq = Hq_u
+      )
+    }else{
+      inner_opt = optim(
+        par = env$pu_best,
+        fn = tape_pu,
+        gr = grad_pu,
+        method = "L-BFGS-B",
+        control = list(trace=0, maxit = 1e3, factr = 1e-2)
+      )
+    }
     env$x[x_profile_random] = inner_opt$par
 
     # Have to assign into env(Hq)$mle to evaluate at right point

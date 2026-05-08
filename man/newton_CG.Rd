@@ -5,21 +5,21 @@
 \title{Nonlinear minimizer using line search with approximated Newton solution}
 \usage{
 newton_CG(
-  x0,
+  par,
   fn,
   gr,
   Hq,
   gr_tol = 1e-05,
   e_ratio = 1,
   maxit_newton = 100,
-  maxit_CG = min(100, length(x0)),
+  maxit_CG = min(100, length(par)),
   c1 = 0.01,
   beta = 0.5,
   silent = FALSE
 )
 }
 \arguments{
-\item{x0}{initial parameter vector}
+\item{par}{initial parameter vector}
 
 \item{fn}{function to evaluate negative log-likelihood}
 
