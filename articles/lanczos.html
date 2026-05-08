@@ -158,46 +158,16 @@ factorization that is default in TMB:</p>
 <span>  <span class="va">nll</span>, </span>
 <span>  <span class="va">parlist</span>,</span>
 <span>  random <span class="op">=</span> <span class="st">"u"</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"optim"</span>,</span>
 <span>  k <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># optimize </span></span>
-<span><span class="va">opt_pen0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">pen0</span><span class="op">$</span><span class="va">par</span>, <span class="va">pen0</span><span class="op">$</span><span class="va">fn</span>, control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="co">#&gt;   0:     39.910646:  0.00000  0.00000  0.00000</span></span>
-<span><span class="co">#&gt;   1:     36.675617: 0.0555001 -0.198190 -0.366144</span></span>
-<span><span class="co">#&gt;   2:     36.535047: -0.0102992 -0.244893 -0.410111</span></span>
-<span><span class="co">#&gt;   3:     36.505322: -0.0803584 -0.210515 -0.458626</span></span>
-<span><span class="co">#&gt;   4:     36.475717: -0.0681256 -0.161748 -0.535540</span></span>
-<span><span class="co">#&gt;   5:     36.469920: -0.0997312 -0.140044 -0.572350</span></span>
-<span><span class="co">#&gt;   6:     36.469465: -0.0969518 -0.144120 -0.576529</span></span>
-<span><span class="co">#&gt;   7:     36.469282: -0.0994561 -0.141170 -0.581709</span></span>
-<span><span class="co">#&gt;   8:     36.469092: -0.103463 -0.133466 -0.594961</span></span>
-<span><span class="co">#&gt;   9:     36.469084: -0.106717 -0.131960 -0.600523</span></span>
-<span><span class="co">#&gt;  10:     36.469073: -0.104862 -0.133183 -0.597215</span></span>
-<span><span class="co">#&gt;  11:     36.469073: -0.104857 -0.133204 -0.597217</span></span>
-<span><span class="co">#&gt;  12:     36.469073: -0.104829 -0.133207 -0.597249</span></span>
-<span><span class="co">#&gt;  13:     36.469073: -0.104891 -0.133210 -0.597408</span></span>
-<span><span class="co">#&gt;  14:     36.469073: -0.104817 -0.133200 -0.597380</span></span>
-<span><span class="co">#&gt;  15:     36.469073: -0.104838 -0.133192 -0.597399</span></span>
-<span><span class="co">#&gt;  16:     36.469073: -0.104864 -0.133194 -0.597415</span></span>
-<span><span class="co">#&gt;  17:     36.469073: -0.104882 -0.133193 -0.597439</span></span>
-<span><span class="co">#&gt;  18:     36.469072: -0.104890 -0.133190 -0.597484</span></span>
-<span><span class="co">#&gt;  19:     36.469072: -0.104886 -0.133187 -0.597489</span></span>
-<span><span class="co">#&gt;  20:     36.469072: -0.104882 -0.133149 -0.597525</span></span>
-<span><span class="co">#&gt;  21:     36.469072: -0.104900 -0.133047 -0.597523</span></span>
-<span><span class="co">#&gt;  22:     36.469072: -0.104896 -0.132950 -0.597738</span></span>
-<span><span class="co">#&gt;  23:     36.469072: -0.104925 -0.132890 -0.597937</span></span>
-<span><span class="co">#&gt;  24:     36.469072: -0.105003 -0.132901 -0.597929</span></span>
-<span><span class="co">#&gt;  25:     36.469072: -0.105064 -0.132853 -0.597948</span></span>
-<span><span class="co">#&gt;  26:     36.469072: -0.105075 -0.132866 -0.598004</span></span>
-<span><span class="co">#&gt;  27:     36.469072: -0.105061 -0.132859 -0.598014</span></span>
-<span><span class="co">#&gt;  28:     36.469072: -0.105061 -0.132859 -0.598014</span></span>
+<span><span class="va">opt_pen0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">pen0</span><span class="op">$</span><span class="va">par</span>, <span class="va">pen0</span><span class="op">$</span><span class="va">fn</span> <span class="op">)</span></span>
 <span><span class="va">opt_pen0</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1050606 -0.1328589 -0.5980141 </span></span>
+<span><span class="co">#&gt; -0.1054474 -0.1323386 -0.5991714 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
 <span><span class="co">#&gt; [1] 36.46907</span></span>
@@ -206,11 +176,11 @@ factorization that is default in TMB:</p>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 28</span></span>
+<span><span class="co">#&gt; [1] 43</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       59      141 </span></span>
+<span><span class="co">#&gt;       73      228 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
@@ -383,7 +353,7 @@ to a dummy variable epsilon to correct for retransformation bias:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sdrep</span><span class="op">)</span><span class="op">[</span><span class="st">'sumexpu'</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
 <span><span class="co">#&gt;            4.064121            1.625808            4.734025                  NA</span></span></code></pre></div>
-<p>Runtime for this vignette: 7.36 secs</p>
+<p>Runtime for this vignette: 9.71 secs</p>
 </div>
 <div class="section level2">
 <h2 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
