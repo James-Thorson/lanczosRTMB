@@ -50,6 +50,9 @@ nll = function(p){
   if(what == "sumexpu") return(sumexpu)
   if(what == "biascorr") return(jnll + p$eps * sumexpu)
 }
+
+# Starting list of parameters
+parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0, eps = 0)
 ```
 
 Finally, we fit this model as a log-linked generalized linear mixed
@@ -61,7 +64,7 @@ model (GLMM):
 what = "jnll"
 obj = RTMB::MakeADFun( 
   nll, 
-  list(u=u, mu = 0, logsd = 0, logcv = 0, eps = 0),
+  parlist,
   map = list(eps = factor(NA)),
   random = "u",
   silent = TRUE
@@ -89,6 +92,92 @@ opt
 #> 
 #> $message
 #> [1] "relative convergence (4)"
+```
+
+## Fit as marginal likelihood without Cholesky decomposition
+
+We first show that we can re-fit the model using the marginal
+likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky
+factorization that is default in TMB:
+
+``` r
+
+parlist$eps = numeric()
+pen0 = lanczos_MakeADFun(
+  nll, 
+  parlist,
+  random = "u",
+  method = "optim",
+  k = 10,
+  silent = TRUE
+)
+
+# optimize 
+opt_pen0 = nlminb( pen0$par, pen0$fn, control = list(trace = 1) )
+#>   0:     39.910646:  0.00000  0.00000  0.00000
+#>   1:     36.513207: -0.0610391 -0.219325 -0.433051
+#>   2:     36.499397: -0.0358829 -0.212092 -0.474385
+#>   3:     36.483784: -0.0669697 -0.176820 -0.487917
+#>   4:     36.474964: -0.0886213 -0.172405 -0.531567
+#>   5:     36.473660: -0.0802839 -0.138859 -0.566191
+#>   6:     36.469332: -0.0998972 -0.139569 -0.579935
+#>   7:     36.469146: -0.101806 -0.137720 -0.588132
+#>   8:     36.469110: -0.102884 -0.135692 -0.590837
+#>   9:     36.469108: -0.102718 -0.135189 -0.591376
+#>  10:     36.469102: -0.103304 -0.135192 -0.591852
+#>  11:     36.469098: -0.103080 -0.135718 -0.592347
+#>  12:     36.469097: -0.103158 -0.135528 -0.592121
+#>  13:     36.469096: -0.103277 -0.135326 -0.592318
+#>  14:     36.469093: -0.103770 -0.134572 -0.593141
+#>  15:     36.469085: -0.103722 -0.134483 -0.593928
+#>  16:     36.469080: -0.103931 -0.134178 -0.594779
+#>  17:     36.469080: -0.104000 -0.134230 -0.594880
+#>  18:     36.469079: -0.104071 -0.134293 -0.595092
+#>  19:     36.469079: -0.104086 -0.134299 -0.595157
+#>  20:     36.469078: -0.104125 -0.134036 -0.595166
+#>  21:     36.469078: -0.104272 -0.133969 -0.595378
+#>  22:     36.469077: -0.104121 -0.133968 -0.595598
+#>  23:     36.469077: -0.104259 -0.133848 -0.595621
+#>  24:     36.469076: -0.104399 -0.133814 -0.595735
+#>  25:     36.469076: -0.104436 -0.133763 -0.595907
+#>  26:     36.469074: -0.104640 -0.133447 -0.596539
+#>  27:     36.469072: -0.105440 -0.132216 -0.599087
+#>  28:     36.469072: -0.105494 -0.132188 -0.599348
+#>  29:     36.469072: -0.105489 -0.132320 -0.599373
+#>  30:     36.469072: -0.105498 -0.132278 -0.599335
+#>  31:     36.469072: -0.105500 -0.132274 -0.599278
+#>  32:     36.469072: -0.105491 -0.132299 -0.599289
+#>  33:     36.469072: -0.105467 -0.132301 -0.599273
+#>  34:     36.469072: -0.105474 -0.132291 -0.599265
+#>  35:     36.469072: -0.105470 -0.132297 -0.599253
+#>  36:     36.469072: -0.105477 -0.132350 -0.599233
+#>  37:     36.469072: -0.105464 -0.132339 -0.599178
+#>  38:     36.469072: -0.105462 -0.132335 -0.599181
+#>  39:     36.469072: -0.105457 -0.132335 -0.599178
+#>  40:     36.469072: -0.105447 -0.132337 -0.599171
+#>  41:     36.469072: -0.105447 -0.132339 -0.599171
+#>  42:     36.469072: -0.105447 -0.132339 -0.599171
+#>  43:     36.469072: -0.105447 -0.132339 -0.599171
+opt_pen0
+#> $par
+#>         mu      logsd      logcv 
+#> -0.1054474 -0.1323386 -0.5991714 
+#> 
+#> $objective
+#> [1] 36.46907
+#> 
+#> $convergence
+#> [1] 1
+#> 
+#> $iterations
+#> [1] 43
+#> 
+#> $evaluations
+#> function gradient 
+#>       73      228 
+#> 
+#> $message
+#> [1] "false convergence (8)"
 ```
 
 ## Fit as a penalized likelihood model
@@ -128,12 +217,12 @@ Hq = make_Hq( tape, pen$par )
 
 # run Newton optimizer
 opt_pen2 = newton_CG(
-  x0 = pen$par,
+  par = pen$par,
   fn = tape,
   gr = tape$jacfun(),
   Hq = Hq
 )
-#> value: 41.78943 mgc: 4.47975e-14
+#> value: 41.78943 mgc: 9.836576e-13
 ```
 
 We can then use stochastic trace estimation and the Lanczos method to
@@ -189,7 +278,7 @@ sdrep = sdreport( obj, ignore.parm.uncertainty = TRUE )
 as.list(sdrep, what = "Std. Error")$u[1:3]
 #> [1] 0.4839019 0.4864751 0.4066186
 apply( samples, MARGIN = 1, FUN = sd)[1:3]
-#> [1] 0.4836432 0.4823133 0.4087638
+#> [1] 0.4782002 0.4887318 0.4051458
 ```
 
 Alternatively, we can apply Lanczos methods to approximate the Hessian
@@ -224,7 +313,7 @@ samples = lanczos_sample(
 # Compare SD of samples with the delta method
 sumexpu1 = apply( samples, MARGIN = 2, FUN = \(v)pen$report(v)$sumexpu )
 c( pen$report()$sumexpu, sd(sumexpu1) )
-#> [1] 4.064121 0.974645
+#> [1] 4.0641214 0.9435151
 summary(sdrep)['sumexpu',]
 #>   Estimate Std. Error 
 #>   4.064121   1.194484
@@ -284,12 +373,12 @@ sdrep = sdreport( obj, bias.correct = TRUE )
 #
 (nll_hi['nll'] - nll_mid['nll']) / (phat$eps)
 #>      nll 
-#> 4.733928
+#> 4.733918
 summary(sdrep)['sumexpu',]
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 3.26 secs
+Runtime for this vignette: 9.7 secs
 
 ## Works cited

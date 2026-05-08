@@ -13,6 +13,7 @@ lanczos_MakeADFun(
   k,
   profile = NULL,
   m = 3,
+  method = "newton_CG",
   seed = 123
 )
 ```
@@ -45,6 +46,14 @@ lanczos_MakeADFun(
 
   number of probe-vectors to use for approximating average and standard
   deviation of log-determinant
+
+- method:
+
+  whether to use
+  [newton_CG](https://james-thorson.github.io/lanczosRTMB/reference/newton_CG.md)
+  or a gradient-based low-memory option specifically "L-BFGS-B" in
+  [optim](https://rdrr.io/r/stats/optim.html) to optimize the inner
+  problem
 
 - seed:
 
@@ -111,19 +120,19 @@ nll = function(p){
 # Build
 obj = lanczos_MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", k = 10 )
 opt = nlminb( obj$par, obj$fn )
+#> Error in objective(.par, ...): Check math
 
 # Compare with RTMB
 obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
-#>            mu         logsd         logcv 
-#> -2.380471e-05  4.309889e-05 -9.203910e-05 
+#> Error: object 'opt' not found
 
 # Fit again using FD gradient for Lanczos method using fixed probe-recursion
   # This requires an optimizer that is tolerant to small imprecision in the gradient
   # And it ends at a slightly different estimator
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
+#> Error in fn(par, ...): Check math
 opt3$par - opt2$par
-#>           mu        logsd        logcv 
-#>  0.003816865 -0.005031017  0.010298147 
+#> Error: object 'opt3' not found
 ```
