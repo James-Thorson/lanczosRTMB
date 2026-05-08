@@ -128,7 +128,7 @@ function( x0,
     }
   }
   out = list(
-    par = hat,
+    par = x,
     runtime = Sys.time() - start_time,
     newton_iter = newton_iter,
     CG_iter = na.omit(CG_iter)
