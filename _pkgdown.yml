@@ -38,3 +38,5 @@ reference:
   contents:
   - lanczos_MakeADFun
   - lanczos_fixedQ
+  - CG
+  - newton_CG
