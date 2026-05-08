@@ -791,7 +791,7 @@ function( func,
     }
 
     # Run inner and assign pu to environment
-    #if( method == "newton_CG" ){
+    if( method == "newton_CG" ){
       inner_opt = newton_CG(
         par = env$pu_best,
         fn = tape_pu,
@@ -800,18 +800,18 @@ function( func,
         silent = silent,
         ...
       )
-    #}else{
-      inner_opt2 = optim(
+    }else{
+      inner_opt = optim(
         par = env$pu_best,
         fn = tape_pu,
         gr = grad_pu,
         method = "L-BFGS-B",
         control = list(trace=ifelse(silent,0,1), maxit = 1e3, factr = 1e-2)
       )
-    #}
-    if( max(abs(inner_opt$par - inner_opt2$par)) > 1e-5 ){
-      stop("Check math")
     }
+    #if( max(abs(inner_opt$par - inner_opt2$par)) > 1e-5 ){
+    #  stop("Check math")
+    #}
     env$x[x_profile_random] = inner_opt$par
 
     # Have to assign into env(Hq)$mle to evaluate at right point
