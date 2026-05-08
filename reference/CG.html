@@ -121,7 +121,7 @@ Adapted from <code>mcmcsae::CG</code> under GPL-3 licence to use Hessian-vector 
 <span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="va">tape</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">H</span> <span class="op">=</span> <span class="va">gr</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span>sparse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># Test unregularized solution</span></span></span>
 <span class="r-in"><span><span class="va">b</span> <span class="op">=</span> <span class="fu">gr</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">Hess</span> <span class="op">=</span> <span class="fu">H</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/solve-methods.html" class="external-link">solve</a></span><span class="op">(</span> <span class="va">Hess</span>, <span class="va">b</span><span class="op">)</span></span></span>
@@ -129,10 +129,18 @@ Adapted from <code>mcmcsae::CG</code> under GPL-3 licence to use Hessian-vector 
 <span class="r-in"><span>  b <span class="op">=</span> <span class="va">b</span>,</span></span>
 <span class="r-in"><span>  Hq <span class="op">=</span> <span class="va">Hq</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">x</span>, <span class="va">out</span><span class="op">$</span><span class="va">x</span> <span class="op">)</span></span></span>
 <span class="r-plt img"><img src="CG-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Test trust-region regularization</span></span></span>
+<span class="r-in"><span><span class="va">Hess2</span> <span class="op">=</span> <span class="va">Hess</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span>n<span class="op">=</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/solve-methods.html" class="external-link">solve</a></span><span class="op">(</span> <span class="va">Hess2</span>, <span class="va">b</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">=</span> <span class="fu">CG</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  b <span class="op">=</span> <span class="va">b</span>,</span></span>
+<span class="r-in"><span>  Hq <span class="op">=</span> \<span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="fu">Hq</span><span class="op">(</span><span class="va">b</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="va">b</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">x</span>, <span class="va">out</span><span class="op">$</span><span class="va">x</span> <span class="op">)</span></span></span>
+<span class="r-plt img"><img src="CG-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
