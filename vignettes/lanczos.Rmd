@@ -91,13 +91,12 @@ pen0 = lanczos_MakeADFun(
   nll, 
   parlist,
   random = "u",
-  method = "optim",
   k = 10,
   silent = TRUE
 )
 
 # optimize 
-opt_pen0 = nlminb( pen0$par, pen0$fn, control = list(trace = 1) )
+opt_pen0 = nlminb( pen0$par, pen0$fn )
 opt_pen0
 ```
 
