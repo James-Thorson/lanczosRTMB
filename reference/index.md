@@ -12,6 +12,8 @@ Core tools, using Lanczos to approximate model properties
   : Sample from Lanczos method
 - [`lanczos_variance()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_variance.md)
   : Estimate variance using Lanczos method
+- [`lanczos_dgmrf()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_dgmrf.md)
+  : Approximate the log-density of a GMRF using Lanczos
 
 ## Helper functions
 
@@ -31,3 +33,8 @@ Experimental tools, under development.
   (EXPERIMENTAL)
 - [`lanczos_fixedQ()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_fixedQ.md)
   : Calculate Lanczos approximation using fixed Q
+- [`CG()`](https://james-thorson.github.io/lanczosRTMB/reference/CG.md)
+  : Truncated conjugate gradient using Hessian-vector products
+- [`newton_CG()`](https://james-thorson.github.io/lanczosRTMB/reference/newton_CG.md)
+  : Nonlinear minimizer using line search with approximated Newton
+  solution

@@ -3,8 +3,7 @@
 [![docs
 (main)](https://img.shields.io/badge/docs-lanczosRTMB-orange.svg?colorB=E91E63)](https://james-thorson.github.io/lanczosRTMB/)
 
-Methods using Krylov subspace recursion in RTMB, to use matrix-vector
-products to replace sparse-Cholesky factorization.
+Lanczos methods for RTMB
 
 ### Uses
 
@@ -16,17 +15,3 @@ approximate:
 - Standard errors using a matrix-free delta method
 - The log-determinant of the Hessian using stochastic trace estimation
 - The log marginal likelihood using the Laplace approximation
-- The log-density of a GMRF
-- Iterative Newton solvers involving truncated conjugate gradients
-
-### Potential developments
-
-There’s many avenues for further improvement. These include:
-
-Improving a quasi-Newton inner optimizer using `Hq`, i.e., a variant of
-conjugate gradient;
-
-Moving the FD logic for the `obj$gr` to tape;
-
-Exploring a conjugate gradient algorithm for an implicit solution to the
-gradient of the log-determinant;
