@@ -54,22 +54,19 @@ CG(
 ## Examples
 
 ``` r
+library(Matrix)
+
 # Settings
 n = 10^4
 rho = 0.99
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
 P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
-#> Error in bandSparse(n = n, k = c(-1), diagonals = list(rep(1, n))): could not find function "bandSparse"
 Q = (Diagonal(n) - rho * t(P)) %*% (Diagonal(n) - rho * P)
-#> Error in Diagonal(n): could not find function "Diagonal"
 x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'A' in selecting a method for function 'Cholesky': object 'Q' not found
 y = x + 0.1 * rnorm(n)
-#> Error: object 'x' not found
 which_seen = sample( seq_len(n), size = n/10, replace = FALSE)
 y[-which_seen] = NA
-#> Error: object 'y' not found
 
 nll = function(p){
   -dgmrf(p$x, Q = Q, log = TRUE) - sum(dnorm(y, p$x, sd = 0.1, log=TRUE), na.rm=TRUE)
@@ -77,26 +74,20 @@ nll = function(p){
 parlist = list( x=rnorm(n) )
 
 tape = MakeTape(nll, parlist)
-#> Error in f(x): object 'Q' not found
 gr = tape$jacfun()
-#> Error: object 'tape' not found
 Hq = make_Hq( tape, x = unlist(parlist) )
-#> Error: object 'tape' not found
 H = gr$jacfun(sparse = TRUE)
-#> Error: object 'gr' not found
 
 #
 b = gr(unlist(parlist))[1,]
-#> Error in gr(unlist(parlist)): could not find function "gr"
-x = solve( H(unlist(parlist)), b)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'a' in selecting a method for function 'solve': could not find function "H"
+Hess = H(unlist(parlist))
+x = solve( Hess, b)
 out = CG(
   b = b,
   Hq = Hq
 )
-#> Error: object 'b' not found
 
 #
 plot( x, out$x )
-#> Error: object 'x' not found
+
 ```
