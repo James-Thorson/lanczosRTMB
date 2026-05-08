@@ -12,7 +12,8 @@ lanczos_MakeADFun(
   profile = NULL,
   m = 3,
   method = "newton_CG",
-  seed = 123
+  seed = 123,
+  silent = TRUE
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ specifically "L-BFGS-B" in \link{optim} to optimize the inner problem}
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
 lower variance using a fixed seed.}
+
+\item{silent}{Disable all tracing information?}
 }
 \value{
 An object (list) of class \code{tinyVAST}. Elements include:
