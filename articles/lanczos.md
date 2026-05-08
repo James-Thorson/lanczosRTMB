@@ -116,23 +116,23 @@ opt_pen0 = nlminb( pen0$par, pen0$fn )
 opt_pen0
 #> $par
 #>         mu      logsd      logcv 
-#> -0.1054474 -0.1323386 -0.5991714 
+#> -0.1051868 -0.1326846 -0.5983878 
 #> 
 #> $objective
 #> [1] 36.46907
 #> 
 #> $convergence
-#> [1] 1
+#> [1] 0
 #> 
 #> $iterations
-#> [1] 43
+#> [1] 12
 #> 
 #> $evaluations
 #> function gradient 
-#>       73      228 
+#>       18       51 
 #> 
 #> $message
-#> [1] "false convergence (8)"
+#> [1] "relative convergence (4)"
 ```
 
 ## Fit as a penalized likelihood model
@@ -334,6 +334,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 9.52 secs
+Runtime for this vignette: 4.91 secs
 
 ## Works cited

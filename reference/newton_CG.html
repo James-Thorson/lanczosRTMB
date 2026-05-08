@@ -112,6 +112,73 @@ for a Newton.</p>
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org" class="external-link">Matrix</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/kaskr/RTMB" class="external-link">RTMB</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Settings</span></span></span>
+<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fl">4</span></span></span>
+<span class="r-in"><span><span class="va">rho</span> <span class="op">=</span> <span class="fl">0.99</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)</span></span></span>
+<span class="r-in"><span><span class="va">P</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/bandSparse.html" class="external-link">bandSparse</a></span><span class="op">(</span> n <span class="op">=</span> <span class="va">n</span>, k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>, diagonals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Q</span> <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">-</span> <span class="va">rho</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">P</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">-</span> <span class="va">rho</span> <span class="op">*</span> <span class="va">P</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">:::</span><span class="fu">rgmrf0</span><span class="op">(</span> n<span class="op">=</span> <span class="fl">1</span>, Q <span class="op">=</span> <span class="va">Q</span> <span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="va">x</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">which_seen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>, size <span class="op">=</span> <span class="va">n</span><span class="op">/</span><span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span><span class="op">[</span><span class="op">-</span><span class="va">which_seen</span><span class="op">]</span> <span class="op">=</span> <span class="cn">NA</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">nll</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="op">-</span><span class="fu"><a href="https://rdrr.io/pkg/RTMB/man/MVgauss.html" class="external-link">dgmrf</a></span><span class="op">(</span><span class="va">p</span><span class="op">$</span><span class="va">x</span>, Q <span class="op">=</span> <span class="va">Q</span>, log <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">p</span><span class="op">$</span><span class="va">x</span>, sd <span class="op">=</span> <span class="fl">0.1</span>, log<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">parlist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span> x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">tape</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RTMB/man/Tape.html" class="external-link">MakeTape</a></span><span class="op">(</span><span class="va">nll</span>, <span class="va">parlist</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">gr</span> <span class="op">=</span> <span class="va">tape</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="va">tape</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">H</span> <span class="op">=</span> <span class="va">gr</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span>sparse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">start_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">opt1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  fn <span class="op">=</span> <span class="va">tape</span>,</span></span>
+<span class="r-in"><span>  gr <span class="op">=</span> <span class="va">gr</span>,</span></span>
+<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"L-BFGS-B"</span>,</span></span>
+<span class="r-in"><span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    maxit <span class="op">=</span> <span class="fl">1e4</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">opt1</span><span class="op">$</span><span class="va">runtime</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">opt2</span> <span class="op">=</span> <span class="fu">newton_CG</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">parlist</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  fn <span class="op">=</span> <span class="va">tape</span>,</span></span>
+<span class="r-in"><span>  gr <span class="op">=</span> <span class="va">gr</span>,</span></span>
+<span class="r-in"><span>  Hq <span class="op">=</span> <span class="va">Hq</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 1954672 mgc: 1945.622 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 49346.75 mgc: 35.80117 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 10369.95 mgc: 2.873469 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8326.888 mgc: 0.2209161 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8285.138 mgc: 0.02620562 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8284.761 mgc: 0.002207228 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8284.757 mgc: 0.0003804977 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8284.757 mgc: 2.092504e-05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8284.757 mgc: 1.719685e-06 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8284.757 mgc: 1.776369e-07 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8284.757 mgc: 1.250664e-08 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> value: 8284.757 mgc: 9.609325e-09 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compare the estimates and speed</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">opt1</span><span class="op">$</span><span class="va">par</span>, <span class="va">opt2</span><span class="op">$</span><span class="va">par</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>,<span class="st">"blue"</span>,<span class="st">"red"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="st">"solid"</span> <span class="op">)</span></span></span>
+<span class="r-plt img"><img src="newton_CG-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">opt1</span><span class="op">$</span><span class="va">runtime</span>, <span class="va">opt2</span><span class="op">$</span><span class="va">runtime</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time differences in secs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3.252345 1.305755</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
