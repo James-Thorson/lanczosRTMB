@@ -68,9 +68,9 @@ x = RTMB:::rgmrf0(n = 1, Q )[,1]
 
 # Exact density using RTMB
 dgmrf(x, Q = Q, log = TRUE)
-#> [1] -149.5183
+#> [1] -141.6156
 
 # Lanczos-approximated density
 lanczos_dgmrf(x, Q = Q, k = 20, log = TRUE)
-#> [1] -155.4749 -147.2144 -148.3715
+#> [1] -141.1068 -146.3984 -138.9235
 ```

@@ -120,19 +120,19 @@ nll = function(p){
 # Build
 obj = lanczos_MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", k = 10 )
 opt = nlminb( obj$par, obj$fn )
-#> Error in objective(.par, ...): Check math
 
 # Compare with RTMB
 obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
-#> Error: object 'opt' not found
+#>         mu      logsd      logcv 
+#> 0.05812064 0.28980775 0.25537464 
 
 # Fit again using FD gradient for Lanczos method using fixed probe-recursion
   # This requires an optimizer that is tolerant to small imprecision in the gradient
   # And it ends at a slightly different estimator
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
-#> Error in fn(par, ...): Check math
 opt3$par - opt2$par
-#> Error: object 'opt3' not found
+#>        mu     logsd     logcv 
+#> 0.1165884 0.2654164 0.2684572 
 ```
