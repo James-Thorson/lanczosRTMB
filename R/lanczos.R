@@ -691,7 +691,8 @@ function( func,
           m = 3,
           #do_grad = FALSE,
           method = "newton_CG",
-          seed = 123 ){
+          seed = 123,
+          silent = TRUE ){
 
   # vectors
   #  p = profile
@@ -778,7 +779,7 @@ function( func,
   }
 
   # Objective function
-  get_nll = function(v){
+  get_nll = function(v, ...){
     # Define fixed effects and assign to global environment
     env$x[x_fixed] = v
     tape_pu$force.update()
@@ -790,21 +791,26 @@ function( func,
     }
 
     # Run inner and assign pu to environment
-    if( method == "newton_CG" ){
+    #if( method == "newton_CG" ){
       inner_opt = newton_CG(
         par = env$pu_best,
         fn = tape_pu,
         gr = grad_pu,
-        Hq = Hq_u
+        Hq = env$Hq_u,
+        silent = silent,
+        ...
       )
-    }else{
-      inner_opt = optim(
+    #}else{
+      inner_opt2 = optim(
         par = env$pu_best,
         fn = tape_pu,
         gr = grad_pu,
         method = "L-BFGS-B",
-        control = list(trace=0, maxit = 1e3, factr = 1e-2)
+        control = list(trace=ifelse(silent,0,1), maxit = 1e3, factr = 1e-2)
       )
+    #}
+    if( max(abs(inner_opt$par - inner_opt2$par)) > 1e-5 ){
+      stop("Check math")
     }
     env$x[x_profile_random] = inner_opt$par
 

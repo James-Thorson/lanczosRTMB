@@ -86,15 +86,18 @@ opt
 We first show that we can re-fit the model using the marginal likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky factorization that is default in TMB:
 
 ```{r}
+parlist$eps = numeric()
 pen0 = lanczos_MakeADFun(
   nll, 
-  list(u=u*0, mu = 0, logsd = 0, logcv = 0, eps = numeric()),
+  parlist,
   random = "u",
-  k = 10
+  method = "optim",
+  k = 10,
+  silent = TRUE
 )
 
 # optimize 
-opt_pen0 = nlminb( pen0$par, pen0$fn )
+opt_pen0 = nlminb( pen0$par, pen0$fn, control = list(trace = 1) )
 opt_pen0
 ```
 

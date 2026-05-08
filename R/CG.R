@@ -78,8 +78,8 @@ function( par,
           fn,
           gr,
           Hq,
-          gr_tol = 0.00001,
-          e_ratio = 1,
+          gr_tol = 1e-8,
+          e_ratio = 0.01,
           maxit_newton = 100,
           maxit_CG = min(100,length(par)),
           c1 = 0.01,
@@ -90,12 +90,12 @@ function( par,
   x = par
   grad = gr(x)[,1]
   nll = fn(x)
-  CG_iter = rep(NA, maxit_newton)
+  alpha_iter = CG_iter = rep(NA, maxit_newton)
   for( newton_iter in seq_len(maxit_newton) ){
     # CG for H^-1 grad
     step = CG(
       b = grad,
-      Hq = Hq,
+      Hq = \(q) Hq(q,x),
       max.it = maxit_CG,
       e = e_ratio * sum(grad^2)
     )
@@ -114,12 +114,21 @@ function( par,
       }
       alpha = alpha * beta
     }
-    if(nll_test > nll)stop("Problem with newton_CG")
+    alpha_iter[newton_iter] = alpha
+
+    # First checks
+    if(nll_test > nll){
+      grad = as.vector(gr(x_test))
+      max_abs_grad = max(abs(grad))
+      break
+      #browser()
+      #stop("Problem with newton_CG line search")
+    }
 
     # Update stuff
     nll = nll_test
     x = x_test
-    grad = gr(x)[,1]
+    grad = as.vector(gr(x))
     if( isFALSE(silent) ){
       cat("value:", nll,"mgc:",max(abs(grad)),"\n")
     }
@@ -134,6 +143,7 @@ function( par,
     max_abs_grad = max_abs_grad,
     runtime = Sys.time() - start_time,
     newton_iter = newton_iter,
+    alpha_iter = na.omit(alpha_iter),
     CG_iter = na.omit(CG_iter)
   )
   out
