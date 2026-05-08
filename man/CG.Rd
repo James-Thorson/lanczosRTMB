@@ -35,3 +35,38 @@ without forming the Hessian matrix directly and instead using Hessian-vector pro
 e.g., using forwards-on-reverse autodiff
 Adapted from \code{mcmcsae::CG} under GPL-3 licence to use Hessian-vector products
 }
+\examples{
+# Settings
+n = 10^4
+rho = 0.99
+
+# Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
+P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
+Q = (Diagonal(n) - rho * t(P)) \%*\% (Diagonal(n) - rho * P)
+x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
+y = x + 0.1 * rnorm(n)
+which_seen = sample( seq_len(n), size = n/10, replace = FALSE)
+y[-which_seen] = NA
+
+nll = function(p){
+  -dgmrf(p$x, Q = Q, log = TRUE) - sum(dnorm(y, p$x, sd = 0.1, log=TRUE), na.rm=TRUE)
+}
+parlist = list( x=rnorm(n) )
+
+tape = MakeTape(nll, parlist)
+gr = tape$jacfun()
+Hq = make_Hq( tape, x = unlist(parlist) )
+H = gr$jacfun(sparse = TRUE)
+
+#
+b = gr(unlist(parlist))[1,]
+x = solve( H(unlist(parlist)), b)
+out = CG(
+  b = b,
+  Hq = Hq
+)
+
+#
+plot( x, out$x )
+
+}
