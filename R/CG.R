@@ -43,7 +43,8 @@
 #'
 #' #
 #' b = gr(unlist(parlist))[1,]
-#' x = solve( H(unlist(parlist)), b)
+#' Hess = H(unlist(parlist))
+#' x = solve( Hess, b)
 #' out = CG(
 #'   b = b,
 #'   Hq = Hq

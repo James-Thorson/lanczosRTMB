@@ -36,6 +36,8 @@ e.g., using forwards-on-reverse autodiff
 Adapted from \code{mcmcsae::CG} under GPL-3 licence to use Hessian-vector products
 }
 \examples{
+library(Matrix)
+
 # Settings
 n = 10^4
 rho = 0.99
@@ -60,7 +62,8 @@ H = gr$jacfun(sparse = TRUE)
 
 #
 b = gr(unlist(parlist))[1,]
-x = solve( H(unlist(parlist)), b)
+Hess = H(unlist(parlist))
+x = solve( Hess, b)
 out = CG(
   b = b,
   Hq = Hq
