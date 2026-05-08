@@ -72,6 +72,55 @@ function( b,
 #' @param beta updates in line search stepsize alpha when Armijo sufficient decrease condition fails
 #' @param silent Be silent or print progress?
 #'
+#' @examples
+#' library(Matrix)
+#' library(RTMB)
+#'
+#' # Settings
+#' n = 10^4
+#' rho = 0.99
+#'
+#' # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
+#' P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
+#' Q = (Diagonal(n) - rho * t(P)) %*% (Diagonal(n) - rho * P)
+#' x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
+#' y = x + 0.1 * rnorm(n)
+#' which_seen = sample( seq_len(n), size = n/10, replace = FALSE)
+#' y[-which_seen] = NA
+#'
+#' nll = function(p){
+#'   -dgmrf(p$x, Q = Q, log = TRUE) - sum(dnorm(y, p$x, sd = 0.1, log=TRUE), na.rm=TRUE)
+#' }
+#' parlist = list( x=rnorm(n) )
+#'
+#' tape = MakeTape(nll, parlist)
+#' gr = tape$jacfun()
+#' Hq = make_Hq( tape, x = unlist(parlist) )
+#' H = gr$jacfun(sparse = TRUE)
+#'
+#' start_time = Sys.time()
+#' opt1 = optim(
+#'   par = unlist(parlist),
+#'   fn = tape,
+#'   gr = gr,
+#'   method = "L-BFGS-B",
+#'   control = list(
+#'     maxit = 1e4
+#'   )
+#' )
+#' opt1$runtime = Sys.time() - start_time
+#'
+#' opt2 = newton_CG(
+#'   par = unlist(parlist),
+#'   fn = tape,
+#'   gr = gr,
+#'   Hq = Hq
+#' )
+#'
+#' # Compare the estimates and speed
+#' matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), lty = "solid" )
+#' c(opt1$runtime, opt2$runtime)
+#'
 #' @export
 newton_CG <-
 function( par,
@@ -117,13 +166,13 @@ function( par,
     alpha_iter[newton_iter] = alpha
 
     # First checks
-    if(nll_test > nll){
-      grad = as.vector(gr(x_test))
-      max_abs_grad = max(abs(grad))
-      break
-      #browser()
-      #stop("Problem with newton_CG line search")
-    }
+    #if(nll_test > nll){
+    #  grad = as.vector(gr(x_test))
+    #  max_abs_grad = max(abs(grad))
+    #  break
+    #  #browser()
+    #  #stop("Problem with newton_CG line search")
+    #}
 
     # Update stuff
     nll = nll_test
@@ -143,56 +192,8 @@ function( par,
     max_abs_grad = max_abs_grad,
     runtime = Sys.time() - start_time,
     newton_iter = newton_iter,
-    alpha_iter = na.omit(alpha_iter),
-    CG_iter = na.omit(CG_iter)
+    alpha_iter = alpha_iter[seq_len(newton_iter)],
+    CG_iter = CG_iter[seq_len(newton_iter)]
   )
   out
-}
-
-if( FALSE ){
-  # Settings
-  n = 10^4
-  rho = 1
-
-  # Make random walk
-  P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
-  Q = (Diagonal(n) - rho * t(P)) %*% (Diagonal(n) - rho * P)
-  x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
-  y = x + 0.1 * rnorm(n)
-  which_seen = sample( seq_len(n), size = n/10, replace = FALSE)
-  y[-which_seen] = NA
-
-  # Define objective
-  nll = function(p){
-    -1 * ( dgmrf(p$x, Q = Q, log = TRUE) +
-    sum(dnorm(y, p$x, sd = 0.1, log=TRUE), na.rm=TRUE) )
-  }
-  parlist = list( x=rnorm(n) )
-
-  # Make objectss
-  tape = MakeTape(nll, parlist)
-  gr = tape$jacfun()
-  Hq = make_Hq( tape, x = unlist(parlist) )
-
-  # Standard low-memory BFGS
-  start_time = Sys.time()
-  opt1 = optim(
-    par = unlist(parlist),
-    fn = tape,
-    gr = gr,
-    method = "L-BFGS-B",
-    control = list(
-      maxit = 1e4
-    )
-  )
-  opt1$runtime = Sys.time() - start_time
-
-  # alternative option
-  opt2 = newton_CG(
-    par = unlist(parlist), gr = gr, Hq = Hq
-  )
-
-  # Compare estimates and runtimes
-  matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), lty = "solid" )
-  c(opt1$runtime, opt2$runtime)
 }

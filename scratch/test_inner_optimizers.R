@@ -8,7 +8,6 @@ n = 10^4
 rho = 0.99
 
 #
-#P = bandSparse( n = n, k = c(-1,1), diagonals = list(rep(0.5,n),rep(0.5,n)) )
 P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
 Q = (Diagonal(n) - rho * t(P)) %*% (Diagonal(n) - rho * P)
 x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
@@ -26,7 +25,7 @@ gr = tape$jacfun()
 Hq = make_Hq( tape, x = unlist(parlist) )
 H = gr$jacfun(sparse = TRUE)
 
-source( R'(C:\Users\James.Thorson\Desktop\Git\lanczosRTMB\scratch\CG.R)')
+#source( R'(C:\Users\James.Thorson\Desktop\Git\lanczosRTMB\scratch\CG.R)')
 start_time = Sys.time()
 opt1 = optim(
   par = unlist(parlist),
@@ -40,19 +39,14 @@ opt1 = optim(
 opt1$runtime = Sys.time() - start_time
 
 opt2 = newton_CG(
-  x0 = unlist(parlist), gr = gr, Hq = Hq
-)
-
-start_time = Sys.time()
-opt3 = TMB::newton(
   par = unlist(parlist),
   fn = tape,
   gr = gr,
-  he = H,
-  maxit = 10000
+  Hq = Hq,
+  maxit_CG = n,
+  maxit_newton = n,
+  e_ratio = 1e-6
 )
-opt3$runtime = Sys.time() - start_time
 
 matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), lty = "solid" )
-
 c(opt1$runtime, opt2$runtime)
