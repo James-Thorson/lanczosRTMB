@@ -133,7 +133,7 @@ Hq = make_Hq( tape, pen$par )
 
 # run Newton optimizer
 opt_pen2 = newton_CG(
-  x0 = pen$par,
+  par = pen$par,
   fn = tape,
   gr = tape$jacfun(),
   Hq = Hq

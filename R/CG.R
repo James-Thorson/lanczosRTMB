@@ -97,7 +97,7 @@ function( par,
       b = grad,
       Hq = \(q) Hq(q,x),
       max.it = maxit_CG,
-      e = e_ratio * sum(grad^2)
+      e = max(e_ratio * sum(grad^2), 1e-10)
     )
     CG_iter[newton_iter] = step$k
 
