@@ -8,29 +8,39 @@ library(lanczosRTMB)
 #  AR:  Dinv = I - P
 ###############
 
-n = 10001
+n = 1e5 + 1
 kappa = exp(- 2 / n )
 P = bandSparse( n = n, k = c(-1,1), diag = list(rep(0.5,n),rep(0.5,n)) )
 I = V = Diagonal(n = n)
+invD = I - kappa * P
 #Q = (I - kappa * t(P)) %*% solve(V) %*% (I - kappa * P)
 x = rep(0, n)
 x[ceiling(n/2)] = 1
 
+# Exact
 if( n <= 1001 ){
   D0 = expm( kappa*P - Diagonal(n=n) )
 }else{
   D0 = sparseMatrix( i = 1, j = 1, x = 0, dims = c(n,n) )
 }
 
-invD = I - kappa * P
-D = solve(invD)
+# Implicit
+if( n <= 10001 ){
+  D = solve(invD)
+}else{
+  D = sparseMatrix( i = 1, j = 1, x = 0, dims = c(n,n) )
+}
 
 Hq = \(q,x) (invD %*% q)[,1]
 
 # Lanczos
-L = lanczos(Hq, q = x, k = ceiling(n / 10), x = rep(0,n) )
-T = tridiag( L$alpha, L$beta )
-D1 = L$Q %*% solve(T) %*% t(L$Q)
+if( n <= 100001 ){
+  L = lanczos(Hq, q = x, k = 1000, x = rep(0,n) )
+  T = tridiag( L$alpha, L$beta )
+  D1 = L$Q %*% solve(T) %*% t(L$Q)
+}else{
+  D1 = sparseMatrix( i = 1, j = 1, x = 0, dims = c(n,n) )
+}
 
 # CG
 cg_solve = CG( x, Hq, x = x, e = 1e-4 )
