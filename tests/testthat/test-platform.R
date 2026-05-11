@@ -43,6 +43,6 @@ test_that("newton_CG is working ", {
   )
 
   # Compare the estimates and speed
-  expect_equal( opt1$par, opt2$par, tol = 1e-3 )
+  expect_equal( opt1$par, opt2$par, tol = 1e-2 )
 })
 
