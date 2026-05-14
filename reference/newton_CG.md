@@ -118,23 +118,27 @@ opt2 = newton_CG(
   gr = gr,
   Hq = Hq
 )
-#> value: 1954672 mgc: 1945.622 
-#> value: 49346.75 mgc: 35.80117 
-#> value: 10369.95 mgc: 2.873469 
-#> value: 8326.888 mgc: 0.2209161 
-#> value: 8285.138 mgc: 0.02620562 
-#> value: 8284.761 mgc: 0.002207228 
-#> value: 8284.757 mgc: 0.0003804977 
-#> value: 8284.757 mgc: 2.092504e-05 
-#> value: 8284.757 mgc: 1.719685e-06 
-#> value: 8284.757 mgc: 1.776369e-07 
-#> value: 8284.757 mgc: 1.250664e-08 
-#> value: 8284.757 mgc: 9.609325e-09 
+#> value: 49346.74 mgc: 35.80117 
+#> value: 10369.95 mgc: 2.873467 
+#> value: 8326.889 mgc: 0.2209165 
+#> value: 8285.138 mgc: 0.02620617 
+#> value: 8284.761 mgc: 0.002207074 
+#> value: 8284.757 mgc: 0.0004615199 
+#> value: 8284.757 mgc: 8.618456e-05 
+#> value: 8284.757 mgc: 7.827714e-06 
+#> value: 8284.757 mgc: 1.042457e-05 
+#> value: 8284.757 mgc: 5.630421e-06 
+#> value: 8284.757 mgc: 5.406651e-06 
+#> value: 8284.757 mgc: 5.397407e-06 
+#> value: 8284.757 mgc: 5.360276e-06 
+#> value: 8284.757 mgc: 5.348572e-06 
+#> value: 8284.757 mgc: 5.344506e-06 
+#> Not improving much - will try early exit...PD hess?: TRUE 
 
 # Compare the estimates and speed
 matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), lty = "solid" )
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1] 3.228212 1.963252
+#> [1] 3.246719 1.135237
 ```
