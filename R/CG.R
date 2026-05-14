@@ -68,6 +68,7 @@ function( b,
           Minv = Diagonal(n = length(b)),
           max.it = length(b),
           e = 1e-10,
+          stop_if_nonPD = TRUE,
           silent = TRUE ){
   # NOTES: could use Sturm with bisection to detect minimum eigenvalue for Lanczos, rather than min(eigen(H)$values)
 
@@ -76,15 +77,23 @@ function( b,
   p <- z
   rz_old <- sum(r * z)
   alpha = beta = rep(NA, max.it)
+  status = 1    # 0 = non-PD;  1 = exceeds max.it;  2 = converged
   for(k in seq_len(max.it)){
     Ap <- Hq(p)
-    alpha[k] <- rz_old / sum(p * Ap)
+    denom <- sum(p * Ap)
+    alpha[k] <- rz_old / denom
+    # Check for non-PD after alpha, so can still use low-k solution if FALSE
+    if( isTRUE(stop_if_nonPD) && (denom < -1e-8) ){
+      status = 0
+      break
+    }
     x <- x + alpha[k] * p
     r <- r - alpha[k] * Ap
     z = as.vector(Minv %*% r)
     rz_new <- sum(r * z)
     discr <- sum(z * z)
     if (discr < e){
+      status = 2
       break
     }
     beta[k] <- rz_new / rz_old
@@ -98,7 +107,8 @@ function( b,
     x = x,
     k = k,
     alpha = alpha[seq_len(k)],
-    beta = beta[seq_len(k)]
+    beta = beta[seq_len(k)],
+    status = status
   )
 }
 
@@ -127,19 +137,19 @@ function( b,
 #' library(RTMB)
 #'
 #' # Settings
-#' n = 10^4
+#' n = 10^3
 #' rho = 0.99
 #'
 #' # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
 #' P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
 #' Q = (Diagonal(n) - rho * t(P)) %*% (Diagonal(n) - rho * P)
 #' x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
-#' y = x + 0.1 * rnorm(n)
+#' y = rpois( n = n, lambda = exp(1 + x) )
 #' which_seen = sample( seq_len(n), size = n/10, replace = FALSE)
 #' y[-which_seen] = NA
 #'
 #' nll = function(p){
-#'   -dgmrf(p$x, Q = Q, log = TRUE) - sum(dnorm(y, p$x, sd = 0.1, log=TRUE), na.rm=TRUE)
+#'   -dgmrf(p$x, Q = Q, log = TRUE) - sum(dpois(y, lambda = exp(1 + p$x), log=TRUE), na.rm=TRUE)
 #' }
 #' parlist = list( x=rnorm(n) )
 #'
@@ -164,7 +174,9 @@ function( b,
 #'   par = unlist(parlist),
 #'   fn = tape,
 #'   gr = gr,
-#'   Hq = Hq
+#'   Hq = Hq,
+#'   maxit_newton = 1e4,
+#'   gr_tol = 1e-4
 #' )
 #'
 #' # Compare the estimates and speed
@@ -183,72 +195,152 @@ function( par,
           maxit_CG = min(100,length(par)),
           c1 = 0.01,
           beta = 0.5,
+          line_steps = 20,
+          smartsearch = FALSE,
+          ustep = 1, ## Start out optimistic: Newton step
+          power = 0.5, ## decrease=function(u)const*u^power
+          u0 = 1e-4,  ## Increase u=0 to this value
+          stop_if_nonPD = smartsearch,
+          tol10 = 0.001,
+          diagnostics = FALSE,
           silent = FALSE ){
 
+  if(line_steps<1)stop("`line_steps` must be 1 or greater")
   start_time = Sys.time()
+  norm <- function(x) sqrt(sum(x^2))
   x = par
-  grad = gr(x)[,1]
+  grad = as.vector(gr(x))
   nll = fn(x)
-  alpha_iter = CG_iter = rep(NA, maxit_newton)
+  t = 0  # Trust region regulization t >= 0
+  fail = 0
+  status_iter = nll_iter = grad_iter = ustep_iter = stepsize_iter = CG_iter = rep(NA, maxit_newton)
+
+  ## Adaptive stepsize algorithm (smartsearch)
+  phi <- function(u)1/u-1
+  #invphi <- function(x)1/(x+1)           # IGNORED FOR NOW
+  ## ========== Functions controling the algorithm
+  ## Important requirements:
+  ## 1. increase(u) and decrease(u) takes values in [0,1]
+  ## 2. increase(u)>u and decrease(u)<u
+  ## 3. increase(u)->1 when u->1
+  ## 4. decrease(u)->0 when u->0
+  ## Properties of algorithm:
+  ## * ustep must converge towards 1 (because 1 <==> Positive definite hessian)
+
+  ## power<1 - controls the boundary *repulsion*
+  increase <- function(u)u0+(1-u0)*u^power
+  ##decrease <- function(u)1-increase(1-u)
+  ## Solve problem with accuracy when u apprach 0
+  decrease <- function(u)ifelse(u>1e-10,1-increase(1-u),(1-u0)*power*u)
+  ##plot(increase,0,1,ylim=c(0,1));plot(decrease,0,1,add=TRUE);abline(0,1)
+  ustep = increase(ustep)
+
   for( newton_iter in seq_len(maxit_newton) ){
     # CG for H^-1 grad
     step = CG(
       b = grad,
-      Hq = \(q) Hq(q,x),
+      Hq = \(q) Hq(q,x) + phi(ustep)*q,
       max.it = maxit_CG,
-      e = e_ratio * sum(grad^2)
+      #e = e_ratio * sum(grad^2)
+      e = max(e_ratio * sum(grad^2), 1e-8),
+      stop_if_nonPD = stop_if_nonPD
     )
     CG_iter[newton_iter] = step$k
+    status_iter[newton_iter] = step$status
+    ustep_iter[newton_iter] = ustep
 
     # Update trust-region
     Tri = tridiag( step$alpha, step$beta[seq_len(length(step$alpha)-1)] )
     eigval = eigen(Tri, only.values = TRUE, symmetric = TRUE)$values
-    t_new = max(0, -min(eigval) + 1e-3)
+    min_eigval = min(0, min(eigval) - 1e-3)
 
     ## Line search using c1 and beta with Armijo sufficient decrease condition
-    alpha = 1
-    grad_step = sum(grad * step$x)
-    for( i in 1:20 ){
-      x_test = x - alpha * step$x
+    stepsize = 1
+    step_status = 0
+    for( i in seq_len(line_steps) ){
+      x_test = x - stepsize * step$x
       nll_test = fn(x_test)
       if( !is.nan(nll_test) ){
-        if( nll_test < (nll - c1 * alpha * grad_step) ){
+        if( nll_test < (nll - c1 * stepsize * sum(grad * step$x)) ){
+          step_status = 1
           break
         }
       }
-      alpha = alpha * beta
+      stepsize = stepsize * beta
     }
-    alpha_iter[newton_iter] = alpha
+    stepsize_iter[newton_iter] = stepsize
 
     # First checks
-    #if(nll_test > nll){
-    #  grad = as.vector(gr(x_test))
-    #  max_abs_grad = max(abs(grad))
+    #if(newton_iter == 30 )browser()
+    if( isTRUE(smartsearch) ){
+      if( (step$status %in% c(1,2)) && (step_status==1) ){
+        nll = nll_test
+        x = x_test
+        grad = as.vector(gr(x))
+        # Contract
+        #t = sqrt(t) * alpha^-0.5
+        ustep = increase(ustep)
+      }else{
+        # Expand
+        #t = t * alpha^-0.5
+        ustep = decrease(ustep)
+      }
+      if( isFALSE(silent) ){
+        cat("value:", nll,"mgc:",max(abs(grad)),"ustep:",ustep,"\n")
+      }
+    }else{
+      nll = nll_test
+      x = x_test
+      grad = as.vector(gr(x))
+      if( isFALSE(silent) ){
+        cat("value:", nll,"mgc:",max(abs(grad)),"\n")
+      }
+    }
+
+    # Check convervence
+    nll_iter[newton_iter] = nll
+    if( newton_iter > 10 ){
+      tail10 <- tail(nll_iter[seq_len(newton_iter)],10)
+      improve10 <- tail10[1] - tail10[length(tail10)]
+      if(improve10 < tol10){
+        if(isFALSE(silent))cat("Not improving much - will try early exit...")
+        pd <- ifelse( status_iter[newton_iter] %in% c(1,2), TRUE, FALSE )
+        if(isFALSE(silent))cat("PD hess?:",pd,"\n")
+        if(pd) break
+        fail <- fail+1
+      }
+    }
+    #if(norm(par-parold)<step.tol){
     #  break
-    #  #browser()
-    #  #stop("Problem with newton_CG line search")
+    #}
+    #if(fail>5){
+    #  stop("Newton drop out: Too many failed attempts.")
     #}
 
     # Update stuff
-    nll = nll_test
-    x = x_test
-    grad = as.vector(gr(x))
-    if( isFALSE(silent) ){
-      cat("value:", nll,"mgc:",max(abs(grad)),"\n")
-    }
-    max_abs_grad = max(abs(grad))
-    if( max_abs_grad < gr_tol ){
+    grad_iter[newton_iter] = sqrt(sum(grad^2))
+    if( grad_iter[newton_iter] < gr_tol ){
       break
     }
   }
   out = list(
     value = nll,
     par = x,
-    max_abs_grad = max_abs_grad,
+    grad = sqrt(sum(grad^2)),
     runtime = Sys.time() - start_time,
-    newton_iter = newton_iter,
-    alpha_iter = alpha_iter[seq_len(newton_iter)],
-    CG_iter = CG_iter[seq_len(newton_iter)]
+    newton_steps = newton_iter,
+    CG_steps = sum(CG_iter, na.rm=TRUE)
   )
-  out
+  if( isTRUE(diagnostics) ){
+    out$diag = list(
+      nll_iter = nll_iter[seq_len(newton_iter)],
+      grad_iter = grad_iter[seq_len(newton_iter)],
+      newton_iter = newton_iter,
+      stepsize_iter = stepsize_iter[seq_len(newton_iter)],
+      CG_iter = CG_iter[seq_len(newton_iter)],
+      ustep_iter = ustep_iter[seq_len(newton_iter)],
+      status_iter = status_iter[seq_len(newton_iter)]
+    )
+  }
+  return(out)
 }
