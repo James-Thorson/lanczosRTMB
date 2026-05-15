@@ -58,6 +58,7 @@ Adapted from <code>mcmcsae::CG</code> under GPL-3 licence to use Hessian-vector 
 <span>  Minv <span class="op">=</span> <span class="fu">Diagonal</span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  max.it <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span>,</span>
 <span>  e <span class="op">=</span> <span class="fl">1e-10</span>,</span>
+<span>  stop_if_nonPD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -88,6 +89,10 @@ Adapted from <code>mcmcsae::CG</code> under GPL-3 licence to use Hessian-vector 
 
 <dt id="arg-e">e<a class="anchor" aria-label="anchor" href="#arg-e"></a></dt>
 <dd><p>error criterion</p></dd>
+
+
+<dt id="arg-stop-if-nonpd">stop_if_nonPD<a class="anchor" aria-label="anchor" href="#arg-stop-if-nonpd"></a></dt>
+<dd><p>whether to stop CG if recusion is not positive definite</p></dd>
 
 
 <dt id="arg-silent">silent<a class="anchor" aria-label="anchor" href="#arg-silent"></a></dt>
