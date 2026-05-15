@@ -17,6 +17,8 @@
 #' @param stop_if_nonPD whether to stop CG if recusion is not positive definite
 #' @param silent Be silent or print progress?
 #'
+#' @importFrom utils tail
+#'
 #' @examples
 #' library(Matrix)
 #'
