@@ -778,7 +778,7 @@ function( func,
   }
 
   # Objective function
-  get_nll = function(v, ...){
+  get_nll = function(v, ..., what = "nll"){
     # Define fixed effects and assign to global environment
     env$x[x_fixed] = v
     tape_pu$force.update()
@@ -838,7 +838,12 @@ function( func,
       env$nll_best = nll
     }
     env$pu_last = inner_opt$par
-    return( nll )
+    if(what=="nll"){
+      out = nll
+    }else{
+      out = list(nll = nll, inner_opt = inner_opt, logdet = env$L$logdet, env = env)
+    }
+    return( out )
   }
 
   if( isTRUE(make_gr) ){
