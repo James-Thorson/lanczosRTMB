@@ -655,5 +655,5 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  5.866998 34.535513
+#> [1]  5.31043 38.66650
 ```
