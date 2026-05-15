@@ -11,7 +11,10 @@ lanczos_MakeADFun(
   k,
   profile = NULL,
   m = 3,
-  seed = 123
+  method = "newton_CG",
+  seed = 123,
+  make_gr = TRUE,
+  silent = TRUE
 )
 }
 \arguments{
@@ -28,9 +31,17 @@ lanczos_MakeADFun(
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
 
+\item{method}{whether to use \link{newton_CG} or a gradient-based low-memory option
+specifically "L-BFGS-B" in \link{optim} to optimize the inner problem}
+
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
 lower variance using a fixed seed.}
+
+\item{make_gr}{whether to make approximated gradient using fixed probes
+(slow for large models)}
+
+\item{silent}{Disable all tracing information?}
 }
 \value{
 An object (list) of class \code{tinyVAST}. Elements include:
@@ -44,6 +55,10 @@ An object (list) of class \code{tinyVAST}. Elements include:
 \description{
 Make a function that returns the Lanczos-Laplace approximation for
 a user-supplied joint likelihood and designated random effects
+}
+\details{
+The gradient uses a finite-difference applied to a fixed set of probes,
+inspired by Dong et al. (2017) and the \code{stochasticLQ} option in GPyTorch.
 }
 \examples{
 # Simulate lognormal-gamma process
@@ -79,4 +94,8 @@ opt$par - opt2$par
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 opt3$par - opt2$par
 
+}
+\references{
+Dong, K., Eriksson, D., Nickisch, H., Bindel, D., & Wilson, A. G. (2017). Scalable log determinants for Gaussian process kernel learning. Advances in Neural Information Processing Systems, 30.
+\url{https://proceedings.neurips.cc/paper/2017/hash/976abf49974d4686f87192efa0513ae0-Abstract.html}
 }

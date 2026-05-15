@@ -59,6 +59,9 @@ nll = function(p){
   if(what == "sumexpu") return(sumexpu)
   if(what == "biascorr") return(jnll + p$eps * sumexpu)
 }
+
+# Starting list of parameters
+parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0, eps = 0)
 ```
 
 Finally, we fit this model as a log-linked generalized linear mixed model (GLMM): 
@@ -68,7 +71,7 @@ Finally, we fit this model as a log-linked generalized linear mixed model (GLMM)
 what = "jnll"
 obj = RTMB::MakeADFun( 
   nll, 
-  list(u=u, mu = 0, logsd = 0, logcv = 0, eps = 0),
+  parlist,
   map = list(eps = factor(NA)),
   random = "u",
   silent = TRUE
@@ -77,6 +80,24 @@ obj = RTMB::MakeADFun(
 # optimize 
 opt = nlminb( obj$par, obj$fn, obj$gr )
 opt
+```
+## Fit as marginal likelihood without Cholesky decomposition
+
+We first show that we can re-fit the model using the marginal likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky factorization that is default in TMB:
+
+```{r}
+parlist$eps = numeric()
+pen0 = lanczos_MakeADFun(
+  nll, 
+  parlist,
+  random = "u",
+  k = 10,
+  silent = TRUE
+)
+
+# optimize 
+opt_pen0 = nlminb( pen0$par, pen0$fn )
+opt_pen0
 ```
 
 ## Fit as a penalized likelihood model
@@ -100,6 +121,22 @@ pen = RTMB::MakeADFun(
 
 # Re-optimize
 opt_pen = nlminb( pen$par, pen$fn, pen$gr )
+```
+
+Alternatively, we provide a Newton optimizer using a truncated conjugate gradient, which operates using Hessian-vector products without ever forming the full Hessian matrix:
+
+```{r}
+# Extract tape and make Hessian-vector-product function
+tape = GetTape(pen)
+Hq = make_Hq( tape, pen$par )
+
+# run Newton optimizer
+opt_pen2 = newton_CG(
+  par = pen$par,
+  fn = tape,
+  gr = tape$jacfun(),
+  Hq = Hq
+)
 ```
 
 We can then use stochastic trace estimation and the Lanczos method to approximate the log-determinant of the Hessian for random effects:

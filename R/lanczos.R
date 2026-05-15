@@ -17,7 +17,7 @@
 #'
 #' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
 #' @importFrom Matrix sparseMatrix Diagonal Matrix t
-#' @importFrom stats optim rnorm sd
+#' @importFrom stats optim rnorm sd na.omit
 #' @importFrom numDeriv grad
 #'
 #' @examples
@@ -624,9 +624,17 @@ function( obj,
 #' Make a function that returns the Lanczos-Laplace approximation for
 #'   a user-supplied joint likelihood and designated random effects
 #'
+#' @details
+#' The gradient uses a finite-difference applied to a fixed set of probes,
+#' inspired by Dong et al. (2017) and the `stochasticLQ` option in GPyTorch.
+#'
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
 #' @inheritParams TMB::MakeADFun
+#' @param method whether to use [newton_CG] or a gradient-based low-memory option
+#'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
+#' @param make_gr whether to make approximated gradient using fixed probes
+#'   (slow for large models)
 #'
 #' @return
 #' An object (list) of class `tinyVAST`. Elements include:
@@ -671,6 +679,10 @@ function( obj,
 #' opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 #' opt3$par - opt2$par
 #'
+#' @references
+#' Dong, K., Eriksson, D., Nickisch, H., Bindel, D., & Wilson, A. G. (2017). Scalable log determinants for Gaussian process kernel learning. Advances in Neural Information Processing Systems, 30.
+#' <https://proceedings.neurips.cc/paper/2017/hash/976abf49974d4686f87192efa0513ae0-Abstract.html>
+#'
 #' @export
 lanczos_MakeADFun <-
 function( func,
@@ -680,7 +692,10 @@ function( func,
           profile = NULL,
           m = 3,
           #do_grad = FALSE,
-          seed = 123 ){
+          method = "newton_CG",
+          seed = 123,
+          make_gr = TRUE,
+          silent = TRUE ){
 
   # vectors
   #  p = profile
@@ -740,10 +755,6 @@ function( func,
   tape_v$reorder()
   grad_v = tape_v$jacfun()
 
-  # Get cross-grad
-  tape_x = MakeTape( func, parameters )
-  dudv = tape_x$newton(random = x_random)$jacfun()
-
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
   grad_pu = tape_pu$jacfun()
   grad_pu$simplify()
@@ -767,7 +778,7 @@ function( func,
   }
 
   # Objective function
-  get_nll = function(v){
+  get_nll = function(v, ..., what = "nll"){
     # Define fixed effects and assign to global environment
     env$x[x_fixed] = v
     tape_pu$force.update()
@@ -779,13 +790,27 @@ function( func,
     }
 
     # Run inner and assign pu to environment
-    inner_opt = optim(
-      par = env$pu_best,
-      fn = tape_pu,
-      gr = grad_pu,
-      method = "L-BFGS-B",
-      control = list(trace=0, maxit = 1e3, factr = 1e-2)
-    )
+    if( method == "newton_CG" ){
+      inner_opt = newton_CG(
+        par = env$pu_best,
+        fn = tape_pu,
+        gr = grad_pu,
+        Hq = env$Hq_u,
+        silent = silent,
+        ...
+      )
+    }else{
+      inner_opt = optim(
+        par = env$pu_best,
+        fn = tape_pu,
+        gr = grad_pu,
+        method = "L-BFGS-B",
+        control = list(trace=ifelse(silent,0,1), maxit = 1e3, factr = 1e-2)
+      )
+    }
+    #if( max(abs(inner_opt$par - inner_opt2$par)) > 1e-5 ){
+    #  stop("Check math")
+    #}
     env$x[x_profile_random] = inner_opt$par
 
     # Have to assign into env(Hq)$mle to evaluate at right point
@@ -813,42 +838,55 @@ function( func,
       env$nll_best = nll
     }
     env$pu_last = inner_opt$par
-    return( nll )
+    if(what=="nll"){
+      out = nll
+    }else{
+      out = list(nll = nll, inner_opt = inner_opt, logdet = env$L$logdet, env = env)
+    }
+    return( out )
   }
 
-  get_grad = function(v){
-    # Run to do inner optimizer
-    get_nll(v)
-    pu = env$pu_last
-    env$x[x_fixed] = v
-    env$x[-x_fixed] = pu
-    Q_list = lapply(env$L$L, \(x) x$Q )
+  if( isTRUE(make_gr) ){
+    # Get cross-grad
+    tape_x = MakeTape( func, parameters )
+    dudv = tape_x$newton(random = x_random)$jacfun()
 
-    # Get grad_jnll
-    grad_v$force.update()
-    grad_jnll = grad_v(v)
+    get_grad = function(v){
+      # Run to do inner optimizer
+      get_nll(v)
+      pu = env$pu_last
+      env$x[x_fixed] = v
+      env$x[-x_fixed] = pu
+      Q_list = lapply(env$L$L, \(x) x$Q )
 
-    # Get projection for EB of u given FD change in v
-    dudv$force.update()
-    P = dudv(v)
-    x = env$x
+      # Get grad_jnll
+      grad_v$force.update()
+      grad_jnll = grad_v(v)
 
-    grad_logdet = grad(
-      function(vnew){
-        env$x = x
-        env$x[x_fixed] = vnew
-        # Project based on central jacobian
-        env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
-        # Recompute exactly
-        #get_nll( vnew ) # MUST INCLUDE!
-        #env$x[-x_fixed] = env$pu_last
-        # Apply in log-det
-        mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list))
-      },
-      x = v
-    )
+      # Get projection for EB of u given FD change in v
+      dudv$force.update()
+      P = dudv(v)
+      x = env$x
 
-    return( grad_jnll + 0.5*grad_logdet )
+      grad_logdet = grad(
+        function(vnew){
+          env$x = x
+          env$x[x_fixed] = vnew
+          # Project based on central jacobian
+          env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
+          # Recompute exactly
+          #get_nll( vnew ) # MUST INCLUDE!
+          #env$x[-x_fixed] = env$pu_last
+          # Apply in log-det
+          mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list))
+        },
+        x = v
+      )
+
+      return( grad_jnll + 0.5*grad_logdet )
+    }
+  }else{
+    get_grad = NULL
   }
 
   #
