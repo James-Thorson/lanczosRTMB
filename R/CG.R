@@ -14,6 +14,7 @@
 #' @param Minv preconditioner matrix (uses Identity by default)
 #' @param max.it maximum iterations (often should be less than \code{length(b)})
 #' @param e error criterion
+#' @param stop_if_nonPD whether to stop CG if recusion is not positive definite
 #' @param silent Be silent or print progress?
 #'
 #' @examples
@@ -121,6 +122,7 @@ function( b,
 #' for a Newton.
 #'
 #' @inheritParams CG
+#' @inheritParams TMB::newton
 #' @param par initial parameter vector
 #' @param fn function to evaluate negative log-likelihood
 #' @param gr function to evaluate gradient of negative log-likelihood
@@ -128,8 +130,10 @@ function( b,
 #' @param e_ratio early stopping condition for error of CG, relative to initial gradient
 #' @param maxit_newton maximum iterations for Newton solver
 #' @param maxit_CG maximum iterations for CG solution for each Newton iteration
+#' @param line_steps number of steps to explore for linear-search given Newton update
 #' @param c1 stopping condition for line search given CG solution in each Newton iteration
 #' @param beta updates in line search stepsize alpha when Armijo sufficient decrease condition fails
+#' @param diagonstics whether to provide extra diagnostics for each Newton iteration
 #' @param silent Be silent or print progress?
 #'
 #' @examples

@@ -15,6 +15,14 @@ newton_CG(
   maxit_CG = min(100, length(par)),
   c1 = 0.01,
   beta = 0.5,
+  line_steps = 20,
+  smartsearch = FALSE,
+  ustep = 1,
+  power = 0.5,
+  u0 = 1e-04,
+  stop_if_nonPD = smartsearch,
+  tol10 = 0.001,
+  diagnostics = FALSE,
   silent = FALSE
 )
 }
@@ -39,7 +47,23 @@ newton_CG(
 
 \item{beta}{updates in line search stepsize alpha when Armijo sufficient decrease condition fails}
 
+\item{line_steps}{number of steps to explore for linear-search given Newton update}
+
+\item{smartsearch}{Turn on adaptive stepsize algorithm for non-convex problems?}
+
+\item{ustep}{Adaptive stepsize initial guess between 0 and 1.}
+
+\item{power}{Parameter controlling adaptive stepsize.}
+
+\item{u0}{Parameter controlling adaptive stepsize.}
+
+\item{stop_if_nonPD}{whether to stop CG if recusion is not positive definite}
+
+\item{tol10}{Try to exit if last 10 iterations not improved more than this.}
+
 \item{silent}{Be silent or print progress?}
+
+\item{diagonstics}{whether to provide extra diagnostics for each Newton iteration}
 }
 \description{
 Nonlinear minimizer designed for cheap Hessian-vector products using
@@ -51,19 +75,19 @@ library(Matrix)
 library(RTMB)
 
 # Settings
-n = 10^4
+n = 10^3
 rho = 0.99
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
 P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
 Q = (Diagonal(n) - rho * t(P)) \%*\% (Diagonal(n) - rho * P)
 x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
-y = x + 0.1 * rnorm(n)
+y = rpois( n = n, lambda = exp(1 + x) )
 which_seen = sample( seq_len(n), size = n/10, replace = FALSE)
 y[-which_seen] = NA
 
 nll = function(p){
-  -dgmrf(p$x, Q = Q, log = TRUE) - sum(dnorm(y, p$x, sd = 0.1, log=TRUE), na.rm=TRUE)
+  -dgmrf(p$x, Q = Q, log = TRUE) - sum(dpois(y, lambda = exp(1 + p$x), log=TRUE), na.rm=TRUE)
 }
 parlist = list( x=rnorm(n) )
 
@@ -88,7 +112,9 @@ opt2 = newton_CG(
   par = unlist(parlist),
   fn = tape,
   gr = gr,
-  Hq = Hq
+  Hq = Hq,
+  maxit_newton = 1e4,
+  gr_tol = 1e-4
 )
 
 # Compare the estimates and speed

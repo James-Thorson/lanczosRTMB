@@ -11,6 +11,7 @@ CG(
   Minv = Diagonal(n = length(b)),
   max.it = length(b),
   e = 1e-10,
+  stop_if_nonPD = TRUE,
   silent = TRUE
 )
 }
@@ -26,6 +27,8 @@ CG(
 \item{max.it}{maximum iterations (often should be less than \code{length(b)})}
 
 \item{e}{error criterion}
+
+\item{stop_if_nonPD}{whether to stop CG if recusion is not positive definite}
 
 \item{silent}{Be silent or print progress?}
 }
