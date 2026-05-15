@@ -104,13 +104,13 @@ newton_CG(
 
   Try to exit if last 10 iterations not improved more than this.
 
+- diagnostics:
+
+  whether to provide extra diagnostics for each Newton iteration
+
 - silent:
 
   Be silent or print progress?
-
-- diagonstics:
-
-  whether to provide extra diagnostics for each Newton iteration
 
 ## Examples
 
@@ -655,5 +655,5 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  5.31043 38.66650
+#> [1]  5.251675 39.463585
 ```
