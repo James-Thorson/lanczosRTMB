@@ -135,7 +135,7 @@ function( b,
 #' @param line_steps number of steps to explore for linear-search given Newton update
 #' @param c1 stopping condition for line search given CG solution in each Newton iteration
 #' @param beta updates in line search stepsize alpha when Armijo sufficient decrease condition fails
-#' @param diagonstics whether to provide extra diagnostics for each Newton iteration
+#' @param diagnostics whether to provide extra diagnostics for each Newton iteration
 #' @param silent Be silent or print progress?
 #'
 #' @examples

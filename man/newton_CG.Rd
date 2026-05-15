@@ -61,9 +61,9 @@ newton_CG(
 
 \item{tol10}{Try to exit if last 10 iterations not improved more than this.}
 
-\item{silent}{Be silent or print progress?}
+\item{diagnostics}{whether to provide extra diagnostics for each Newton iteration}
 
-\item{diagonstics}{whether to provide extra diagnostics for each Newton iteration}
+\item{silent}{Be silent or print progress?}
 }
 \description{
 Nonlinear minimizer designed for cheap Hessian-vector products using
