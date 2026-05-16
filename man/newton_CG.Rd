@@ -66,9 +66,10 @@ newton_CG(
 \item{silent}{Be silent or print progress?}
 }
 \description{
-Nonlinear minimizer designed for cheap Hessian-vector products using
-\link{make_Hq}, involving iterating a linear search along the truncated conjugate gradient
-for a Newton.
+Nonlinear minimizer designed to use cheap Hessian-vector products using
+\link{make_Hq}.  The minimizer approximates a Newton update using truncated conjugate
+gradient, while adapting a regularization parameter designed and using a
+line-search for each step.
 }
 \details{
 This minimizer approximates Newton steps, but solving each Newton solution using a
