@@ -112,6 +112,32 @@ newton_CG(
 
   Be silent or print progress?
 
+## Details
+
+This minimizer approximates Newton steps, but solving each Newton
+solution using a truncated conjugate gradient using Hessian-vector
+products without ever constructing the Hessian matrix directly. It then
+uses three separate tricks for numerical and computational efficiency.
+
+1.  For each CG, it recursively improves the solution until a desired
+    accuracy is reached;
+
+2.  For each Newton-step, it uses a line-search algorithm, while
+    decreasing the step-size to find a decrease in objective function.
+
+3.  The CG is monitored to identify whether the Hessian matrix is
+    positive definite (PD), and if it is not PD then the CG may be
+    terminated.
+
+4.  When using `smartsearch = TRUE`, if the Hessian is not PD, then a
+    regularization `ustep` is decreased, corresponding to an increase in
+    `t` where the Newton step is actually using \\(H + tI)^{-1} g\\
+    where \\g\\ is the gradient. This increase or decrease in `ustep`
+    (and associated decrease/increase in \\t\\) is copied from
+    [`TMB::newton`](https://rdrr.io/pkg/TMB/man/newton.html). If
+    `smartsearch = FALSE` then \\t=0\\ and CG uses the Hessian
+    corresponding to unregularized Newton steps.
+
 ## Examples
 
 ``` r
@@ -655,5 +681,5 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  5.816926 35.332386
+#> [1]  5.26121 39.54170
 ```
