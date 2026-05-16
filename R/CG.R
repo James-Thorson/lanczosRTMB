@@ -138,6 +138,26 @@ function( b,
 #' @param diagnostics whether to provide extra diagnostics for each Newton iteration
 #' @param silent Be silent or print progress?
 #'
+#' @details
+#' This minimizer approximates Newton steps, but solving each Newton solution using a
+#' truncated conjugate gradient using Hessian-vector products without ever constructing
+#' the Hessian matrix directly.  It then uses three separate tricks for numerical and
+#' computational efficiency.
+#' \enumerate{
+#' \item For each CG, it recursively improves the solution until a desired accuracy is reached;
+#' \item For each Newton-step, it uses a line-search algorithm, while decreasing the step-size
+#'       to find a decrease in objective function.
+#' \item The CG is monitored to identify whether
+#'       the Hessian matrix is positive definite (PD), and if it is not PD then the CG may be
+#'       terminated.
+#' \item  When using \code{smartsearch = TRUE}, if the Hessian is not PD, then
+#'        a regularization \code{ustep} is decreased, corresponding to an increase in \code{t}
+#'        where the Newton step is actually using \eqn{(H + tI)^{-1} g} where \eqn{g} is the
+#'        gradient.  This increase or decrease in \code{ustep} (and associated decrease/increase
+#'        in \eqn{t}) is copied from \code{TMB::newton}. If \code{smartsearch = FALSE} then
+#'        \eqn{t=0} and CG uses the Hessian corresponding to unregularized Newton steps.
+#' }
+#'
 #' @examples
 #' library(Matrix)
 #' library(RTMB)
