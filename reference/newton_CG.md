@@ -1,9 +1,10 @@
 # Nonlinear minimizer using line search with approximated Newton solution
 
-Nonlinear minimizer designed for cheap Hessian-vector products using
-[make_Hq](https://james-thorson.github.io/lanczosRTMB/reference/make_Hq.md),
-involving iterating a linear search along the truncated conjugate
-gradient for a Newton.
+Nonlinear minimizer designed to use cheap Hessian-vector products using
+[make_Hq](https://james-thorson.github.io/lanczosRTMB/reference/make_Hq.md).
+The minimizer approximates a Newton update using truncated conjugate
+gradient, while adapting a regularization parameter designed and using a
+line-search for each step.
 
 ## Usage
 
@@ -681,5 +682,5 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  5.26121 39.54170
+#> [1]  4.541361 21.398312
 ```
