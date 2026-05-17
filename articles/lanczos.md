@@ -116,7 +116,7 @@ opt_pen0 = nlminb( pen0$par, pen0$fn )
 opt_pen0
 #> $par
 #>         mu      logsd      logcv 
-#> -0.1055536 -0.1322019 -0.5994463 
+#> -0.1051230 -0.1327639 -0.5981617 
 #> 
 #> $objective
 #> [1] 36.46907
@@ -125,11 +125,11 @@ opt_pen0
 #> [1] 1
 #> 
 #> $iterations
-#> [1] 20
+#> [1] 25
 #> 
 #> $evaluations
 #> function gradient 
-#>       39       86 
+#>       51      110 
 #> 
 #> $message
 #> [1] "false convergence (8)"
@@ -177,7 +177,7 @@ opt_pen2 = newton_CG(
   gr = tape$jacfun(),
   Hq = Hq
 )
-#> value: 41.78943 mgc: 9.836576e-13
+#> value: 41.78943 mgc: 9.836576e-13 ustep: 0.9999
 ```
 
 We can then use stochastic trace estimation and the Lanczos method to
@@ -334,6 +334,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 5.19 secs
+Runtime for this vignette: 5.92 secs
 
 ## Works cited
