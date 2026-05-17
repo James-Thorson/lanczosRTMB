@@ -140,7 +140,10 @@ function( b,
 #' @param silent Be silent or print progress?
 #'
 #' @details
-#' This minimizer approximates Newton steps, but solving each Newton solution using a
+#' This minimizer approximates Newton steps \eqn{x_{i+1} = x_{i} - H(x_i)^{-1} g(x_i)},
+#' where \eqn{H(x_i) = \nabla^2 f(x_i)} is the Hessian matrix and
+#' \eqn{g(x_i) = \nabla f(x_i)} is the gradient of the negative log-likelihood
+#' \eqn{f(x_i)}, but solving each Newton solution using a
 #' truncated conjugate gradient using Hessian-vector products without ever constructing
 #' the Hessian matrix directly.  It then uses several strategies for numerical and
 #' computational efficiency.
