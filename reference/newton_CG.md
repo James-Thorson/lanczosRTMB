@@ -148,7 +148,7 @@ and computational efficiency.
     tI)^{-1} g\\ where \\g\\ is the gradient, and \\1\>u\>0\\
     corresponds to \\t\>0\\. This increase or decrease in `ustep` (and
     associated decrease/increase in \\t\\) is copied from
-    [`newton()`](https://rdrr.io/pkg/TMB/man/newton.html). If
+    [`TMB::newton()`](https://rdrr.io/pkg/TMB/man/newton.html). If
     `smartsearch = FALSE` then \\ustep=1\\ and \\t=0\\ such that CG uses
     the Hessian corresponding to unregularized Newton steps. This
     smartsearch behavior controlled by `u0`, `ustep`, `power`, and
@@ -697,5 +697,5 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  5.805652 34.623049
+#> [1]  5.854782 34.941513
 ```
