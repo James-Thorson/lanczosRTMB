@@ -167,7 +167,7 @@ function( b,
 #'       \eqn{t=\frac{1}{u}-1} where the Newton step is actually using \eqn{(H + tI)^{-1} g}
 #'       where \eqn{g} is the gradient, and \eqn{1>u>0} corresponds to \eqn{t>0}.
 #'       This increase or decrease in \code{ustep} (and associated decrease/increase
-#'       in \eqn{t}) is copied from \link{TMB::newton}. If \code{smartsearch = FALSE} then
+#'       in \eqn{t}) is copied from [TMB::newton()]. If \code{smartsearch = FALSE} then
 #'       \eqn{ustep=1} and \eqn{t=0} such that CG uses the Hessian
 #'       corresponding to unregularized Newton steps.
 #'       This smartsearch behavior controlled by \code{u0}, \code{ustep},
