@@ -16,7 +16,7 @@ newton_CG(
   c1 = 0.01,
   beta = 0.5,
   line_steps = 20,
-  smartsearch = FALSE,
+  smartsearch = TRUE,
   ustep = 1,
   power = 0.5,
   u0 = 1e-04,
@@ -43,7 +43,8 @@ newton_CG(
 
 \item{maxit_CG}{maximum iterations for CG solution for each Newton iteration}
 
-\item{c1}{stopping condition for line search given CG solution in each Newton iteration}
+\item{c1}{stopping condition for line search given CG solution in each Newton iteration, where
+\eqn{1>c1>0} seeks to prevent overshoot and resulting zigzagging.}
 
 \item{beta}{updates in line search stepsize alpha when Armijo sufficient decrease condition fails}
 
@@ -66,9 +67,44 @@ newton_CG(
 \item{silent}{Be silent or print progress?}
 }
 \description{
-Nonlinear minimizer designed for cheap Hessian-vector products using
-\link{make_Hq}, involving iterating a linear search along the truncated conjugate gradient
-for a Newton.
+Nonlinear minimizer designed to use cheap Hessian-vector products using
+\link{make_Hq}.  The minimizer approximates a Newton update using truncated conjugate
+gradient, while adapting a regularization parameter designed and using a
+line-search for each step.
+}
+\details{
+This minimizer approximates Newton steps \eqn{x_{i+1} = x_{i} - H(x_i)^{-1} g(x_i)},
+where \eqn{H(x_i) = \nabla^2 f(x_i)} is the Hessian matrix and
+\eqn{g(x_i) = \nabla f(x_i)} is the gradient of the negative log-likelihood
+\eqn{f(x_i)}.
+It then uses several strategies for numerical and computational efficiency.
+\enumerate{
+\item It approximates each Newton step \eqn{H(x_i)^{-1} g(x_i)} using a truncated
+conjugate gradient algorithm that involves Hessian-vector products \eqn{H(x_i) v}.
+It then recursively improves the solution until a desired accuracy is reached,
+controlled by \code{gr_tol}, without ever constructing the Hessian matrix itself;
+\item It approximates each Newton solution \eqn{H(x_i)^{-1} g(x_i)}
+without ever constructing or storing the Hessian \eqn{H(x_i)}, and instead computing
+Hessian-vector product \eqn{H(x_i) v = \nabla( v^T \nabla f(x_i) )} using
+autodifferentiation in RTMB;
+\item After approximating each step direction \eqn{H(x_i)^{-1} g(x_i)},
+it uses a line-search algorithm while decreasing the step-size if needed
+to find a suitable decrease in the objective function, controlled
+\code{line_steps}, \code{beta}, and \code{c1};
+\item The CG is monitored to identify whether
+the Hessian matrix is positive definite (PD), and if it is not PD then the CG may be
+terminated, controlled by \code{stop_if_nonPD}.
+\item When using \code{smartsearch = TRUE}, if the Hessian is not PD, then
+a regularization \code{ustep} is decreased, corresponding to an increase in
+\eqn{t=\frac{1}{u}-1} where the Newton step is actually using \eqn{(H + tI)^{-1} g}
+where \eqn{g} is the gradient, and \eqn{1>u>0} corresponds to \eqn{t>0}.
+This increase or decrease in \code{ustep} (and associated decrease/increase
+in \eqn{t}) is copied from \code{\link[TMB:newton]{TMB::newton()}}. If \code{smartsearch = FALSE} then
+\eqn{ustep=1} and \eqn{t=0} such that CG uses the Hessian
+corresponding to unregularized Newton steps.
+This smartsearch behavior controlled by \code{u0}, \code{ustep},
+\code{power}, and \code{tol10}, and it corresponds to an adaptive "trust-region".
+}
 }
 \examples{
 library(Matrix)
