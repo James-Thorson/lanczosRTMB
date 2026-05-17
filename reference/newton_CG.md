@@ -147,9 +147,10 @@ and computational efficiency.
     \\t=\frac{1}{u}-1\\ where the Newton step is actually using \\(H +
     tI)^{-1} g\\ where \\g\\ is the gradient, and \\1\>u\>0\\
     corresponds to \\t\>0\\. This increase or decrease in `ustep` (and
-    associated decrease/increase in \\t\\) is copied from TMB::newton.
-    If `smartsearch = FALSE` then \\ustep=1\\ and \\t=0\\ such that CG
-    uses the Hessian corresponding to unregularized Newton steps. This
+    associated decrease/increase in \\t\\) is copied from
+    [`TMB::newton()`](https://rdrr.io/pkg/TMB/man/newton.html). If
+    `smartsearch = FALSE` then \\ustep=1\\ and \\t=0\\ such that CG uses
+    the Hessian corresponding to unregularized Newton steps. This
     smartsearch behavior controlled by `u0`, `ustep`, `power`, and
     `tol10`, and it corresponds to an adaptive "trust-region".
 
@@ -696,5 +697,5 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  3.472427 20.727697
+#> [1]  5.800411 34.661608
 ```

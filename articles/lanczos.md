@@ -116,20 +116,20 @@ opt_pen0 = nlminb( pen0$par, pen0$fn )
 opt_pen0
 #> $par
 #>         mu      logsd      logcv 
-#> -0.1051230 -0.1327639 -0.5981617 
+#> -0.1084795 -0.1284993 -0.6074894 
 #> 
 #> $objective
-#> [1] 36.46907
+#> [1] 36.46912
 #> 
 #> $convergence
 #> [1] 1
 #> 
 #> $iterations
-#> [1] 25
+#> [1] 11
 #> 
 #> $evaluations
 #> function gradient 
-#>       51      110 
+#>       31       35 
 #> 
 #> $message
 #> [1] "false convergence (8)"
@@ -334,6 +334,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 7.07 secs
+Runtime for this vignette: 4.83 secs
 
 ## Works cited
