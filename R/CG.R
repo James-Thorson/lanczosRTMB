@@ -142,21 +142,24 @@ function( b,
 #' @details
 #' This minimizer approximates Newton steps, but solving each Newton solution using a
 #' truncated conjugate gradient using Hessian-vector products without ever constructing
-#' the Hessian matrix directly.  It then uses three separate tricks for numerical and
+#' the Hessian matrix directly.  It then uses several strategies for numerical and
 #' computational efficiency.
 #' \enumerate{
-#' \item For each CG, it recursively improves the solution until a desired accuracy is reached;
+#' \item For each CG, it recursively improves the solution until a desired accuracy is reached,
+#'       controlled by \code{gr_tol}, without ever constructing the Hessian matrix itself;
 #' \item For each Newton-step, it uses a line-search algorithm, while decreasing the step-size
-#'       to find a decrease in objective function.
+#'       to find a decrease in objective function, controlled \code{line_steps}, \code{beta},
+#'       and \code{c1}.
 #' \item The CG is monitored to identify whether
 #'       the Hessian matrix is positive definite (PD), and if it is not PD then the CG may be
-#'       terminated.
+#'       terminated, controlled by \code{stop_if_nonPD}.
 #' \item  When using \code{smartsearch = TRUE}, if the Hessian is not PD, then
 #'        a regularization \code{ustep} is decreased, corresponding to an increase in \code{t}
 #'        where the Newton step is actually using \eqn{(H + tI)^{-1} g} where \eqn{g} is the
 #'        gradient.  This increase or decrease in \code{ustep} (and associated decrease/increase
 #'        in \eqn{t}) is copied from \code{TMB::newton}. If \code{smartsearch = FALSE} then
 #'        \eqn{t=0} and CG uses the Hessian corresponding to unregularized Newton steps.
+#'        This is controlled by \code{u0}, \code{ustep}, \code{power}, and \code{tol10}.
 #' }
 #'
 #' @examples
@@ -223,7 +226,7 @@ function( par,
           c1 = 0.01,
           beta = 0.5,
           line_steps = 20,
-          smartsearch = FALSE,
+          smartsearch = TRUE,
           ustep = 1, ## Start out optimistic: Newton step
           power = 0.5, ## decrease=function(u)const*u^power
           u0 = 1e-4,  ## Increase u=0 to this value
