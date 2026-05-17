@@ -156,7 +156,10 @@ line-search for each step.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This minimizer approximates Newton steps, but solving each Newton solution using a
+    <p>This minimizer approximates Newton steps \(x_{i+1} = x_{i} - H(x_i)^{-1} g(x_i)\),
+where \(H(x_i) = \nabla^2 f(x_i)\) is the Hessian matrix and
+\(g(x_i) = \nabla f(x_i)\) is the gradient of the negative log-likelihood
+\(f(x_i)\), but solving each Newton solution using a
 truncated conjugate gradient using Hessian-vector products without ever constructing
 the Hessian matrix directly.  It then uses several strategies for numerical and
 computational efficiency.</p><ol><li><p>For each CG, it recursively improves the solution until a desired accuracy is reached,
@@ -718,7 +721,7 @@ This is controlled by <code>u0</code>, <code>ustep</code>, <code>power</code>, a
 <span class="r-plt img"><img src="newton_CG-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">opt1</span><span class="op">$</span><span class="va">runtime</span>, <span class="va">opt2</span><span class="op">$</span><span class="va">runtime</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Time differences in secs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  4.550184 21.525636</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  3.576065 23.923654</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

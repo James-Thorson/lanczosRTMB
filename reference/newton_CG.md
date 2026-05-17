@@ -115,10 +115,13 @@ newton_CG(
 
 ## Details
 
-This minimizer approximates Newton steps, but solving each Newton
-solution using a truncated conjugate gradient using Hessian-vector
-products without ever constructing the Hessian matrix directly. It then
-uses several strategies for numerical and computational efficiency.
+This minimizer approximates Newton steps \\x\_{i+1} = x\_{i} -
+H(x_i)^{-1} g(x_i)\\, where \\H(x_i) = \nabla^2 f(x_i)\\ is the Hessian
+matrix and \\g(x_i) = \nabla f(x_i)\\ is the gradient of the negative
+log-likelihood \\f(x_i)\\, but solving each Newton solution using a
+truncated conjugate gradient using Hessian-vector products without ever
+constructing the Hessian matrix directly. It then uses several
+strategies for numerical and computational efficiency.
 
 1.  For each CG, it recursively improves the solution until a desired
     accuracy is reached, controlled by `gr_tol`, without ever
@@ -685,5 +688,5 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  4.550184 21.525636
+#> [1]  3.576065 23.923654
 ```
