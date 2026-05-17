@@ -181,7 +181,7 @@ a regularization <code>ustep</code> is decreased, corresponding to an increase i
 \(t=\frac{1}{u}-1\) where the Newton step is actually using \((H + tI)^{-1} g\)
 where \(g\) is the gradient, and \(1&gt;u&gt;0\) corresponds to \(t&gt;0\).
 This increase or decrease in <code>ustep</code> (and associated decrease/increase
-in \(t\)) is copied from <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">TMB::newton()</a></code>. If <code>smartsearch = FALSE</code> then
+in \(t\)) is copied from <code><a href="https://rdrr.io/pkg/TMB/man/newton.html" class="external-link">newton()</a></code>. If <code>smartsearch = FALSE</code> then
 \(ustep=1\) and \(t=0\) such that CG uses the Hessian
 corresponding to unregularized Newton steps.
 This smartsearch behavior controlled by <code>u0</code>, <code>ustep</code>,
@@ -730,7 +730,7 @@ This smartsearch behavior controlled by <code>u0</code>, <code>ustep</code>,
 <span class="r-plt img"><img src="newton_CG-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">opt1</span><span class="op">$</span><span class="va">runtime</span>, <span class="va">opt2</span><span class="op">$</span><span class="va">runtime</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Time differences in secs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  5.800411 34.661608</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  5.805652 34.623049</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
