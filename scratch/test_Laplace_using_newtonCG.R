@@ -27,7 +27,9 @@ nll = function(p){
   Qx = (Ix - plogis(p$invlogis_rho) * t(Px)) %*% (exp(2*p$logtau) * Ix) %*% (Ix - plogis(p$invlogis_rho) * Px)
   Qy = (Iy - plogis(p$invlogis_rho) * t(Py)) %*% (exp(2*p$logtau) * Iy) %*% (Iy - plogis(p$invlogis_rho) * Py)
   Q = kronecker( Qy, Qx )
-  -dgmrf(p$x, Q = Q, log = TRUE) - sum(dpois(y, exp(p$mu + p$x), log=TRUE), na.rm=TRUE) - dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE)
+  -dgmrf(p$x, Q = Q, log = TRUE) -
+  sum(dpois(y, exp(p$mu + p$x), log=TRUE), na.rm=TRUE) -
+  dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE)
 }
 parlist = list( x=rnorm(nx*ny), logtau = 0, invlogis_rho = 0, mu = 0 )
 
