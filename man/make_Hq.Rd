@@ -4,7 +4,12 @@
 \alias{make_Hq}
 \title{Make function to calculate H \%*\% q}
 \usage{
-make_Hq(tape, x0, which_random = seq_along(x0))
+make_Hq(
+  tape,
+  x0,
+  which_random = seq_along(x0),
+  method = c("forward-on-forward", "sparse")
+)
 }
 \arguments{
 \item{tape}{Alternative to specifying \code{obj}}
@@ -22,10 +27,8 @@ A function with two arguments:
 }
 }
 \description{
-Given a TMB object, make a function that efficiently calculates
-\code{H \%*\% q} without constructing H itself, and instead using \verb{grad_u( grad_u(f) \%** q)}
-given function f(x) that returns the negative log-likelihood given \code{x = u} with fixed \code{v}.  This can
-then be used e.g. in Lanczos methods when H is too large to construct explicitly
+Given a TMB object, make a function that efficiently calculates a Hessian-vector product (HVP)
+\code{H \%*\% q}.
 }
 \details{
 The output \code{Hq = make_Hq( tape, x )} takes as argument a probe \eqn{\mathbf{q}} and outputs
@@ -57,9 +60,9 @@ nll = function(p){
 params = list(u=u, mu = 0, logsd = 0, logcv = 0)
 obj = MakeADFun( nll, params, random = "u", silent = TRUE )
 
-# Build with Lanczos
+# Build with with bespoke function
 tape = MakeTape( nll, params )
-which_random = 1:30
+which_random = seq_len(n)
 Hq = make_Hq(
   tape,
   x = params,
@@ -81,4 +84,15 @@ all.equal(
   (obj$env$spHess(par = x_new, random=TRUE) \%*\% q)[,1]
 )
 
+# Compare speed for two alternative methods
+Hq2 = make_Hq(
+  tape,
+  x = params,
+  which_random = which_random,
+  method = "sparse"
+)
+x_new[which_random] = rnorm(length(which_random))
+system.time(Hq(q, x_new))
+system.time(Hq2(q, x_new))
+system.time(Hq2(q, x_new, update_H = FALSE))
 }

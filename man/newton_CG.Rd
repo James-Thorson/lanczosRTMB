@@ -82,7 +82,8 @@ It then uses several strategies for numerical and computational efficiency.
 \item It approximates each Newton step \eqn{H(x_i)^{-1} g(x_i)} using a truncated
 conjugate gradient algorithm that involves Hessian-vector products \eqn{H(x_i) v}.
 It then recursively improves the solution until a desired accuracy is reached,
-controlled by \code{gr_tol}, without ever constructing the Hessian matrix itself;
+controlled by \code{gr_tol}, often using many fewer steps than the full dimension
+\code{length(x_i)};
 \item It approximates each Newton solution \eqn{H(x_i)^{-1} g(x_i)}
 without ever constructing or storing the Hessian \eqn{H(x_i)}, and instead computing
 Hessian-vector product \eqn{H(x_i) v = \nabla( v^T \nabla f(x_i) )} using

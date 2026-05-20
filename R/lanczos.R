@@ -141,10 +141,21 @@ function( Hq,
 #' Make function to calculate H %*% q
 #'
 #' @description
-#' Given a TMB object, make a function that efficiently calculates
-#'   `H %*% q` without constructing H itself, and instead using `grad_u( grad_u(f) %** q)`
-#'   given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`.  This can
-#'   then be used e.g. in Lanczos methods when H is too large to construct explicitly
+#' Given a TMB object, make a function that efficiently calculates a Hessian-vector product (HVP)
+#'   `H %*% q`.
+#'
+#' @ details
+#' This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
+#' When \code{method = "forward-on-forward"}, \code{make_Hq} calculates a HVP
+#' without constructing H itself, and instead using `grad_u( grad_u(f) %** q)`
+#' given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`
+#'
+#' When \code{method = "sparse"}, \code{make_Hq} instead calculates a HVP by
+#' calculating and storing the sparse Hessian in a local environment. The resulting
+#' function can be used with \code{update_H = FALSE} to use the pre-calculated Hessian as-is,
+#' or \code{update_H = TRUE} to recalculate the sparse Hessian, store the update in the local
+#' environment and then calculate the HVP. \code{update_H = FALSE} is then useful when repeadly
+#' using the same Hessian in a HVP
 #'
 #' @details
 #' The output `Hq = make_Hq( tape, x )` takes as argument a probe \eqn{\mathbf{q}} and outputs
@@ -156,6 +167,7 @@ function( Hq,
 #' @param tape Alternative to specifying `obj`
 #' @param which_random integer-vector indicating which elements of `x` correspond to random effects,
 #'        where the probe `q` then has length `length(which_random)`
+#' @param tape Alternative to specifying `obj`
 #'
 #' @details
 #' `qprime` is defined internally where `qprime[which_random] = q` and
@@ -189,9 +201,9 @@ function( Hq,
 #' params = list(u=u, mu = 0, logsd = 0, logcv = 0)
 #' obj = MakeADFun( nll, params, random = "u", silent = TRUE )
 #'
-#' # Build with Lanczos
+#' # Build with with bespoke function
 #' tape = MakeTape( nll, params )
-#' which_random = 1:30
+#' which_random = seq_len(n)
 #' Hq = make_Hq(
 #'   tape,
 #'   x = params,
@@ -213,14 +225,28 @@ function( Hq,
 #'   (obj$env$spHess(par = x_new, random=TRUE) %*% q)[,1]
 #' )
 #'
+#' # Compare speed for two alternative methods
+#' Hq2 = make_Hq(
+#'   tape,
+#'   x = params,
+#'   which_random = which_random,
+#'   method = "sparse"
+#' )
+#' x_new[which_random] = rnorm(length(which_random))
+#' system.time(Hq(q, x_new))
+#' system.time(Hq2(q, x_new))
+#' system.time(Hq2(q, x_new, update_H = FALSE))
 #' @export
 make_Hq <-
 function( tape,
           x0,
-          which_random = seq_along(x0) ){
+          which_random = seq_along(x0),
+          method = c("forward-on-forward","sparse") ){
 
 # @param live_x whether to pass `x` explicitly so that it can be taped.
 #        This is only necessary when computing the derivative of a log-determinant
+  #
+  method = match.arg(method)
 
   # Make environment for passing qprime without retaping
   # qprime[which_random] = q, where q is the probe passed by users
@@ -234,33 +260,45 @@ function( tape,
   dfdx = tape$jacfun()
   dfdx$simplify()
 
-  # grad * qprime
-  dfdx_qprime = function(x){
-    qprime = DataEval(fetch_qprime)
-    sum(dfdx(x)[which_random] * qprime[which_random])
-  }
-  tape_dfdx_qprime = MakeTape(
-    f = dfdx_qprime,
-    x = x0
-  )
-  tape_dfdx_qprime$simplify()
-  tape_dfdx_qprime$reorder()
+  if( method == "forward-on-forward" ){
+    # grad * qprime
+    dfdx_qprime = function(x){
+      qprime = DataEval(fetch_qprime)
+      sum(dfdx(x)[which_random] * qprime[which_random])
+    }
+    tape_dfdx_qprime = MakeTape(
+      f = dfdx_qprime,
+      x = x0
+    )
+    tape_dfdx_qprime$simplify()
+    tape_dfdx_qprime$reorder()
 
-  # grad( grad * v )
-  d2fdx2_qprime = tape_dfdx_qprime$jacfun()
-  d2fdx2_qprime$simplify()
-  d2fdx2_qprime$reorder()
+    # grad( grad * v )
+    d2fdx2_qprime = tape_dfdx_qprime$jacfun()
+    d2fdx2_qprime$simplify()
+    d2fdx2_qprime$reorder()
 
-  # remove extra stuff from closure
-  # scratch/check_memory_size.R suggests that it is not necessary
-  #rm("tape_dfdx_qprime")
-  #gc()
+    # remove extra stuff from closure
+    # scratch/check_memory_size.R suggests that it is not necessary
+    #rm("tape_dfdx_qprime")
+    #gc()
 
-  # Function to supply v for grad( grad * v )
-  Hq <- function(q, x = x0) {
-    env$qprime[which_random] = q
-    d2fdx2_qprime$force.update()
-    return(d2fdx2_qprime(x)[which_random])
+    # Function to supply v for grad( grad * v )
+    Hq <- function(q, x = x0) {
+      env$qprime[which_random] = q
+      d2fdx2_qprime$force.update()
+      return(d2fdx2_qprime(x)[which_random])
+    }
+  }else if(method == "sparse"){
+    d2fdx2 = dfdx$jacfun(sparse = TRUE)
+    env$H = d2fdx2(x0)
+    Hq <- function(q, x = x0, update_H = TRUE) {
+      if(isTRUE(update_H)){
+        env$H = d2fdx2(x)
+      }
+      env$qprime[which_random] = q
+      return( as.vector(env$H[which_random,which_random] %*% q) )
+    }
   }
 
   # bundle with environment
