@@ -18,6 +18,8 @@ make_Hq(
 
 \item{which_random}{integer-vector indicating which elements of \code{x} correspond to random effects,
 where the probe \code{q} then has length \code{length(which_random)}}
+
+\item{method}{See details}
 }
 \value{
 A function with two arguments:
@@ -31,10 +33,17 @@ Given a TMB object, make a function that efficiently calculates a Hessian-vector
 \code{H \%*\% q}.
 }
 \details{
-The output \code{Hq = make_Hq( tape, x )} takes as argument a probe \eqn{\mathbf{q}} and outputs
-\eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
-assign a new value to \code{attr(Hq,"env")$x}.  RTMB then does a \code{force.update()} to update
-the tape based on that new value.
+This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
+When \code{method = "forward-on-forward"}, \code{make_Hq} calculates a HVP
+without constructing H itself, and instead using \verb{grad_u( grad_u(f) \%** q)}
+given function f(x) that returns the negative log-likelihood given \code{x = u} with fixed \code{v}
+
+When \code{method = "sparse"}, \code{make_Hq} instead calculates a HVP by
+calculating and storing the sparse Hessian in a local environment. The resulting
+function can be used with \code{update_H = FALSE} to use the pre-calculated Hessian as-is,
+or \code{update_H = TRUE} to recalculate the sparse Hessian, store the update in the local
+environment and then calculate the HVP. \code{update_H = FALSE} is then useful when repeadly
+using the same Hessian in a HVP.
 
 \code{qprime} is defined internally where \code{qprime[which_random] = q} and
 \code{qprime[!which_random] = 0}, where \code{length(qprime)} is equal to \code{length(x)}

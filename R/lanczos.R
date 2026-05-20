@@ -144,7 +144,7 @@ function( Hq,
 #' Given a TMB object, make a function that efficiently calculates a Hessian-vector product (HVP)
 #'   `H %*% q`.
 #'
-#' @ details
+#' @details
 #' This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
 #' When \code{method = "forward-on-forward"}, \code{make_Hq} calculates a HVP
 #' without constructing H itself, and instead using `grad_u( grad_u(f) %** q)`
@@ -155,23 +155,16 @@ function( Hq,
 #' function can be used with \code{update_H = FALSE} to use the pre-calculated Hessian as-is,
 #' or \code{update_H = TRUE} to recalculate the sparse Hessian, store the update in the local
 #' environment and then calculate the HVP. \code{update_H = FALSE} is then useful when repeadly
-#' using the same Hessian in a HVP
+#' using the same Hessian in a HVP.
 #'
-#' @details
-#' The output `Hq = make_Hq( tape, x )` takes as argument a probe \eqn{\mathbf{q}} and outputs
-#' \eqn{\mathbf{Hq}}.  To change the point at which \eqn{\mathbf{Hq}} is evaluated,
-#' assign a new value to `attr(Hq,"env")$x`.  RTMB then does a `force.update()` to update
-#' the tape based on that new value.
+#' `qprime` is defined internally where `qprime[which_random] = q` and
+#' `qprime[!which_random] = 0`, where `length(qprime)` is equal to `length(x)`
 #'
 #' @param x0 parameter vector `x` (or list coersed to vector) used as default when evaluating `H`
 #' @param tape Alternative to specifying `obj`
 #' @param which_random integer-vector indicating which elements of `x` correspond to random effects,
 #'        where the probe `q` then has length `length(which_random)`
-#' @param tape Alternative to specifying `obj`
-#'
-#' @details
-#' `qprime` is defined internally where `qprime[which_random] = q` and
-#' `qprime[!which_random] = 0`, where `length(qprime)` is equal to `length(x)`
+#' @param method See details
 #'
 #' @return
 #' A function with two arguments:
