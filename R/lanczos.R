@@ -251,6 +251,11 @@ function( tape,
   d2fdx2_qprime$simplify()
   d2fdx2_qprime$reorder()
 
+  # remove extra stuff from closure
+  # scratch/check_memory_size.R suggests that it is not necessary
+  #rm("tape_dfdx_qprime")
+  #gc()
+
   # Function to supply v for grad( grad * v )
   Hq <- function(q, x = x0) {
     env$qprime[which_random] = q
