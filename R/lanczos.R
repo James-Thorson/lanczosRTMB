@@ -277,7 +277,7 @@ function( tape,
     #gc()
 
     # Function to supply v for grad( grad * v )
-    Hq <- function(q, x = x0) {
+    Hq <- function(q, x = x0, update_H = TRUE) {
       env$qprime[which_random] = q
       d2fdx2_qprime$force.update()
       return(d2fdx2_qprime(x)[which_random])
