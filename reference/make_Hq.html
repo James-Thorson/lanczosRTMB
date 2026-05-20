@@ -69,6 +69,10 @@ H %*% q."></head><body>
 <dd><p>integer-vector indicating which elements of <code>x</code> correspond to random effects,
 where the probe <code>q</code> then has length <code>length(which_random)</code></p></dd>
 
+
+<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
+<dd><p>See details</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -77,10 +81,16 @@ where the probe <code>q</code> then has length <code>length(which_random)</code>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The output <code>Hq = make_Hq( tape, x )</code> takes as argument a probe \(\mathbf{q}\) and outputs
-\(\mathbf{Hq}\).  To change the point at which \(\mathbf{Hq}\) is evaluated,
-assign a new value to <code>attr(Hq,"env")$x</code>.  RTMB then does a <code>force.update()</code> to update
-the tape based on that new value.</p>
+    <p>This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
+When <code>method = "forward-on-forward"</code>, <code>make_Hq</code> calculates a HVP
+without constructing H itself, and instead using <code>grad_u( grad_u(f) %** q)</code>
+given function f(x) that returns the negative log-likelihood given <code>x = u</code> with fixed <code>v</code></p>
+<p>When <code>method = "sparse"</code>, <code>make_Hq</code> instead calculates a HVP by
+calculating and storing the sparse Hessian in a local environment. The resulting
+function can be used with <code>update_H = FALSE</code> to use the pre-calculated Hessian as-is,
+or <code>update_H = TRUE</code> to recalculate the sparse Hessian, store the update in the local
+environment and then calculate the HVP. <code>update_H = FALSE</code> is then useful when repeadly
+using the same Hessian in a HVP.</p>
 <p><code>qprime</code> is defined internally where <code>qprime[which_random] = q</code> and
 <code>qprime[!which_random] = 0</code>, where <code>length(qprime)</code> is equal to <code>length(x)</code></p>
     </div>
@@ -146,7 +156,7 @@ the tape based on that new value.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       0       0       0 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu">Hq2</span><span class="op">(</span><span class="va">q</span>, <span class="va">x_new</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.007   0.000   0.007 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.006   0.000   0.006 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu">Hq2</span><span class="op">(</span><span class="va">q</span>, <span class="va">x_new</span>, update_H <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       0       0       0 </span>

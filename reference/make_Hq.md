@@ -30,6 +30,10 @@ make_Hq(
   integer-vector indicating which elements of `x` correspond to random
   effects, where the probe `q` then has length `length(which_random)`
 
+- method:
+
+  See details
+
 ## Value
 
 A function with two arguments:
@@ -40,11 +44,19 @@ A function with two arguments:
 
 ## Details
 
-The output `Hq = make_Hq( tape, x )` takes as argument a probe
-\\\mathbf{q}\\ and outputs \\\mathbf{Hq}\\. To change the point at which
-\\\mathbf{Hq}\\ is evaluated, assign a new value to `attr(Hq,"env")$x`.
-RTMB then does a `force.update()` to update the tape based on that new
-value.
+This can then be used e.g. in Lanczos methods when H is too large to
+construct explicitly. When `method = "forward-on-forward"`, `make_Hq`
+calculates a HVP without constructing H itself, and instead using
+`grad_u( grad_u(f) %** q)` given function f(x) that returns the negative
+log-likelihood given `x = u` with fixed `v`
+
+When `method = "sparse"`, `make_Hq` instead calculates a HVP by
+calculating and storing the sparse Hessian in a local environment. The
+resulting function can be used with `update_H = FALSE` to use the
+pre-calculated Hessian as-is, or `update_H = TRUE` to recalculate the
+sparse Hessian, store the update in the local environment and then
+calculate the HVP. `update_H = FALSE` is then useful when repeadly using
+the same Hessian in a HVP.
 
 `qprime` is defined internally where `qprime[which_random] = q` and
 `qprime[!which_random] = 0`, where `length(qprime)` is equal to
@@ -112,7 +124,7 @@ system.time(Hq(q, x_new))
 #>       0       0       0 
 system.time(Hq2(q, x_new))
 #>    user  system elapsed 
-#>   0.007   0.000   0.007 
+#>   0.006   0.000   0.006 
 system.time(Hq2(q, x_new, update_H = FALSE))
 #>    user  system elapsed 
 #>       0       0       0 
