@@ -1,15 +1,17 @@
 # Make function to calculate H %\*% q
 
-Given a TMB object, make a function that efficiently calculates
-`H %*% q` without constructing H itself, and instead using
-`grad_u( grad_u(f) %** q)` given function f(x) that returns the negative
-log-likelihood given `x = u` with fixed `v`. This can then be used e.g.
-in Lanczos methods when H is too large to construct explicitly
+Given a TMB object, make a function that efficiently calculates a
+Hessian-vector product (HVP) `H %*% q`.
 
 ## Usage
 
 ``` r
-make_Hq(tape, x0, which_random = seq_along(x0))
+make_Hq(
+  tape,
+  x0,
+  which_random = seq_along(x0),
+  method = c("forward-on-forward", "sparse")
+)
 ```
 
 ## Arguments
@@ -71,9 +73,9 @@ nll = function(p){
 params = list(u=u, mu = 0, logsd = 0, logcv = 0)
 obj = MakeADFun( nll, params, random = "u", silent = TRUE )
 
-# Build with Lanczos
+# Build with with bespoke function
 tape = MakeTape( nll, params )
-which_random = 1:30
+which_random = seq_len(n)
 Hq = make_Hq(
   tape,
   x = params,
@@ -96,4 +98,22 @@ all.equal(
   (obj$env$spHess(par = x_new, random=TRUE) %*% q)[,1]
 )
 #> [1] TRUE
+
+# Compare speed for two alternative methods
+Hq2 = make_Hq(
+  tape,
+  x = params,
+  which_random = which_random,
+  method = "sparse"
+)
+x_new[which_random] = rnorm(length(which_random))
+system.time(Hq(q, x_new))
+#>    user  system elapsed 
+#>       0       0       0 
+system.time(Hq2(q, x_new))
+#>    user  system elapsed 
+#>   0.007   0.000   0.007 
+system.time(Hq2(q, x_new, update_H = FALSE))
+#>    user  system elapsed 
+#>       0       0       0 
 ```
