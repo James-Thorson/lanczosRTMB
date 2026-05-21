@@ -59,9 +59,9 @@
 #' x2 = solve( Hess2, b)
 #' out = CG(
 #'   b = b,
-#'   Hq = \(b) Hq(b) + 2*b
+#'   Hq = \(b,...) Hq(b,...) + 2*b
 #' )
-#' plot( x, out$x )
+#' plot( x2, out$x )
 #'
 #' @export
 CG <-
@@ -82,7 +82,11 @@ function( b,
   alpha = beta = rep(NA, max.it)
   status = 1    # 0 = non-PD;  1 = exceeds max.it;  2 = converged
   for(k in seq_len(max.it)){
-    Ap <- Hq(p)
+    if(k==1){
+      Ap <- Hq(p, update_H = TRUE)
+    }else{
+      Ap <- Hq(p, update_H = FALSE)
+    }
     denom <- sum(p * Ap)
     alpha[k] <- rz_old / denom
     # Check for non-PD after alpha, so can still use low-k solution if FALSE
@@ -150,7 +154,8 @@ function( b,
 #' \item It approximates each Newton step \eqn{H(x_i)^{-1} g(x_i)} using a truncated
 #'       conjugate gradient algorithm that involves Hessian-vector products \eqn{H(x_i) v}.
 #'       It then recursively improves the solution until a desired accuracy is reached,
-#'       controlled by \code{gr_tol}, without ever constructing the Hessian matrix itself;
+#'       controlled by \code{gr_tol}, often using many fewer steps than the full dimension
+#'       \code{length(x_i)};
 #' \item It approximates each Newton solution \eqn{H(x_i)^{-1} g(x_i)}
 #'       without ever constructing or storing the Hessian \eqn{H(x_i)}, and instead computing
 #'       Hessian-vector product \eqn{H(x_i) v = \nabla( v^T \nabla f(x_i) )} using
@@ -285,7 +290,7 @@ function( par,
     # CG for H^-1 grad
     step = CG(
       b = grad,
-      Hq = \(q) Hq(q,x) + phi(ustep)*q,
+      Hq = \(q,update_H=TRUE) Hq(q,x,update_H) + phi(ustep)*q,
       max.it = maxit_CG,
       #e = e_ratio * sum(grad^2)
       e = max(e_ratio * sum(grad^2), 1e-8),

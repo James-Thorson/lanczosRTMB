@@ -2,11 +2,12 @@
 library(Matrix)
 library(RTMB)
 library(lanczosRTMB)
+library(numDeriv)
 
 # Settings
 set.seed(123)
 nx = 10^2
-ny = 10^2
+ny = 10^1
 rho = 0.9
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
@@ -21,17 +22,58 @@ x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
 y = rpois( nx*ny, lambda = exp(1 + x) )
 which_seen = sample( seq_len(nx*ny), size = nx*ny/100, replace = FALSE)
 sumy = sum(y)
-y[-which_seen] = NA
+#y[-which_seen] = NA
 
 nll = function(p){
   Qx = (Ix - plogis(p$invlogis_rho) * t(Px)) %*% (exp(2*p$logtau) * Ix) %*% (Ix - plogis(p$invlogis_rho) * Px)
   Qy = (Iy - plogis(p$invlogis_rho) * t(Py)) %*% (exp(2*p$logtau) * Iy) %*% (Iy - plogis(p$invlogis_rho) * Py)
   Q = kronecker( Qy, Qx )
-  -dgmrf(p$x, Q = Q, log = TRUE) -
-  sum(dpois(y, exp(p$mu + p$x), log=TRUE), na.rm=TRUE) -
-  dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE)
+  loglik1 = dgmrf(p$x, Q = Q, log = TRUE)
+  loglik2 = sum(dpois(y, exp(p$mu + p$x), log=TRUE), na.rm=TRUE)
+  loglik3 = dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE)
+  -1 * ( loglik1 + loglik2 ) # + loglik3 )
 }
 parlist = list( x=rnorm(nx*ny), logtau = 0, invlogis_rho = 0, mu = 0 )
+
+################
+# Compare initial optimizers
+################
+
+obj = lanczos_MakeADFun(
+  nll,
+  parlist,
+  random = "x",
+  k = 100,
+  #method = "L-BFGS-B",
+  make_gr = FALSE,
+  silent = TRUE
+)
+tmp = obj$fn( obj$par, gr_tol = 1e-8, smartsearch = TRUE, what = "all" )
+x = tmp$inner_opt$par
+
+obj2 = MakeADFun(
+  nll,
+  parlist,
+  random = "x",
+  silent = TRUE
+)
+tmp2 = obj2$fn( obj2$par )
+x2 = obj2$env$last.par[obj2$env$lrandom()]
+
+cor(x, x2)
+c(tmp$nll, tmp2)
+
+################
+# Check gradients
+################
+
+gr = grad( obj$fn, obj$par )
+gr2 = obj2$gr( obj$par )
+cbind( obj$par, gr, gr2 )
+
+################
+# Compare MLE and speeds
+################
 
 start_time = Sys.time()
 obj = lanczos_MakeADFun(
@@ -43,7 +85,6 @@ obj = lanczos_MakeADFun(
   make_gr = FALSE,
   silent = TRUE
 )
-tmp = obj$fn( obj$par, gr_tol = 1e-8, smartsearch = TRUE, what = "all" )
 opt = optim(
   obj$par,
   \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
