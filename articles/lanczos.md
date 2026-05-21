@@ -334,6 +334,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 5.16 secs
+Runtime for this vignette: 5.08 secs
 
 ## Works cited
