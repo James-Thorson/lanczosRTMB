@@ -101,6 +101,6 @@ out = CG(
   b = b,
   Hq = \(b,...) Hq(b,...) + 2*b
 )
-plot( x, out$x )
+plot( x2, out$x )
 
 ```
