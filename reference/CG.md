@@ -99,8 +99,8 @@ Hess2 = Hess + 2 * Diagonal(n=n)
 x2 = solve( Hess2, b)
 out = CG(
   b = b,
-  Hq = \(b) Hq(b) + 2*b
+  Hq = \(b,...) Hq(b,...) + 2*b
 )
-#> Error in Hq(p, update_H = TRUE): unused argument (update_H = TRUE)
 plot( x, out$x )
+
 ```
