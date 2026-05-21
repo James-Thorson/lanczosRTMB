@@ -112,12 +112,13 @@ library(Matrix)
 library(RTMB)
 
 # Settings
-n = 10^3
-rho = 0.99
+set.seed(123)
+n = 1000
+rho = 0.999
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
-P = bandSparse( n = n, k = c(-1), diagonals = list(rep(1,n)) )
-Q = (Diagonal(n) - rho * t(P)) \%*\% (Diagonal(n) - rho * P)
+P = bandSparse( n = n, k = c(-1,1), diagonals = list(rep(0.5,n),rep(0.5,n)) )
+Q = (Diagonal(n) - rho * t(P)) \%*\% (400 * Diagonal(n)) \%*\% (Diagonal(n) - rho * P)
 x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
 y = rpois( n = n, lambda = exp(1 + x) )
 which_seen = sample( seq_len(n), size = n/10, replace = FALSE)
@@ -140,7 +141,7 @@ opt1 = optim(
   gr = gr,
   method = "L-BFGS-B",
   control = list(
-    maxit = 1e4
+    maxit = 1e5
   )
 )
 opt1$runtime = Sys.time() - start_time
@@ -151,11 +152,14 @@ opt2 = newton_CG(
   gr = gr,
   Hq = Hq,
   maxit_newton = 1e4,
-  gr_tol = 1e-4
+  ustep = 0.01,
+  silent = TRUE
 )
 
 # Compare the estimates and speed
 matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), lty = "solid" )
 c(opt1$runtime, opt2$runtime)
+# newton_CG finds a slightly better fit
+c(opt1$value, opt2$value)
 
 }
