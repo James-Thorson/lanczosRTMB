@@ -59,7 +59,7 @@
 #' x2 = solve( Hess2, b)
 #' out = CG(
 #'   b = b,
-#'   Hq = \(b) Hq(b) + 2*b
+#'   Hq = \(b,...) Hq(b,...) + 2*b
 #' )
 #' plot( x, out$x )
 #'
