@@ -146,7 +146,7 @@ function( Hq,
 #'
 #' @details
 #' This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
-#' When \code{method = "forward-on-forward"}, \code{make_Hq} calculates a HVP
+#' When \code{method = "reverse-on-reverse"}, \code{make_Hq} calculates a HVP
 #' without constructing H itself, and instead using `grad_u( grad_u(f) %** q)`
 #' given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`
 #'
@@ -234,12 +234,13 @@ make_Hq <-
 function( tape,
           x0,
           which_random = seq_along(x0),
-          method = c("forward-on-forward","sparse") ){
+          method = c("reverse-on-reverse","sparse") ){
 
-# @param live_x whether to pass `x` explicitly so that it can be taped.
-#        This is only necessary when computing the derivative of a log-determinant
+  # @param live_x whether to pass `x` explicitly so that it can be taped.
+  #        This is only necessary when computing the derivative of a log-determinant
   #
   method = match.arg(method)
+  # TODO:  Add method == "FD-on-reverse"
 
   # Make environment for passing qprime without retaping
   # qprime[which_random] = q, where q is the probe passed by users
@@ -253,7 +254,7 @@ function( tape,
   dfdx = tape$jacfun()
   dfdx$simplify()
 
-  if( method == "forward-on-forward" ){
+  if( method == "reverse-on-reverse" ){
     # grad * qprime
     dfdx_qprime = function(x){
       qprime = DataEval(fetch_qprime)

@@ -8,7 +8,7 @@ make_Hq(
   tape,
   x0,
   which_random = seq_along(x0),
-  method = c("forward-on-forward", "sparse")
+  method = c("reverse-on-reverse", "sparse")
 )
 }
 \arguments{
@@ -34,7 +34,7 @@ Given a TMB object, make a function that efficiently calculates a Hessian-vector
 }
 \details{
 This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
-When \code{method = "forward-on-forward"}, \code{make_Hq} calculates a HVP
+When \code{method = "reverse-on-reverse"}, \code{make_Hq} calculates a HVP
 without constructing H itself, and instead using \verb{grad_u( grad_u(f) \%** q)}
 given function f(x) that returns the negative log-likelihood given \code{x = u} with fixed \code{v}
 
