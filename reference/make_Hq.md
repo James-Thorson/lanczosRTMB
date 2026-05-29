@@ -10,7 +10,7 @@ make_Hq(
   tape,
   x0,
   which_random = seq_along(x0),
-  method = c("forward-on-forward", "sparse")
+  method = c("reverse-on-reverse", "sparse")
 )
 ```
 
@@ -45,7 +45,7 @@ A function with two arguments:
 ## Details
 
 This can then be used e.g. in Lanczos methods when H is too large to
-construct explicitly. When `method = "forward-on-forward"`, `make_Hq`
+construct explicitly. When `method = "reverse-on-reverse"`, `make_Hq`
 calculates a HVP without constructing H itself, and instead using
 `grad_u( grad_u(f) %** q)` given function f(x) that returns the negative
 log-likelihood given `x = u` with fixed `v`
@@ -127,5 +127,5 @@ system.time(Hq2(q, x_new))
 #>   0.006   0.000   0.006 
 system.time(Hq2(q, x_new, update_H = FALSE))
 #>    user  system elapsed 
-#>   0.000   0.000   0.001 
+#>   0.001   0.000   0.000 
 ```
