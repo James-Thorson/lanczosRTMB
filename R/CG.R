@@ -90,7 +90,7 @@ function( b,
     denom <- sum(p * Ap)
     alpha[k] <- rz_old / denom
     # Check for non-PD after alpha, so can still use low-k solution if FALSE
-    if( isTRUE(stop_if_nonPD) && (denom < -1e-8) ){
+    if( isTRUE(stop_if_nonPD) && !isTRUE(denom > -1e-8) ){  # isFALSE also triggers when denom is Inf or NA
       status = 0
       break
     }
