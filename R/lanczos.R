@@ -146,6 +146,7 @@ function( Hq,
 #'
 #' @details
 #' This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
+#'
 #' When \code{method = "reverse-on-reverse"}, \code{make_Hq} calculates a HVP
 #' without constructing H itself, and instead using `grad_u( grad_u(f) %** q)`
 #' given function f(x) that returns the negative log-likelihood given `x = u` with fixed `v`
@@ -156,6 +157,11 @@ function( Hq,
 #' or \code{update_H = TRUE} to recalculate the sparse Hessian, store the update in the local
 #' environment and then calculate the HVP. \code{update_H = FALSE} is then useful when repeadly
 #' using the same Hessian in a HVP.
+#'
+#' When \code{method = "FD-on-verse"}, \code{make_Hq} instead calculates a two-sided finite-difference
+#' approximation to a forward-on-reverse autodiff calculation, using \code{delta = 1e-6}
+#' forward-on-reverse (and FD of autodiff gradients) is efficient given that
+#' `grad_u(f) %** q` has length of one.
 #'
 #' `qprime` is defined internally where `qprime[which_random] = q` and
 #' `qprime[!which_random] = 0`, where `length(qprime)` is equal to `length(x)`
@@ -218,7 +224,7 @@ function( Hq,
 #'   (obj$env$spHess(par = x_new, random=TRUE) %*% q)[,1]
 #' )
 #'
-#' # Compare speed for two alternative methods
+#' # Compare speed with explicit sparse H
 #' Hq2 = make_Hq(
 #'   tape,
 #'   x = params,
@@ -226,21 +232,28 @@ function( Hq,
 #'   method = "sparse"
 #' )
 #' x_new[which_random] = rnorm(length(which_random))
+#'
+#' # Compare speed with finite-difference approximation to forward-on-reverse
+#' Hq3 = make_Hq(
+#'   tape,
+#'   x = params,
+#'   which_random = which_random,
+#'   method = "FD-on-reverse"
+#' )
+#' x_new[which_random] = rnorm(length(which_random))
+#'
 #' system.time(Hq(q, x_new))
 #' system.time(Hq2(q, x_new))
 #' system.time(Hq2(q, x_new, update_H = FALSE))
+#' system.time(Hq3(q, x_new))
 #' @export
 make_Hq <-
 function( tape,
           x0,
           which_random = seq_along(x0),
-          method = c("reverse-on-reverse","sparse") ){
+          method = c("reverse-on-reverse","sparse","FD-on-reverse") ){
 
-  # @param live_x whether to pass `x` explicitly so that it can be taped.
-  #        This is only necessary when computing the derivative of a log-determinant
-  #
   method = match.arg(method)
-  # TODO:  Add method == "FD-on-reverse"
 
   # Make environment for passing qprime without retaping
   # qprime[which_random] = q, where q is the probe passed by users
@@ -292,6 +305,20 @@ function( tape,
       }
       env$qprime[which_random] = q
       return( as.vector(env$H[which_random,which_random] %*% q) )
+    }
+  }else if(method == "FD-on-reverse"){
+    Hq <- function(q, x = x0, update_H = TRUE){
+      delta = 1e-6
+      env$qprime[which_random] = q
+      # Use length-1 FD
+      denom = sqrt(sum(q^2))
+      qnorm = q / denom
+      # Define values to evaluate FD
+      xleft = xright = x
+      xleft[which_random] = xleft[which_random] + delta*qnorm
+      xright[which_random] = xright[which_random] - delta*qnorm
+      diff = (dfdx(xleft)[which_random] - dfdx(xright)[which_random]) / (2*delta)
+      return(diff * denom)
     }
   }
 

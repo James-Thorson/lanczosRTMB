@@ -8,7 +8,7 @@ make_Hq(
   tape,
   x0,
   which_random = seq_along(x0),
-  method = c("reverse-on-reverse", "sparse")
+  method = c("reverse-on-reverse", "sparse", "FD-on-reverse")
 )
 }
 \arguments{
@@ -34,6 +34,7 @@ Given a TMB object, make a function that efficiently calculates a Hessian-vector
 }
 \details{
 This can then be used e.g. in Lanczos methods when H is too large to construct explicitly.
+
 When \code{method = "reverse-on-reverse"}, \code{make_Hq} calculates a HVP
 without constructing H itself, and instead using \verb{grad_u( grad_u(f) \%** q)}
 given function f(x) that returns the negative log-likelihood given \code{x = u} with fixed \code{v}
@@ -44,6 +45,11 @@ function can be used with \code{update_H = FALSE} to use the pre-calculated Hess
 or \code{update_H = TRUE} to recalculate the sparse Hessian, store the update in the local
 environment and then calculate the HVP. \code{update_H = FALSE} is then useful when repeadly
 using the same Hessian in a HVP.
+
+When \code{method = "FD-on-verse"}, \code{make_Hq} instead calculates a two-sided finite-difference
+approximation to a forward-on-reverse autodiff calculation, using \code{delta = 1e-6}
+forward-on-reverse (and FD of autodiff gradients) is efficient given that
+\verb{grad_u(f) \%** q} has length of one.
 
 \code{qprime} is defined internally where \code{qprime[which_random] = q} and
 \code{qprime[!which_random] = 0}, where \code{length(qprime)} is equal to \code{length(x)}
@@ -93,7 +99,7 @@ all.equal(
   (obj$env$spHess(par = x_new, random=TRUE) \%*\% q)[,1]
 )
 
-# Compare speed for two alternative methods
+# Compare speed with explicit sparse H
 Hq2 = make_Hq(
   tape,
   x = params,
@@ -101,6 +107,16 @@ Hq2 = make_Hq(
   method = "sparse"
 )
 x_new[which_random] = rnorm(length(which_random))
+
+# Compare speed with finite-difference approximation to forward-on-reverse
+Hq3 = make_Hq(
+  tape,
+  x = params,
+  which_random = which_random,
+  method = "FD-on-reverse"
+)
+x_new[which_random] = rnorm(length(which_random))
+
 system.time(Hq(q, x_new))
 system.time(Hq2(q, x_new))
 system.time(Hq2(q, x_new, update_H = FALSE))
