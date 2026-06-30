@@ -56,6 +56,11 @@ CG(
 
   Be silent or print progress?
 
+## Details
+
+Note that `CG` can only be taped when `stop_if_nonPD = FALSE` and
+`e = 0`, and using a fixed number of steps, e.g., `max.it = 30`
+
 ## Examples
 
 ``` r
