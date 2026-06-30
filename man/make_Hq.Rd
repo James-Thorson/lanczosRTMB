@@ -120,4 +120,5 @@ x_new[which_random] = rnorm(length(which_random))
 system.time(Hq(q, x_new))
 system.time(Hq2(q, x_new))
 system.time(Hq2(q, x_new, update_H = FALSE))
+system.time(Hq3(q, x_new))
 }

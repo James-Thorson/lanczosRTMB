@@ -38,6 +38,10 @@ without forming the Hessian matrix directly and instead using Hessian-vector pro
 e.g., using forwards-on-reverse autodiff
 Adapted from \code{mcmcsae::CG} under GPL-3 licence to use Hessian-vector products
 }
+\details{
+Note that \code{CG} can only be taped when \code{stop_if_nonPD = FALSE} and
+\code{e = 0}, and using a fixed number of steps, e.g., \code{max.it = 30}
+}
 \examples{
 library(Matrix)
 

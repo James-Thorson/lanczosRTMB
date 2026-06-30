@@ -19,6 +19,10 @@
 #'
 #' @importFrom utils tail
 #'
+#' @details
+#' Note that \code{CG} can only be taped when \code{stop_if_nonPD = FALSE} and
+#' \code{e = 0}, and using a fixed number of steps, e.g., \code{max.it = 30}
+#'
 #' @examples
 #' library(Matrix)
 #'
@@ -75,11 +79,15 @@ function( b,
           silent = TRUE ){
   # NOTES: could use Sturm with bisection to detect minimum eigenvalue for Lanczos, rather than min(eigen(H)$values)
 
+  # Globals
+  "c" <- ADoverload("c")
+  "[<-" <- ADoverload("[<-")
+
   r <- b - Hq(x)
-  z = as.vector(Minv %*% r)
+  z = (Minv %*% r)[,1]      # Avoid as.vector (which drops adtype?)
   p <- z
   rz_old <- sum(r * z)
-  alpha = beta = rep(NA, max.it)
+  alpha = beta = rep(0, max.it)      # use initial 0 (instead of NA) to allow taping
   status = 1    # 0 = non-PD;  1 = exceeds max.it;  2 = converged
   for(k in seq_len(max.it)){
     if(k==1){
@@ -96,10 +104,10 @@ function( b,
     }
     x <- x + alpha[k] * p
     r <- r - alpha[k] * Ap
-    z = as.vector(Minv %*% r)
+    z = (Minv %*% r)[,1]
     rz_new <- sum(r * z)
     discr <- sum(z * z)
-    if (discr < e){
+    if( isTRUE(e > 0) && isTRUE(discr < e) ){
       status = 2
       break
     }
