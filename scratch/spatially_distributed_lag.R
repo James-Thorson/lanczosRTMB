@@ -8,7 +8,7 @@ library(lanczosRTMB)
 #  AR:  Dinv = I - P
 ###############
 
-n = 1e5 + 1
+n = 1e2 + 1
 kappa = exp(- 2 / n )
 P = bandSparse( n = n, k = c(-1,1), diag = list(rep(0.5,n),rep(0.5,n)) )
 I = V = Diagonal(n = n)
@@ -31,7 +31,7 @@ if( n <= 10001 ){
   D = sparseMatrix( i = 1, j = 1, x = 0, dims = c(n,n) )
 }
 
-Hq = \(q,x) (invD %*% q)[,1]
+Hq = \(q,x,update_H) (invD %*% q)[,1]
 
 # Lanczos
 if( n <= 100001 ){
@@ -44,6 +44,7 @@ if( n <= 100001 ){
 
 # CG
 cg_solve = CG( x, Hq, x = x, e = 1e-4 )
+cg_solve = CG( x, Hq, x = x, e = 0, max.it = 2 )
 
 Y = cbind(D0 %*% x, D %*% x, D1 %*% x, cg_solve$x )
 matplot(
