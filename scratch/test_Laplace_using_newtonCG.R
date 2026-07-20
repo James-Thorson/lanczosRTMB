@@ -6,8 +6,8 @@ library(numDeriv)
 
 # Settings
 set.seed(123)
-nx = 10^2
-ny = 10^1
+nx = 10^1
+ny = 10^2
 rho = 0.9
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
@@ -80,20 +80,63 @@ obj = lanczos_MakeADFun(
   nll,
   parlist,
   random = "x",
-  k = 100,
+  k = 40,
   #method = "L-BFGS-B",
   make_gr = FALSE,
   silent = TRUE
 )
-opt = optim(
+#opt = optim(
+#  obj$par,
+#  \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
+#  #\(par) obj$fn(par, gr_tol = 1e-06, e_ratio = 0.1, maxit_newton = 200 , maxit_CG = 200 ),
+#  control = list(trace = 6),
+#  method = "L-BFGS-B"
+#)
+opt = nlminb(
   obj$par,
   \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
   #\(par) obj$fn(par, gr_tol = 1e-06, e_ratio = 0.1, maxit_newton = 200 , maxit_CG = 200 ),
-  control = list(trace = 6),
-  method = "L-BFGS-B"
+  control = list(trace = 1)
 )
 opt$run_time = Sys.time() - start_time
 
+# Try with gradient
+start_time = Sys.time()
+obj = lanczos_MakeADFun(
+  nll,
+  parlist,
+  random = "x",
+  k = 40,
+  make_gr = TRUE,
+  silent = TRUE
+)
+opt = nlminb(
+  obj$par,
+  \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
+  \(x) obj$gr(x, fixed_Q = FALSE), # , method = "simple", method.args = list(eps = 1e-8)),
+  control = list(trace = 1)
+)
+opt$run_time = Sys.time() - start_time
+
+# Try with FD gradient
+start_time = Sys.time()
+obj = lanczos_MakeADFun(
+  nll,
+  parlist,
+  random = "x",
+  k = 40,
+  make_gr = FALSE,
+  silent = TRUE
+)
+opt = nlminb(
+  obj$par,
+  \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
+  \(x) grad(obj$fn, x, method = "Richardson", method.args = list(eps = 1e-4) ),
+  control = list(trace = 1)
+)
+opt$run_time = Sys.time() - start_time
+
+# Check with TMB
 start_time = Sys.time()
 obj2 = MakeADFun(
   nll,
@@ -104,3 +147,43 @@ obj2 = MakeADFun(
 opt2 = nlminb( obj2$par, obj2$fn, control = list(trace = 1) )
 opt2$run_time = Sys.time() - start_time
 
+################
+# Debugging
+################
+
+# FD and AD gradient should match ... confirmed :)
+obj2$fn(obj2$par)
+obj2$gr(obj2$par)
+grad( obj2$fn, obj2$par )
+
+# FD and SLM should match ... they do NOT
+obj$fn(obj$par)
+obj$gr(obj$par, fixed_Q = FALSE)
+grad( obj$fn, obj$par )
+
+################
+# Debug gradient components
+################
+
+# FD and SLM should match given envelope theorem ... they DO
+obj$gr(obj$par, what = "all")$grad_jnll
+jacobian(
+  func = \(x) obj$fn(x, what = "all")$jnll,
+  x = obj$par
+)
+
+#
+obj$gr(obj$par, what = "all", fixed_Q = FALSE)$grad_logdet
+jacobian(
+  func = \(x) mean(obj$fn(x, what = "all")$logdet),
+  x = obj$par
+)
+
+
+################
+# Check
+################
+
+H = obj2$env$spHess(par = obj2$env$par, random = TRUE)
+ones = rep(1, sum(obj2$env$lrandom()))
+t(ones) %*% H %*% ones

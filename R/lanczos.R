@@ -682,7 +682,7 @@ function( obj,
 }
 
 #' @title
-#' Approximate log-marginal likelihood using Lanczos method (EXPERIMENTAL)
+#' Approximate log-marginal likelihood using Lanczos method
 #'
 #' @description
 #' Make a function that returns the Lanczos-Laplace approximation for
@@ -691,6 +691,11 @@ function( obj,
 #' @details
 #' The gradient uses a finite-difference applied to a fixed set of probes,
 #' inspired by Dong et al. (2017) and the `stochasticLQ` option in GPyTorch.
+#' Exploration suggests that a useful approximation to the gradient of the
+#' log-marginal likelihood with respect to fixed effects can be calculated using
+#' the gradient of the joint likelihood with respect to the fixed effects,
+#' and a finite-difference approximation to the log-determinant.  The latter
+#' approximation is only performs well when recalculating the Lanczos matrix \eqn{Q}.
 #'
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
@@ -701,10 +706,11 @@ function( obj,
 #'   (slow for large models)
 #'
 #' @return
-#' An object (list) of class `tinyVAST`. Elements include:
+#' An object (list), where elements include:
 #' \describe{
 #' \item{par}{parameter-vector of fixed effects}
-#' \item{fn}{function that returns the Lanczos-Laplace approximation given fixed effects}
+#' \item{fn}{function that returns the Lanczos-Laplace approximation given fixed effects.}
+#' \item{gr}{a function that returns the approximated gradient of \code{fn} with respect to fixed effects.}
 #' \item{env}{environment of local variables}
 #' \item{Hq}{function that returns the Hessian-vector product (for use in debugging)}
 #' }
@@ -894,7 +900,8 @@ function( func,
     }
 
     # Assemble laplace
-    nll = inner_opt$value - (0.5*length(x_random)*log(2*pi)) + 0.5*mean(env$L$logdet)
+    jnll = inner_opt$value
+    nll = jnll - (0.5*length(x_random)*log(2*pi)) + 0.5*mean(env$L$logdet)
 
     # Assign best and return
     if( nll < env$nll_best ){
@@ -905,7 +912,7 @@ function( func,
     if(what=="nll"){
       out = nll
     }else{
-      out = list(nll = nll, inner_opt = inner_opt, logdet = env$L$logdet, env = env)
+      out = list(jnll = jnll, nll = nll, inner_opt = inner_opt, logdet = env$L$logdet, env = env)
     }
     return( out )
   }
@@ -915,15 +922,20 @@ function( func,
     tape_x = MakeTape( func, parameters )
     dudv = tape_x$newton(random = x_random)$jacfun()
 
-    get_grad = function(v){
+    get_grad = function(v, ..., what = "nll", fixed_Q = FALSE, pu_update = c("FD","exact") ){
       # Run to do inner optimizer
+      pu_update = match.arg(pu_update)
       get_nll(v)
       pu = env$pu_last
       env$x[x_fixed] = v
       env$x[-x_fixed] = pu
-      Q_list = lapply(env$L$L, \(x) x$Q )
+      if( isTRUE(fixed_Q) ){
+        Q_list = lapply(env$L$L, \(x) x$Q )
+      }else{
+        Q_list = NULL
+      }
 
-      # Get grad_jnll
+      # Get grad_jnll ... no need to re-optimize random effects given envelop theorem
       grad_v$force.update()
       grad_jnll = grad_v(v)
 
@@ -932,22 +944,34 @@ function( func,
       P = dudv(v)
       x = env$x
 
+      # Get grad_logdet ... need to re-optimize random effects (not covered by envelop theorem)
       grad_logdet = grad(
         function(vnew){
           env$x = x
           env$x[x_fixed] = vnew
-          # Project based on central jacobian
-          env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
-          # Recompute exactly
-          #get_nll( vnew ) # MUST INCLUDE!
-          #env$x[-x_fixed] = env$pu_last
+          # How to update random effects
+          if( pu_update == "FD" ){
+            # Project based on central jacobian
+            env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
+          }else{
+            # Recompute exactly
+            get_nll( vnew )
+            env$x[-x_fixed] = env$pu_last
+          }
           # Apply in log-det
-          mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list))
+          mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list, k = env$k, m = env$m, seed = env$seed))
         },
-        x = v
+        x = v,
+        method.args = list(...)
       )
 
-      return( grad_jnll + 0.5*grad_logdet )
+      grad = grad_jnll + 0.5*grad_logdet
+      if(what=="nll"){
+        out = grad
+      }else{
+        out = list(grad_jnll = grad_jnll, grad_logdet = grad_logdet, env = env)
+      }
+      return( out )
     }
   }else{
     get_grad = NULL

@@ -2,7 +2,7 @@
 % Please edit documentation in R/lanczos.R
 \name{lanczos_MakeADFun}
 \alias{lanczos_MakeADFun}
-\title{Approximate log-marginal likelihood using Lanczos method (EXPERIMENTAL)}
+\title{Approximate log-marginal likelihood using Lanczos method}
 \usage{
 lanczos_MakeADFun(
   func,
@@ -44,10 +44,11 @@ lower variance using a fixed seed.}
 \item{silent}{Disable all tracing information?}
 }
 \value{
-An object (list) of class \code{tinyVAST}. Elements include:
+An object (list), where elements include:
 \describe{
 \item{par}{parameter-vector of fixed effects}
-\item{fn}{function that returns the Lanczos-Laplace approximation given fixed effects}
+\item{fn}{function that returns the Lanczos-Laplace approximation given fixed effects.}
+\item{gr}{a function that returns the approximated gradient of \code{fn} with respect to fixed effects.}
 \item{env}{environment of local variables}
 \item{Hq}{function that returns the Hessian-vector product (for use in debugging)}
 }
@@ -59,6 +60,11 @@ a user-supplied joint likelihood and designated random effects
 \details{
 The gradient uses a finite-difference applied to a fixed set of probes,
 inspired by Dong et al. (2017) and the \code{stochasticLQ} option in GPyTorch.
+Exploration suggests that a useful approximation to the gradient of the
+log-marginal likelihood with respect to fixed effects can be calculated using
+the gradient of the joint likelihood with respect to the fixed effects,
+and a finite-difference approximation to the log-determinant.  The latter
+approximation is only performs well when recalculating the Lanczos matrix \eqn{Q}.
 }
 \examples{
 # Simulate lognormal-gamma process
