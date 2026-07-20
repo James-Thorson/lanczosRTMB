@@ -30,7 +30,6 @@ Experimental tools, under development.
 
 - [`lanczos_MakeADFun()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_MakeADFun.md)
   : Approximate log-marginal likelihood using Lanczos method
-  (EXPERIMENTAL)
 - [`lanczos_fixedQ()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_fixedQ.md)
   : Calculate Lanczos approximation using fixed Q
 - [`CG()`](https://james-thorson.github.io/lanczosRTMB/reference/CG.md)

@@ -1,4 +1,4 @@
-# Approximate log-marginal likelihood using Lanczos method (EXPERIMENTAL)
+# Approximate log-marginal likelihood using Lanczos method
 
 Make a function that returns the Lanczos-Laplace approximation for a
 user-supplied joint likelihood and designated random effects
@@ -74,7 +74,7 @@ lanczos_MakeADFun(
 
 ## Value
 
-An object (list) of class `tinyVAST`. Elements include:
+An object (list), where elements include:
 
 - par:
 
@@ -83,7 +83,12 @@ An object (list) of class `tinyVAST`. Elements include:
 - fn:
 
   function that returns the Lanczos-Laplace approximation given fixed
-  effects
+  effects.
+
+- gr:
+
+  a function that returns the approximated gradient of `fn` with respect
+  to fixed effects.
 
 - env:
 
@@ -98,7 +103,12 @@ An object (list) of class `tinyVAST`. Elements include:
 
 The gradient uses a finite-difference applied to a fixed set of probes,
 inspired by Dong et al. (2017) and the `stochasticLQ` option in
-GPyTorch.
+GPyTorch. Exploration suggests that a useful approximation to the
+gradient of the log-marginal likelihood with respect to fixed effects
+can be calculated using the gradient of the joint likelihood with
+respect to the fixed effects, and a finite-difference approximation to
+the log-determinant. The latter approximation is only performs well when
+recalculating the Lanczos matrix \\Q\\.
 
 ## References
 
@@ -137,13 +147,13 @@ obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", si
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
 #>         mu      logsd      logcv 
-#> -0.1585939  0.1860163 -5.7699826 
+#> -0.1585838  0.1860306 -6.1881942 
 
 # Fit again using FD gradient for Lanczos method using fixed probe-recursion
   # This requires an optimizer that is tolerant to small imprecision in the gradient
   # And it ends at a slightly different estimator
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 opt3$par - opt2$par
-#>           mu        logsd        logcv 
-#>  0.003816543 -0.005030572  0.010297195 
+#>            mu         logsd         logcv 
+#>  1.673518e-05 -2.399284e-05  5.883783e-05 
 ```
