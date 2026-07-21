@@ -55,6 +55,7 @@ a user-supplied joint likelihood and designated random effects</p>
 <span>  method <span class="op">=</span> <span class="st">"newton_CG"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
 <span>  make_gr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pu_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FD"</span>, <span class="st">"exact"</span><span class="op">)</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -102,6 +103,13 @@ lower variance using a fixed seed.</p></dd>
 <dt id="arg-make-gr">make_gr<a class="anchor" aria-label="anchor" href="#arg-make-gr"></a></dt>
 <dd><p>whether to make approximated gradient using fixed probes
 (slow for large models)</p></dd>
+
+
+<dt id="arg-pu-update">pu_update<a class="anchor" aria-label="anchor" href="#arg-pu-update"></a></dt>
+<dd><p>when make_gr=TRUE, whether to use a finite-difference
+based on an AD tape or re-optimize the joint likelihood to get the update on random
+effects when calculating the FD for fixed effects in the log-determinant calculation.
+pu_update="FD" can be very slow for dense inner-Hessians.</p></dd>
 
 
 <dt id="arg-silent">silent<a class="anchor" aria-label="anchor" href="#arg-silent"></a></dt>
@@ -172,15 +180,13 @@ approximation is only performs well when recalculating the Lanczos matrix \(Q\).
 <span class="r-in"><span><span class="va">opt2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">obj2</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj2</span><span class="op">$</span><span class="va">fn</span>, <span class="va">obj2</span><span class="op">$</span><span class="va">gr</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">opt</span><span class="op">$</span><span class="va">par</span> <span class="op">-</span> <span class="va">opt2</span><span class="op">$</span><span class="va">par</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         mu      logsd      logcv </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1585939  0.1860163 -5.7699826 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1585838  0.1860306 -6.1881942 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fit again using FD gradient for Lanczos method using fixed probe-recursion</span></span></span>
-<span class="r-in"><span>  <span class="co"># This requires an optimizer that is tolerant to small imprecision in the gradient</span></span></span>
-<span class="r-in"><span>  <span class="co"># And it ends at a slightly different estimator</span></span></span>
 <span class="r-in"><span><span class="va">opt3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span><span class="op">(</span> <span class="va">obj</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj</span><span class="op">$</span><span class="va">fn</span>, <span class="va">obj</span><span class="op">$</span><span class="va">gr</span>, method <span class="op">=</span> <span class="st">"BFGS"</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">opt3</span><span class="op">$</span><span class="va">par</span> <span class="op">-</span> <span class="va">opt2</span><span class="op">$</span><span class="va">par</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            mu         logsd         logcv </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1.673644e-05 -2.399408e-05  5.884072e-05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.673518e-05 -2.399284e-05  5.883783e-05 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
