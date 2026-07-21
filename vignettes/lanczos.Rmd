@@ -1,5 +1,5 @@
 ---
-title: "Lanczos for penalized likelihood models"
+title: "Lanczos methods for penalized and marginal likelihood models"
 author: "James T. Thorson"
 output: rmarkdown::html_vignette
 #bibliography: 'CSPDM_vignettes.bib'
