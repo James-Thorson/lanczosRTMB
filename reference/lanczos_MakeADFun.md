@@ -166,5 +166,5 @@ opt$par - opt2$par
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 opt3$par - opt2$par
 #>            mu         logsd         logcv 
-#>  1.671290e-05 -2.396271e-05  5.876997e-05 
+#>  2.661035e-05 -3.771977e-05  8.892734e-05 
 ```
