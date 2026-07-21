@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Lanczos for penalized likelihood models • lanczosRTMB</title>
+<title>Lanczos methods for penalized and marginal likelihood models • lanczosRTMB</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Lanczos for penalized likelihood models">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Lanczos methods for penalized and marginal likelihood models">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -33,7 +33,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/lanczos.html">Lanczos for penalized likelihood models</a></li>
+<li><a class="dropdown-item" href="../articles/lanczos.html">Lanczos methods for penalized and marginal likelihood models</a></li>
   </ul>
 </li>
       </ul>
@@ -55,7 +55,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Lanczos for penalized likelihood models</h1>
+      <h1>Lanczos methods for penalized and marginal likelihood models</h1>
                         <h4 data-toc-skip class="author">James T.
 Thorson</h4>
             
@@ -173,20 +173,20 @@ factorization that is default in TMB:</p>
 <span><span class="va">opt_pen0</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1051230 -0.1327639 -0.5981617 </span></span>
+<span><span class="co">#&gt; -0.1084795 -0.1284993 -0.6074894 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 36.46907</span></span>
+<span><span class="co">#&gt; [1] 36.46912</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $convergence</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 25</span></span>
+<span><span class="co">#&gt; [1] 11</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       51      110 </span></span>
+<span><span class="co">#&gt;       31       35 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
@@ -422,8 +422,8 @@ total across samples:</p>
 <span><span class="co">#&gt;   9:     2013.6575: 0.876790  1.51700 0.782993</span></span>
 <span><span class="co">#&gt;  10:     2013.3776: 0.938107  1.56295 0.772027</span></span>
 <span><span class="co">#&gt;  11:     2011.8855: 0.927086  1.59856 0.839867</span></span>
-<span><span class="co">#&gt;  12:     2010.8797: 0.959770  1.72751 0.760672</span></span>
-<span><span class="co">#&gt;  13:     2009.4383:  1.02311  1.85599 0.819385</span></span>
+<span><span class="co">#&gt;  12:     2010.8796: 0.959770  1.72751 0.760672</span></span>
+<span><span class="co">#&gt;  13:     2009.4383:  1.02311  1.85599 0.819386</span></span>
 <span><span class="co">#&gt;  14:     2008.9140:  1.07910  1.99520 0.857520</span></span>
 <span><span class="co">#&gt;  15:     2008.8848:  1.09254  2.03390 0.865277</span></span>
 <span><span class="co">#&gt;  16:     2008.8843:  1.09379  2.03863 0.866307</span></span>
@@ -462,21 +462,18 @@ likelihood, pending improvements:</p>
 <span><span class="co">#&gt;   6:     2050.9328: 0.646392 0.937739 0.676878</span></span>
 <span><span class="co">#&gt;   7:     2045.3781: 0.856169  1.26234 0.651698</span></span>
 <span><span class="co">#&gt;   8:     2035.0220: 0.858334  1.46156 0.983830</span></span>
-<span><span class="co">#&gt;   9:     2031.8899: 0.969176  1.78968 0.810470</span></span>
-<span><span class="co">#&gt;  10:     2031.6987:  1.02808  1.82392 0.849464</span></span>
-<span><span class="co">#&gt;  11:     2031.5593:  1.02544  1.84969 0.811039</span></span>
-<span><span class="co">#&gt;  12:     2031.5074:  1.01228  1.85370 0.807976</span></span>
-<span><span class="co">#&gt;  13:     2031.4434:  1.01510  1.85422 0.821778</span></span>
-<span><span class="co">#&gt;  14:     2031.4434:  1.01530  1.85412 0.821696</span></span>
-<span><span class="co">#&gt;  15:     2031.4273:  1.01923  1.85288 0.828187</span></span>
-<span><span class="co">#&gt;  16:     2031.4273:  1.01923  1.85288 0.828181</span></span>
-<span><span class="co">#&gt;  17:     2031.4273:  1.01922  1.85287 0.828182</span></span>
-<span><span class="co">#&gt;  18:     2031.4273:  1.01923  1.85287 0.828183</span></span>
-<span><span class="co">#&gt;  19:     2031.4273:  1.01923  1.85288 0.828185</span></span>
-<span><span class="co">#&gt;  20:     2031.4273:  1.01923  1.85288 0.828185</span></span>
-<span><span class="co">#&gt;  21:     2031.4273:  1.01923  1.85288 0.828185</span></span>
-<span><span class="co">#&gt;  22:     2031.4272:  1.01923  1.85288 0.828184</span></span>
-<span><span class="co">#&gt;  23:     2031.4272:  1.01923  1.85288 0.828184</span></span>
+<span><span class="co">#&gt;   9:     2031.8899: 0.969176  1.78968 0.810469</span></span>
+<span><span class="co">#&gt;  10:     2031.7189:  1.02657  1.82029 0.841792</span></span>
+<span><span class="co">#&gt;  11:     2031.7156:  1.01788  1.83338 0.784391</span></span>
+<span><span class="co">#&gt;  12:     2031.6318:  1.00672  1.83015 0.788011</span></span>
+<span><span class="co">#&gt;  13:     2031.6313:  1.00751  1.82936 0.788451</span></span>
+<span><span class="co">#&gt;  14:     2031.6313:  1.00752  1.82936 0.788452</span></span>
+<span><span class="co">#&gt;  15:     2031.6313:  1.00752  1.82935 0.788457</span></span>
+<span><span class="co">#&gt;  16:     2031.6313:  1.00752  1.82936 0.788453</span></span>
+<span><span class="co">#&gt;  17:     2031.6313:  1.00752  1.82936 0.788453</span></span>
+<span><span class="co">#&gt;  18:     2031.6313:  1.00752  1.82936 0.788453</span></span>
+<span><span class="co">#&gt;  19:     2031.6313:  1.00752  1.82936 0.788453</span></span>
+<span><span class="co">#&gt;  20:     2031.6313:  1.00752  1.82936 0.788453</span></span>
 <span><span class="va">opt</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>Where we can compare the runtime for the two models:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -494,15 +491,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">8.67 secs</td>
+<td align="left">9.99 secs</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">37.39 secs</td>
+<td align="left">35.75 secs</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 57.42 secs</p>
+<p>Runtime for this vignette: 57.61 secs</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>

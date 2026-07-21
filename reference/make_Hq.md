@@ -141,7 +141,7 @@ system.time(Hq(q, x_new))
 #>       0       0       0 
 system.time(Hq2(q, x_new))
 #>    user  system elapsed 
-#>   0.005   0.000   0.005 
+#>   0.006   0.000   0.006 
 system.time(Hq2(q, x_new, update_H = FALSE))
 #>    user  system elapsed 
 #>       0       0       0 
