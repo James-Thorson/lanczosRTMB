@@ -487,11 +487,11 @@ knitr::kable( runtime, digits=2, caption="Run-times" )
 
 |         | x          |
 |:--------|:-----------|
-| RTMB    | 10.29 secs |
-| Lanczos | 37.93 secs |
+| RTMB    | 10.48 secs |
+| Lanczos | 35.62 secs |
 
 Run-times {.table}
 
-Runtime for this vignette: 59.66 secs
+Runtime for this vignette: 57.65 secs
 
 ### Works cited
