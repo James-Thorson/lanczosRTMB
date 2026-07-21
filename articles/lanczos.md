@@ -12,7 +12,12 @@ library(lanczosRTMB)
 library(RTMB)
 ```
 
-## Simulate and fit a generalized linear mixed model
+## Generalized linear mixed model
+
+We first demonstrate Lanczos methods using a simple generalized linear
+mixed model.
+
+### Simulate from a GLMM
 
 We first simulate data from a compound lognormal-Gamma process:
 
@@ -94,7 +99,7 @@ opt
 #> [1] "relative convergence (4)"
 ```
 
-## Fit as marginal likelihood without Cholesky decomposition
+### Fit as marginal likelihood without Cholesky decomposition
 
 We first show that we can re-fit the model using the marginal
 likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky
@@ -116,26 +121,26 @@ opt_pen0 = nlminb( pen0$par, pen0$fn )
 opt_pen0
 #> $par
 #>         mu      logsd      logcv 
-#> -0.1051230 -0.1327639 -0.5981617 
+#> -0.1084795 -0.1284993 -0.6074894 
 #> 
 #> $objective
-#> [1] 36.46907
+#> [1] 36.46912
 #> 
 #> $convergence
 #> [1] 1
 #> 
 #> $iterations
-#> [1] 25
+#> [1] 11
 #> 
 #> $evaluations
 #> function gradient 
-#>       51      110 
+#>       31       35 
 #> 
 #> $message
 #> [1] "false convergence (8)"
 ```
 
-## Fit as a penalized likelihood model
+### Fit as a penalized likelihood model
 
 Next, we show that the model can be refitted using penalized likelihood,
 conditional upon fixed values for variance parameters:
@@ -213,7 +218,7 @@ opt$obj
 #> [1] 36.46907
 ```
 
-## Delta methods
+### Delta methods
 
 Alternatively, we can apply Lanczos methods to standard errors for
 parameters. Here, we will sample the first three random effects
@@ -294,7 +299,7 @@ summary(sdrep)['sumexpu',]
 #>   4.064121   1.194484
 ```
 
-## Epsilon methods
+### Epsilon methods
 
 Finally, we can use the gradient of the log-likelihood with respect to a
 dummy variable epsilon to correct for retransformation bias:
@@ -334,6 +339,6 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 6.23 secs
+Runtime for this vignette: 5.31 secs
 
-## Works cited
+### Works cited

@@ -75,8 +75,13 @@ matrix representing associations among random effects.</p>
 <span><span class="co">#&gt; Loading required package: RTMB</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/kaskr/RTMB" class="external-link">RTMB</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="simulate-and-fit-a-generalized-linear-mixed-model">Simulate and fit a generalized linear mixed model<a class="anchor" aria-label="anchor" href="#simulate-and-fit-a-generalized-linear-mixed-model"></a>
+<h2 id="generalized-linear-mixed-model">Generalized linear mixed model<a class="anchor" aria-label="anchor" href="#generalized-linear-mixed-model"></a>
 </h2>
+<p>We first demonstrate Lanczos methods using a simple generalized
+linear mixed model.</p>
+<div class="section level3">
+<h3 id="simulate-from-a-glmm">Simulate from a GLMM<a class="anchor" aria-label="anchor" href="#simulate-from-a-glmm"></a>
+</h3>
 <p>We first simulate data from a compound lognormal-Gamma process:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
@@ -146,9 +151,9 @@ model (GLMM):</p>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "relative convergence (4)"</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="fit-as-marginal-likelihood-without-cholesky-decomposition">Fit as marginal likelihood without Cholesky decomposition<a class="anchor" aria-label="anchor" href="#fit-as-marginal-likelihood-without-cholesky-decomposition"></a>
-</h2>
+<div class="section level3">
+<h3 id="fit-as-marginal-likelihood-without-cholesky-decomposition">Fit as marginal likelihood without Cholesky decomposition<a class="anchor" aria-label="anchor" href="#fit-as-marginal-likelihood-without-cholesky-decomposition"></a>
+</h3>
 <p>We first show that we can re-fit the model using the marginal
 likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky
 factorization that is default in TMB:</p>
@@ -167,27 +172,27 @@ factorization that is default in TMB:</p>
 <span><span class="va">opt_pen0</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1051230 -0.1327639 -0.5981617 </span></span>
+<span><span class="co">#&gt; -0.1084795 -0.1284993 -0.6074894 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 36.46907</span></span>
+<span><span class="co">#&gt; [1] 36.46912</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $convergence</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 25</span></span>
+<span><span class="co">#&gt; [1] 11</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       51      110 </span></span>
+<span><span class="co">#&gt;       31       35 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="fit-as-a-penalized-likelihood-model">Fit as a penalized likelihood model<a class="anchor" aria-label="anchor" href="#fit-as-a-penalized-likelihood-model"></a>
-</h2>
+<div class="section level3">
+<h3 id="fit-as-a-penalized-likelihood-model">Fit as a penalized likelihood model<a class="anchor" aria-label="anchor" href="#fit-as-a-penalized-likelihood-model"></a>
+</h3>
 <p>Next, we show that the model can be refitted using penalized
 likelihood, conditional upon fixed values for variance parameters:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -249,9 +254,9 @@ likelihood using Lanczos with the full calculation:</p>
 <span><span class="va">opt</span><span class="op">$</span><span class="va">obj</span></span>
 <span><span class="co">#&gt; [1] 36.46907</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="delta-methods">Delta methods<a class="anchor" aria-label="anchor" href="#delta-methods"></a>
-</h2>
+<div class="section level3">
+<h3 id="delta-methods">Delta methods<a class="anchor" aria-label="anchor" href="#delta-methods"></a>
+</h3>
 <p>Alternatively, we can apply Lanczos methods to standard errors for
 parameters. Here, we will sample the first three random effects</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -316,9 +321,9 @@ quantity using Lanczos within the delta method:</p>
 <span><span class="co">#&gt;   Estimate Std. Error </span></span>
 <span><span class="co">#&gt;   4.064121   1.194484</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="epsilon-methods">Epsilon methods<a class="anchor" aria-label="anchor" href="#epsilon-methods"></a>
-</h2>
+<div class="section level3">
+<h3 id="epsilon-methods">Epsilon methods<a class="anchor" aria-label="anchor" href="#epsilon-methods"></a>
+</h3>
 <p>Finally, we can use the gradient of the log-likelihood with respect
 to a dummy variable epsilon to correct for retransformation bias:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
@@ -353,11 +358,12 @@ to a dummy variable epsilon to correct for retransformation bias:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sdrep</span><span class="op">)</span><span class="op">[</span><span class="st">'sumexpu'</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
 <span><span class="co">#&gt;            4.064121            1.625808            4.734025                  NA</span></span></code></pre></div>
-<p>Runtime for this vignette: 6.23 secs</p>
+<p>Runtime for this vignette: 5.31 secs</p>
 </div>
-<div class="section level2">
-<h2 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
-</h2>
+<div class="section level3">
+<h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
+</h3>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

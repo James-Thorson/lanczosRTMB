@@ -170,10 +170,10 @@ forward-on-reverse (and FD of autodiff gradients) is efficient given that
 <span class="r-out co"><span class="r-pr">#&gt;</span>       0       0       0 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu">Hq2</span><span class="op">(</span><span class="va">q</span>, <span class="va">x_new</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.005   0.000   0.005 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.006   0.000   0.006 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu">Hq2</span><span class="op">(</span><span class="va">q</span>, <span class="va">x_new</span>, update_H <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0       0       0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.001   0.000   0.000 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="fu">Hq3</span><span class="op">(</span><span class="va">q</span>, <span class="va">x_new</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       0       0       0 </span>
