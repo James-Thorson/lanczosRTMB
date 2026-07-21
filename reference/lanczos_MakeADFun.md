@@ -16,7 +16,7 @@ lanczos_MakeADFun(
   method = "newton_CG",
   seed = 123,
   make_gr = TRUE,
-  pu_update = c("FD", "exact", "implicit"),
+  pu_update = c("implicit", "FD", "exact"),
   silent = TRUE
 )
 ```
@@ -71,11 +71,14 @@ lanczos_MakeADFun(
 
 - pu_update:
 
-  when make_gr=TRUE, whether to use a finite-difference based on an AD
-  tape or re-optimize the joint likelihood to get the update on random
-  effects when calculating the FD for fixed effects in the
-  log-determinant calculation. pu_update="FD" can be very slow for dense
-  inner-Hessians.
+  when make_gr=TRUE, whether to update random effects for proposed fixed
+  effects using a finite-difference based on the implicit solution and a
+  conjugate gradient solver, a FD based on taping the inner newton
+  solution for random effects, or re-optimizing the joint likelihood
+  with respect to random effects. These updated values are then used
+  within a finite-difference approximation to the gradient of the
+  Lanczos approximation to the log-determinant. pu_update="FD" can be
+  very slow for dense inner-Hessians.
 
 - silent:
 
@@ -163,5 +166,5 @@ opt$par - opt2$par
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 opt3$par - opt2$par
 #>            mu         logsd         logcv 
-#>  1.673644e-05 -2.399408e-05  5.884072e-05 
+#>  1.671290e-05 -2.396271e-05  5.876997e-05 
 ```

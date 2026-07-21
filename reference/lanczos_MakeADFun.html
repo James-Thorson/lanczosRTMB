@@ -55,7 +55,7 @@ a user-supplied joint likelihood and designated random effects</p>
 <span>  method <span class="op">=</span> <span class="st">"newton_CG"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
 <span>  make_gr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  pu_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FD"</span>, <span class="st">"exact"</span>, <span class="st">"implicit"</span><span class="op">)</span>,</span>
+<span>  pu_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"implicit"</span>, <span class="st">"FD"</span>, <span class="st">"exact"</span><span class="op">)</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -106,9 +106,12 @@ lower variance using a fixed seed.</p></dd>
 
 
 <dt id="arg-pu-update">pu_update<a class="anchor" aria-label="anchor" href="#arg-pu-update"></a></dt>
-<dd><p>when make_gr=TRUE, whether to use a finite-difference
-based on an AD tape or re-optimize the joint likelihood to get the update on random
-effects when calculating the FD for fixed effects in the log-determinant calculation.
+<dd><p>when make_gr=TRUE, whether to update random effects for proposed fixed effects
+using a finite-difference based on the implicit solution and a conjugate gradient solver,
+a FD based on taping the inner newton solution for random effects, or
+re-optimizing the joint likelihood with respect to random effects.
+These updated values are then used within a finite-difference approximation to the
+gradient of the Lanczos approximation to the log-determinant.
 pu_update="FD" can be very slow for dense inner-Hessians.</p></dd>
 
 
@@ -187,7 +190,7 @@ approximation is only performs well when recalculating the Lanczos matrix \(Q\).
 <span class="r-in"><span><span class="va">opt3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></span><span class="op">(</span> <span class="va">obj</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj</span><span class="op">$</span><span class="va">fn</span>, <span class="va">obj</span><span class="op">$</span><span class="va">gr</span>, method <span class="op">=</span> <span class="st">"BFGS"</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">opt3</span><span class="op">$</span><span class="va">par</span> <span class="op">-</span> <span class="va">opt2</span><span class="op">$</span><span class="va">par</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            mu         logsd         logcv </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1.673644e-05 -2.399408e-05  5.884072e-05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.671290e-05 -2.396271e-05  5.876997e-05 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
