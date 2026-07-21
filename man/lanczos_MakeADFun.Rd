@@ -14,7 +14,7 @@ lanczos_MakeADFun(
   method = "newton_CG",
   seed = 123,
   make_gr = TRUE,
-  pu_update = c("FD", "exact"),
+  pu_update = c("FD", "exact", "implicit"),
   silent = TRUE
 )
 }
