@@ -991,7 +991,8 @@ function( func,
             CG(
               b = q,
               Hq = \(q,update_H) env$Hq_pu( q=q, x = env$x ),
-              silent = TRUE
+              silent = TRUE,
+              e = 1e-6
             )$x
           }
         )
