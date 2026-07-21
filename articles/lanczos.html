@@ -409,26 +409,30 @@ total across samples:</p>
 <span>  random <span class="op">=</span> <span class="st">"x"</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">opt_RTMB</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">obj_RTMB</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj_RTMB</span><span class="op">$</span><span class="va">fn</span>, control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">opt_RTMB</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span></span>
+<span>  <span class="va">obj_RTMB</span><span class="op">$</span><span class="va">par</span>,</span>
+<span>  <span class="va">obj_RTMB</span><span class="op">$</span><span class="va">fn</span>,</span>
+<span>  <span class="va">obj_RTMB</span><span class="op">$</span><span class="va">gr</span>,</span>
+<span>  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span><span class="co">#&gt;   0:     2280.0939:  0.00000  0.00000  0.00000</span></span>
-<span><span class="co">#&gt;   1:     2207.2635: 0.127215 -0.00624317 0.00846231</span></span>
-<span><span class="co">#&gt;   2:     2177.1001: 0.251238 0.00562723 0.0362419</span></span>
-<span><span class="co">#&gt;   3:     2138.5541: 0.261331 0.180753 0.221731</span></span>
-<span><span class="co">#&gt;   4:     2102.8547: 0.600013 0.413495 0.524771</span></span>
-<span><span class="co">#&gt;   5:     2044.0344: 0.571580 0.920853 0.574647</span></span>
-<span><span class="co">#&gt;   6:     2019.8392: 0.824137  1.36282 0.614486</span></span>
-<span><span class="co">#&gt;   7:     2017.8952: 0.805356  1.47898 0.761772</span></span>
-<span><span class="co">#&gt;   8:     2015.2160: 0.861372  1.41749 0.848267</span></span>
-<span><span class="co">#&gt;   9:     2013.6575: 0.876790  1.51700 0.782993</span></span>
-<span><span class="co">#&gt;  10:     2013.3776: 0.938107  1.56295 0.772027</span></span>
-<span><span class="co">#&gt;  11:     2011.8855: 0.927086  1.59856 0.839867</span></span>
-<span><span class="co">#&gt;  12:     2010.8796: 0.959770  1.72751 0.760672</span></span>
-<span><span class="co">#&gt;  13:     2009.4383:  1.02311  1.85599 0.819386</span></span>
-<span><span class="co">#&gt;  14:     2008.9140:  1.07910  1.99520 0.857520</span></span>
-<span><span class="co">#&gt;  15:     2008.8848:  1.09254  2.03390 0.865277</span></span>
-<span><span class="co">#&gt;  16:     2008.8843:  1.09379  2.03863 0.866307</span></span>
-<span><span class="co">#&gt;  17:     2008.8843:  1.09374  2.03871 0.866424</span></span>
-<span><span class="co">#&gt;  18:     2008.8843:  1.09371  2.03865 0.866449</span></span>
+<span><span class="co">#&gt;   1:     2207.2877: 0.127160 -0.00625933 0.00844188</span></span>
+<span><span class="co">#&gt;   2:     2177.1118: 0.251132 0.00559584 0.0361984</span></span>
+<span><span class="co">#&gt;   3:     2138.4981: 0.261639 0.180607 0.221620</span></span>
+<span><span class="co">#&gt;   4:     2103.4571: 0.600893 0.412780 0.524083</span></span>
+<span><span class="co">#&gt;   5:     2043.9903: 0.571990 0.919862 0.574231</span></span>
+<span><span class="co">#&gt;   6:     2019.9030: 0.823870  1.36207 0.612885</span></span>
+<span><span class="co">#&gt;   7:     2017.8703: 0.804545  1.47280 0.762314</span></span>
+<span><span class="co">#&gt;   8:     2015.3034: 0.860650  1.41406 0.845721</span></span>
+<span><span class="co">#&gt;   9:     2013.7610: 0.874801  1.51102 0.782851</span></span>
+<span><span class="co">#&gt;  10:     2013.4386: 0.936469  1.55903 0.771969</span></span>
+<span><span class="co">#&gt;  11:     2011.9344: 0.926273  1.59507 0.841422</span></span>
+<span><span class="co">#&gt;  12:     2011.0591: 0.954344  1.72269 0.752932</span></span>
+<span><span class="co">#&gt;  13:     2008.9144:  1.07549  1.99143 0.869239</span></span>
+<span><span class="co">#&gt;  14:     2008.8854:  1.09049  2.02967 0.867466</span></span>
+<span><span class="co">#&gt;  15:     2008.8843:  1.09366  2.03837 0.866483</span></span>
+<span><span class="co">#&gt;  16:     2008.8843:  1.09371  2.03863 0.866436</span></span>
+<span><span class="co">#&gt;  17:     2008.8843:  1.09371  2.03864 0.866446</span></span>
 <span><span class="va">opt_RTMB</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>We can see that the Hessian is dense:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -485,15 +489,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">10.15 secs</td>
+<td align="left">6.81 secs</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">33.48 secs</td>
+<td align="left">33.14 secs</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 55.03 secs</p>
+<p>Runtime for this vignette: 51.38 secs</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
