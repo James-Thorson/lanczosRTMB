@@ -704,6 +704,10 @@ function( obj,
 #'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
 #' @param make_gr whether to make approximated gradient using fixed probes
 #'   (slow for large models)
+#' @param pu_update when make_gr=TRUE, whether to use a finite-difference
+#'   based on an AD tape or re-optimize the joint likelihood to get the update on random
+#'   effects when calculating the FD for fixed effects in the log-determinant calculation.
+#'   pu_update="FD" can be very slow for dense inner-Hessians.
 #'
 #' @return
 #' An object (list), where elements include:
@@ -744,8 +748,6 @@ function( obj,
 #' opt$par - opt2$par
 #'
 #' # Fit again using FD gradient for Lanczos method using fixed probe-recursion
-#'   # This requires an optimizer that is tolerant to small imprecision in the gradient
-#'   # And it ends at a slightly different estimator
 #' opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 #' opt3$par - opt2$par
 #'
@@ -765,6 +767,7 @@ function( func,
           method = "newton_CG",
           seed = 123,
           make_gr = TRUE,
+          pu_update = c("FD","exact"),
           silent = TRUE ){
 
   # vectors
@@ -772,6 +775,7 @@ function( func,
   #  u = random
   #  v = fixed
   #  x = (p,u,v)
+  pu_update = match.arg(pu_update)
 
   # save stuff in env
   env = new.env(parent = emptyenv())
@@ -920,11 +924,12 @@ function( func,
   if( isTRUE(make_gr) ){
     # Get cross-grad
     tape_x = MakeTape( func, parameters )
-    dudv = tape_x$newton(random = x_random)$jacfun()
+    if( pu_update == "FD" ){
+      dudv = tape_x$newton(random = x_random)$jacfun()
+    }
 
-    get_grad = function(v, ..., what = "nll", fixed_Q = FALSE, pu_update = c("FD","exact") ){
+    get_grad = function(v, ..., what = "nll", fixed_Q = FALSE ){
       # Run to do inner optimizer
-      pu_update = match.arg(pu_update)
       get_nll(v)
       pu = env$pu_last
       env$x[x_fixed] = v
@@ -940,8 +945,10 @@ function( func,
       grad_jnll = grad_v(v)
 
       # Get projection for EB of u given FD change in v
-      dudv$force.update()
-      P = dudv(v)
+      if( pu_update == "FD" ){
+        dudv$force.update()
+        P = dudv(v)
+      }
       x = env$x
 
       # Get grad_logdet ... need to re-optimize random effects (not covered by envelop theorem)
@@ -962,7 +969,7 @@ function( func,
           mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list, k = env$k, m = env$m, seed = env$seed))
         },
         x = v,
-        method.args = list(...)
+        ...
       )
 
       grad = grad_jnll + 0.5*grad_logdet

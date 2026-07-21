@@ -31,7 +31,7 @@ nll = function(p){
   loglik1 = dgmrf(p$x, Q = Q, log = TRUE)
   loglik2 = sum(dpois(y, exp(p$mu + p$x), log=TRUE), na.rm=TRUE)
   loglik3 = dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE)
-  -1 * ( loglik1 + loglik2 ) # + loglik3 )
+  -1 * ( loglik1 + loglik2 + loglik3 )
 }
 parlist = list( x=rnorm(nx*ny), logtau = 0, invlogis_rho = 0, mu = 0 )
 
@@ -108,12 +108,13 @@ obj = lanczos_MakeADFun(
   random = "x",
   k = 40,
   make_gr = TRUE,
-  silent = TRUE
+  silent = TRUE,
+  pu_update = "exact"
 )
 opt = nlminb(
   obj$par,
   \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
-  \(x) obj$gr(x, fixed_Q = FALSE), # , method = "simple", method.args = list(eps = 1e-8)),
+  \(x) obj$gr(x), #, method = "simple", method.args = list(eps = 1e-8)),  # fixed_Q = FALSE,
   control = list(trace = 1)
 )
 opt$run_time = Sys.time() - start_time
@@ -131,7 +132,7 @@ obj = lanczos_MakeADFun(
 opt = nlminb(
   obj$par,
   \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
-  \(x) grad(obj$fn, x, method = "Richardson", method.args = list(eps = 1e-4) ),
+  \(x) grad(obj$fn, x), # , method = "Richardson", method.args = list(eps = 1e-4) ),
   control = list(trace = 1)
 )
 opt$run_time = Sys.time() - start_time

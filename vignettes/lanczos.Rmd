@@ -24,7 +24,11 @@ library(lanczosRTMB)
 library(RTMB)
 ```
 
-## Simulate and fit a generalized linear mixed model
+# Generalized linear mixed model
+
+We first demonstrate Lanczos methods using a simple generalized linear mixed model.
+
+## Simulate from a GLMM
 
 We first simulate data from a compound lognormal-Gamma process:
 
