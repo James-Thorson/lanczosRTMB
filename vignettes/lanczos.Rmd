@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-start_time = Sys.time()
+vignette_start = Sys.time()
 ```
 
 This vignette demonstrates how Lanczos methods can be used to approximate standard errors and epsilon bias-correction for penalized likelihood models, without directly forming or inverting the Hessian matrix representing associations among random effects. 
@@ -317,6 +317,11 @@ opt_RTMB = nlminb( obj_RTMB$par, obj_RTMB$fn, control = list(trace = 1) )
 opt_RTMB$run_time = Sys.time() - start_time
 ```
 
+We can see that the Hessian is dense:
+```{r, include = TRUE, warning=FALSE, message=FALSE}
+Matrix::image( obj_RTMB$env$spHess(random=TRUE) )
+```
+
 Alternatively, we can fit this using Lanczos methods, which are less sensitive to the lack-of-sparsity.  Here, we avoid constructing the gradient of the Laplace-Lanczos approximation to the log-marginal likelihood, pending improvements:
 
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
@@ -347,7 +352,7 @@ knitr::kable( runtime, digits=2, caption="Run-times" )
 ```
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
-run_time = Sys.time() - start_time
+run_time = Sys.time() - vignette_start
 ```
 Runtime for this vignette: `r paste( round(unclass(run_time),2), attr(run_time, "units") )`
 
