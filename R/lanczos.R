@@ -928,19 +928,22 @@ function( func,
   if( isTRUE(make_gr) ){
     # Get cross-grad
     tape_x = MakeTape( func, parameters )
+    #tape_x =  MakeTape(
+    #  f = cmb( jnll_vec, parnames = names(parameters) ),
+    #  x = env$x
+    #)
     if( pu_update == "FD" ){
       duhat_dv = tape_x$newton(random = x_random)$jacfun()
     }else if( pu_update == "implicit" ){
       grad_x = tape_x$jacfun()
       pu = env$x[x_profile_random]
-      grad_u = function(v){
+      dpu_dv = function(v){
         "[<-" <- ADoverload("[<-")
-        x = env$x
+        x = DataEval(fetch_x)
         x[x_fixed] = v
-        x[x_profile_random] = pu
         grad_x(x)[x_profile_random]
       }
-      grad_dudv = MakeTape(grad_u, env$x[x_fixed])$jacfun(sparse=TRUE)
+      grad_dpudv = MakeTape(dpu_dv, env$x[x_fixed])$jacfun(sparse=TRUE)
 
       # Hessian-vector product for pu
       env$Hq_pu = make_Hq(
@@ -968,13 +971,14 @@ function( func,
 
       # Get projection for EB of u given FD change in v
       if( pu_update == "FD" ){
-        duhat_dv$force.update()
+        #duhat_dv$force.update()  # Updated automatically via taping and newton
         P = duhat_dv(v)
       }else if( pu_update == "implicit" ){
-        du_dv = grad_dudv(v)
-        tape_x$force.update()
+        grad_dpudv$force.update()
+        dpu_dv = grad_dpudv(v)
+        # dpuhat_dv = H^-1 dpu_dv
         P = -1 * apply(
-          du_dv,
+          dpu_dv,
           MARGIN = 2,
           FUN = \(q){
             CG(
@@ -995,13 +999,14 @@ function( func,
           # How to update random effects
           if( pu_update == "FD" ){
             # Project based on central jacobian
-            env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
+            env$x[x_profile_random] = pu + (P %*% (vnew-v))[,1]
           }else if( pu_update == "exact" ){
             # Recompute exactly
             get_nll( vnew )
-            env$x[-x_fixed] = env$pu_last
+            env$x[x_profile_random] = env$pu_last
           }else if( pu_update == "implicit" ){
-
+            # Project based on implicit update
+            env$x[x_profile_random] = pu + (P %*% (vnew-v))[,1]
           }
           # Apply in log-det
           mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list, k = env$k, m = env$m, seed = env$seed))
