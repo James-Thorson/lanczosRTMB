@@ -264,9 +264,9 @@ summary(sdrep)['sumexpu',]
 
 # Spatial change of support
 
-Next, we fit a model that involves spatial change of support, which breaks sparsity in the inner Hessian.
+Next, we fit a model that involves spatial change of support, which breaks sparsity in the inner Hessian.  We again simulate data from the change-in-support process:
 
-```{r, include = FALSE, warning=FALSE, message=FALSE}
+```{r, include = TRUE, warning=FALSE, message=FALSE}
 # Settings
 set.seed(123)
 nx = 10^1
@@ -286,7 +286,11 @@ y = rpois( nx*ny, lambda = exp(1 + x) )
 which_seen = sample( seq_len(nx*ny), size = nx*ny/100, replace = FALSE)
 sumy = sum(y)
 #y[-which_seen] = NA
+```
 
+
+We then define the joint likelihood that includes a term for the total across samples:
+```{r, include = TRUE, warning=FALSE, message=FALSE}
 nll = function(p){
   Qx = (Ix - plogis(p$invlogis_rho) * t(Px)) %*% (exp(2*p$logtau) * Ix) %*% (Ix - plogis(p$invlogis_rho) * Px)
   Qy = (Iy - plogis(p$invlogis_rho) * t(Py)) %*% (exp(2*p$logtau) * Iy) %*% (Iy - plogis(p$invlogis_rho) * Py)
@@ -299,10 +303,9 @@ nll = function(p){
 parlist = list( x=rnorm(nx*ny), logtau = 0, invlogis_rho = 0, mu = 0 )
 ```
 
-We first fit this as normal in RTMB:
+We then fit this as normal in RTMB:
 
-```{r, include = FALSE, warning=FALSE, message=FALSE}
-# Check with TMB
+```{r, include = TRUE, warning=FALSE, message=FALSE}
 start_time = Sys.time()
 obj_RTMB = MakeADFun(
   nll,
@@ -314,22 +317,21 @@ opt_RTMB = nlminb( obj_RTMB$par, obj_RTMB$fn, control = list(trace = 1) )
 opt_RTMB$run_time = Sys.time() - start_time
 ```
 
-Alternatively, we can fit this using Lanczos methods, which are less sensitive to the lack-of-sparsity.  Here, we :
+Alternatively, we can fit this using Lanczos methods, which are less sensitive to the lack-of-sparsity.  Here, we avoid constructing the gradient of the Laplace-Lanczos approximation to the log-marginal likelihood, pending improvements:
 
-```{r, include = FALSE, warning=FALSE, message=FALSE}
+```{r, include = TRUE, warning=FALSE, message=FALSE}
 start_time = Sys.time()
 obj = lanczos_MakeADFun(
   nll,
   parlist,
   random = "x",
   k = 40,
-  #method = "L-BFGS-B",
   make_gr = FALSE,
   silent = TRUE
 )
 opt = nlminb(
   obj$par,
-  \(x) obj$fn(x), # , gr_tol = 1e-8, smartsearch = TRUE ),
+  \(x) obj$fn(x),
   control = list(trace = 1)
 )
 opt$run_time = Sys.time() - start_time
