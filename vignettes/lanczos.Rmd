@@ -269,7 +269,7 @@ Next, we fit a model that involves spatial change of support, which breaks spars
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 # Settings
 set.seed(123)
-nx = 10^1
+nx = 10^2
 ny = 10^2
 rho = 0.9
 
@@ -313,7 +313,12 @@ obj_RTMB = MakeADFun(
   random = "x",
   silent = TRUE
 )
-opt_RTMB = nlminb( obj_RTMB$par, obj_RTMB$fn, control = list(trace = 1) )
+opt_RTMB = nlminb(
+  obj_RTMB$par,
+  obj_RTMB$fn,
+  obj_RTMB$gr,
+  control = list(trace = 1)
+)
 opt_RTMB$run_time = Sys.time() - start_time
 ```
 
