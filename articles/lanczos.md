@@ -7,9 +7,10 @@ matrix representing associations among random effects.
 
 ``` r
 
-library(lanczosRTMB)
-#> Loading required package: RTMB
+library(Matrix)
 library(RTMB)
+library(lanczosRTMB)
+library(numDeriv)
 ```
 
 ## Generalized linear mixed model
@@ -339,6 +340,34 @@ summary(sdrep)['sumexpu',]
 #>            4.064121            1.625808            4.734025                  NA
 ```
 
-Runtime for this vignette: 7.42 secs
+## Spatial change of support
+
+Next, we fit a model that involves spatial change of support, which
+breaks sparsity in the inner Hessian.
+
+We first fit this as normal in RTMB:
+
+Alternatively, we can fit this using Lanczos methods, which are less
+sensitive to the lack-of-sparsity. Here, we :
+
+Where we can compare the runtime for the two models:
+
+``` r
+
+runtime = c(
+  RTMB = opt_RTMB$run,
+  Lanczos = opt$run
+)
+knitr::kable( runtime, digits=2, caption="Run-times" )
+```
+
+|         | x          |
+|:--------|:-----------|
+| RTMB    | 8.71 secs  |
+| Lanczos | 38.25 secs |
+
+Run-times {.table}
+
+Runtime for this vignette: 38.35 secs
 
 ### Works cited
