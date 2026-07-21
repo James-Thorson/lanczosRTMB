@@ -94,7 +94,7 @@ obj = lanczos_MakeADFun(
 #)
 opt = nlminb(
   obj$par,
-  \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
+  \(x) obj$fn(x), # , gr_tol = 1e-8, smartsearch = TRUE ),
   #\(par) obj$fn(par, gr_tol = 1e-06, e_ratio = 0.1, maxit_newton = 200 , maxit_CG = 200 ),
   control = list(trace = 1)
 )

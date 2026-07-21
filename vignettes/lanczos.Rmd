@@ -20,8 +20,10 @@ start_time = Sys.time()
 This vignette demonstrates how Lanczos methods can be used to approximate standard errors and epsilon bias-correction for penalized likelihood models, without directly forming or inverting the Hessian matrix representing associations among random effects. 
 
 ```{r setup, warning = FALSE}
-library(lanczosRTMB)
+library(Matrix)
 library(RTMB)
+library(lanczosRTMB)
+library(numDeriv)
 ```
 
 # Generalized linear mixed model
@@ -260,6 +262,87 @@ sdrep = sdreport( obj, bias.correct = TRUE )
 summary(sdrep)['sumexpu',]
 ```
 
+# Spatial change of support
+
+Next, we fit a model that involves spatial change of support, which breaks sparsity in the inner Hessian.
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+# Settings
+set.seed(123)
+nx = 10^1
+ny = 10^2
+rho = 0.9
+
+# Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
+Px = bandSparse( n = nx, k = c(-1,1), diagonals = list(rep(0.5,nx),rep(0.5,nx)) )
+Py = bandSparse( n = ny, k = c(-1,1), diagonals = list(rep(0.5,ny),rep(0.5,ny)) )
+Ix = Diagonal(n=nx)
+Iy = Diagonal(n=ny)
+Qx = (Ix - rho * t(Px)) %*% (10 * Ix) %*% (Ix - rho * Px)
+Qy = (Iy - rho * t(Py)) %*% (10 * Iy) %*% (Iy - rho * Py)
+Q = kronecker( Qy, Qx )
+x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
+y = rpois( nx*ny, lambda = exp(1 + x) )
+which_seen = sample( seq_len(nx*ny), size = nx*ny/100, replace = FALSE)
+sumy = sum(y)
+#y[-which_seen] = NA
+
+nll = function(p){
+  Qx = (Ix - plogis(p$invlogis_rho) * t(Px)) %*% (exp(2*p$logtau) * Ix) %*% (Ix - plogis(p$invlogis_rho) * Px)
+  Qy = (Iy - plogis(p$invlogis_rho) * t(Py)) %*% (exp(2*p$logtau) * Iy) %*% (Iy - plogis(p$invlogis_rho) * Py)
+  Q = kronecker( Qy, Qx )
+  loglik1 = dgmrf(p$x, Q = Q, log = TRUE)
+  loglik2 = sum(dpois(y, exp(p$mu + p$x), log=TRUE), na.rm=TRUE)
+  loglik3 = dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE)
+  -1 * ( loglik1 + loglik2 + loglik3 )
+}
+parlist = list( x=rnorm(nx*ny), logtau = 0, invlogis_rho = 0, mu = 0 )
+```
+
+We first fit this as normal in RTMB:
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+# Check with TMB
+start_time = Sys.time()
+obj_RTMB = MakeADFun(
+  nll,
+  parlist,
+  random = "x",
+  silent = TRUE
+)
+opt_RTMB = nlminb( obj_RTMB$par, obj_RTMB$fn, control = list(trace = 1) )
+opt_RTMB$run_time = Sys.time() - start_time
+```
+
+Alternatively, we can fit this using Lanczos methods, which are less sensitive to the lack-of-sparsity.  Here, we :
+
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+start_time = Sys.time()
+obj = lanczos_MakeADFun(
+  nll,
+  parlist,
+  random = "x",
+  k = 40,
+  #method = "L-BFGS-B",
+  make_gr = FALSE,
+  silent = TRUE
+)
+opt = nlminb(
+  obj$par,
+  \(x) obj$fn(x), # , gr_tol = 1e-8, smartsearch = TRUE ),
+  control = list(trace = 1)
+)
+opt$run_time = Sys.time() - start_time
+```
+
+Where we can compare the runtime for the two models:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+runtime = c(
+  RTMB = opt_RTMB$run,
+  Lanczos = opt$run
+)
+knitr::kable( runtime, digits=2, caption="Run-times" )
+```
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
 run_time = Sys.time() - start_time
