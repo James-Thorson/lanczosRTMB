@@ -336,8 +336,8 @@ obj = lanczos_MakeADFun(
 )
 opt = nlminb(
   obj$par,
-  obj$fn(x),
-  obj$gr(x),
+  obj$fn,
+  \(x) obj$gr(x, method = "simple"),
   control = list(trace = 1)
 )
 opt$run_time = Sys.time() - start_time
