@@ -737,13 +737,14 @@ function( obj,
 #'   jnll = -1 * ( sum(nll1) + sum(nll2) )
 #'   return(jnll)
 #' }
+#' parlist =  list(u=u, mu = 0, logsd = 0, logcv = 0)
 #'
 #' # Build
-#' obj = lanczos_MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", k = 10 )
+#' obj = lanczos_MakeADFun( nll, parlist, random = "u", k = 10 )
 #' opt = nlminb( obj$par, obj$fn )
 #'
 #' # Compare with RTMB
-#' obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
+#' obj2 = MakeADFun( nll, parlist, random = "u", silent = TRUE )
 #' opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 #' opt$par - opt2$par
 #'
@@ -892,7 +893,7 @@ function( func,
     if( length(pu_random) > 0 ){
       env$x[x_random] = inner_opt$par[pu_random]
       env$L = lanczos_logdet(
-        Hq = env$Hq_u,
+        Hq = \(u) env$Hq_u,
         x = env$x[x_random],
         k = env$k,
         m = env$m,
@@ -925,12 +926,22 @@ function( func,
     # Get cross-grad
     tape_x = MakeTape( func, parameters )
     if( pu_update == "FD" ){
-      dudv = tape_x$newton(random = x_random)$jacfun()
+      duhat_dv = tape_x$newton(random = x_random)$jacfun()
+    }else if( pu_update == "implicit" ){
+      grad_x = tape_x$jacfun()
+      pu = env$x[x_profile_random]
+      grad_u = function(v){
+        x = env$x
+        x[x_fixed] = v
+        x[x_profile_random] = pu
+        grad_x(x)[x_profile_random]
+      }
+      grad_dudv = MakeTape(grad_u, env$x[x_fixed])$jacfun(sparse=TRUE)
     }
 
     get_grad = function(v, ..., what = "nll", fixed_Q = FALSE ){
       # Run to do inner optimizer
-      get_nll(v)
+      get_nll(v)   # FIXME:  Only need conditional MLE not Lanczos (unless using fixed_Q)
       pu = env$pu_last
       env$x[x_fixed] = v
       env$x[-x_fixed] = pu
@@ -946,8 +957,29 @@ function( func,
 
       # Get projection for EB of u given FD change in v
       if( pu_update == "FD" ){
-        dudv$force.update()
-        P = dudv(v)
+        duhat_dv$force.update()
+        P = duhat_dv(v)
+      }else if( pu_update == "implicit" ){
+        du_dv = grad_dudv(v)
+        env$x[x_fixed] = v
+        env$x[x_profile_random] = pu
+        tape_x$force.update()
+        Hq_pu = make_Hq(
+          tape = tape_x,
+          x0 = env$x,
+          which_random = x_profile_random
+        )
+        P = -1 * apply(
+          du_dv,
+          MARGIN = 2,
+          FUN = \(q){
+            CG(
+              b = q,
+              Hq = Hq_pu,
+              silent = TRUE
+            )$x
+          }
+        )
       }
       x = env$x
 
@@ -960,10 +992,12 @@ function( func,
           if( pu_update == "FD" ){
             # Project based on central jacobian
             env$x[-x_fixed] = pu + (P %*% (vnew-v))[,1]
-          }else{
+          }else if( pu_update == "exact" ){
             # Recompute exactly
             get_nll( vnew )
             env$x[-x_fixed] = env$pu_last
+          }else if( pu_update == "implicit" ){
+
           }
           # Apply in log-det
           mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list, k = env$k, m = env$m, seed = env$seed))

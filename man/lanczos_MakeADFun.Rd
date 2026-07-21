@@ -90,13 +90,14 @@ nll = function(p){
   jnll = -1 * ( sum(nll1) + sum(nll2) )
   return(jnll)
 }
+parlist =  list(u=u, mu = 0, logsd = 0, logcv = 0)
 
 # Build
-obj = lanczos_MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", k = 10 )
+obj = lanczos_MakeADFun( nll, parlist, random = "u", k = 10 )
 opt = nlminb( obj$par, obj$fn )
 
 # Compare with RTMB
-obj2 = MakeADFun( nll, list(u=u, mu = 0, logsd = 0, logcv = 0), random = "u", silent = TRUE )
+obj2 = MakeADFun( nll, parlist, random = "u", silent = TRUE )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
 

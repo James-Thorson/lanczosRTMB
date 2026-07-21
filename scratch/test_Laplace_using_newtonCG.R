@@ -7,7 +7,7 @@ library(numDeriv)
 # Settings
 set.seed(123)
 nx = 10^1
-ny = 10^2
+ny = 10^1
 rho = 0.9
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
@@ -21,7 +21,8 @@ Q = kronecker( Qy, Qx )
 x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
 y = rpois( nx*ny, lambda = exp(1 + x) )
 which_seen = sample( seq_len(nx*ny), size = nx*ny/100, replace = FALSE)
-sumy = sum(y)
+sumy = NA
+#sumy = sum(y)
 #y[-which_seen] = NA
 
 nll = function(p){
@@ -30,7 +31,7 @@ nll = function(p){
   Q = kronecker( Qy, Qx )
   loglik1 = dgmrf(p$x, Q = Q, log = TRUE)
   loglik2 = sum(dpois(y, exp(p$mu + p$x), log=TRUE), na.rm=TRUE)
-  loglik3 = dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE)
+  loglik3 = sum(dnorm(log(sumy), log(sum(exp(p$mu + p$x))), sd = 0.01, log = TRUE), na.rm=TRUE)
   -1 * ( loglik1 + loglik2 + loglik3 )
 }
 parlist = list( x=rnorm(nx*ny), logtau = 0, invlogis_rho = 0, mu = 0 )
@@ -188,3 +189,19 @@ jacobian(
 H = obj2$env$spHess(par = obj2$env$par, random = TRUE)
 ones = rep(1, sum(obj2$env$lrandom()))
 t(ones) %*% H %*% ones
+
+################
+# Check implicit solution for duhat_dtheta
+################
+
+func = nll
+parameters = parlist
+random = "x"
+k = 40
+profile = NULL
+m = 3
+method = "newton_CG"
+seed = 123
+make_gr = TRUE
+pu_update = "FD"
+silent = TRUE
