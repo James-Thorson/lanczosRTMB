@@ -7,7 +7,7 @@ library(numDeriv)
 # Settings
 set.seed(123)
 nx = 10^1
-ny = 10^1
+ny = 10^2
 rho = 0.9
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
@@ -21,8 +21,8 @@ Q = kronecker( Qy, Qx )
 x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
 y = rpois( nx*ny, lambda = exp(1 + x) )
 which_seen = sample( seq_len(nx*ny), size = nx*ny/100, replace = FALSE)
-sumy = NA
-#sumy = sum(y)
+#sumy = NA
+sumy = sum(y)
 #y[-which_seen] = NA
 
 nll = function(p){
@@ -106,7 +106,7 @@ start_time = Sys.time()
 obj = lanczos_MakeADFun(
   nll,
   parlist,
-  random = "u",
+  random = "x",
   k = 40,
   make_gr = TRUE,
   silent = TRUE,
@@ -115,7 +115,7 @@ obj = lanczos_MakeADFun(
 opt = nlminb(
   obj$par,
   \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
-  \(x) obj$gr(x), #, method = "simple", method.args = list(eps = 1e-8)),  # fixed_Q = FALSE,
+  \(x) obj$gr(x, method = "simple", method.args = list(eps = 1e-8)),  # fixed_Q = FALSE,
   control = list(trace = 1)
 )
 opt$run_time = Sys.time() - start_time

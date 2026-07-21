@@ -14,7 +14,7 @@ lanczos_MakeADFun(
   method = "newton_CG",
   seed = 123,
   make_gr = TRUE,
-  pu_update = c("FD", "exact", "implicit"),
+  pu_update = c("implicit", "FD", "exact"),
   silent = TRUE
 )
 }
@@ -42,9 +42,12 @@ lower variance using a fixed seed.}
 \item{make_gr}{whether to make approximated gradient using fixed probes
 (slow for large models)}
 
-\item{pu_update}{when make_gr=TRUE, whether to use a finite-difference
-based on an AD tape or re-optimize the joint likelihood to get the update on random
-effects when calculating the FD for fixed effects in the log-determinant calculation.
+\item{pu_update}{when make_gr=TRUE, whether to update random effects for proposed fixed effects
+using a finite-difference based on the implicit solution and a conjugate gradient solver,
+a FD based on taping the inner newton solution for random effects, or
+re-optimizing the joint likelihood with respect to random effects.
+These updated values are then used within a finite-difference approximation to the
+gradient of the Lanczos approximation to the log-determinant.
 pu_update="FD" can be very slow for dense inner-Hessians.}
 
 \item{silent}{Disable all tracing information?}
