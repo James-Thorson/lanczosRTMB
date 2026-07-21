@@ -935,6 +935,8 @@ function( func,
     #  f = cmb( jnll_vec, parnames = names(parameters) ),
     #  x = env$x
     #)
+    tape_x$simplify()
+
     if( pu_update == "FD" ){
       duhat_dv = tape_x$newton(random = x_random)$jacfun()
     }else if( pu_update == "implicit" ){
@@ -947,6 +949,8 @@ function( func,
         grad_x(x)[x_profile_random]
       }
       grad_dpudv = MakeTape(dpu_dv, env$x[x_fixed])$jacfun(sparse=TRUE)
+      grad_dpudv$simplify()
+      grad_dpudv$reorder()
 
       # Hessian-vector product for pu
       env$Hq_pu = make_Hq(
