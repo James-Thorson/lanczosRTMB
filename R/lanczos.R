@@ -852,6 +852,9 @@ function( func,
     )
   }
 
+  # FIXME
+  # get_inner = function(v){ RUN inner optimizer }
+
   # Objective function
   get_nll = function(v, ..., what = "nll"){
     # Define fixed effects and assign to global environment
@@ -931,6 +934,7 @@ function( func,
       grad_x = tape_x$jacfun()
       pu = env$x[x_profile_random]
       grad_u = function(v){
+        "[<-" <- ADoverload("[<-")
         x = env$x
         x[x_fixed] = v
         x[x_profile_random] = pu
@@ -944,7 +948,7 @@ function( func,
       get_nll(v)   # FIXME:  Only need conditional MLE not Lanczos (unless using fixed_Q)
       pu = env$pu_last
       env$x[x_fixed] = v
-      env$x[-x_fixed] = pu
+      env$x[x_profile_random] = pu
       if( isTRUE(fixed_Q) ){
         Q_list = lapply(env$L$L, \(x) x$Q )
       }else{

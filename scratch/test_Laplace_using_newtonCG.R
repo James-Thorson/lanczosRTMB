@@ -106,11 +106,11 @@ start_time = Sys.time()
 obj = lanczos_MakeADFun(
   nll,
   parlist,
-  random = "x",
+  random = "u",
   k = 40,
   make_gr = TRUE,
   silent = TRUE,
-  pu_update = "exact"
+  pu_update = "implicit"
 )
 opt = nlminb(
   obj$par,
