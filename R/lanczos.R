@@ -893,7 +893,7 @@ function( func,
     if( length(pu_random) > 0 ){
       env$x[x_random] = inner_opt$par[pu_random]
       env$L = lanczos_logdet(
-        Hq = \(u) env$Hq_u,
+        Hq = env$Hq_u,
         x = env$x[x_random],
         k = env$k,
         m = env$m,
