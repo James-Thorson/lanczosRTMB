@@ -941,6 +941,13 @@ function( func,
         grad_x(x)[x_profile_random]
       }
       grad_dudv = MakeTape(grad_u, env$x[x_fixed])$jacfun(sparse=TRUE)
+
+      # Hessian-vector product for pu
+      env$Hq_pu = make_Hq(
+        tape = tape_x,
+        x0 = env$x,
+        which_random = x_profile_random
+      )
     }
 
     get_grad = function(v, ..., what = "nll", fixed_Q = FALSE ){
@@ -965,21 +972,14 @@ function( func,
         P = duhat_dv(v)
       }else if( pu_update == "implicit" ){
         du_dv = grad_dudv(v)
-        env$x[x_fixed] = v
-        env$x[x_profile_random] = pu
         tape_x$force.update()
-        Hq_pu = make_Hq(
-          tape = tape_x,
-          x0 = env$x,
-          which_random = x_profile_random
-        )
         P = -1 * apply(
           du_dv,
           MARGIN = 2,
           FUN = \(q){
             CG(
               b = q,
-              Hq = Hq_pu,
+              Hq = \(q,update_H) env$Hq_pu( q=q, x = env$x ),
               silent = TRUE
             )$x
           }
