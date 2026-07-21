@@ -269,7 +269,7 @@ Next, we fit a model that involves spatial change of support, which breaks spars
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 # Settings
 set.seed(123)
-nx = 10^2
+nx = 10^1
 ny = 10^2
 rho = 0.9
 
