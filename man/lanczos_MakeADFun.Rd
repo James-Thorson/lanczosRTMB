@@ -14,6 +14,7 @@ lanczos_MakeADFun(
   method = "newton_CG",
   seed = 123,
   make_gr = TRUE,
+  pu_update = c("FD", "exact"),
   silent = TRUE
 )
 }
@@ -40,6 +41,11 @@ lower variance using a fixed seed.}
 
 \item{make_gr}{whether to make approximated gradient using fixed probes
 (slow for large models)}
+
+\item{pu_update}{when make_gr=TRUE, whether to use a finite-difference
+based on an AD tape or re-optimize the joint likelihood to get the update on random
+effects when calculating the FD for fixed effects in the log-determinant calculation.
+pu_update="FD" can be very slow for dense inner-Hessians.}
 
 \item{silent}{Disable all tracing information?}
 }
@@ -95,8 +101,6 @@ opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
 
 # Fit again using FD gradient for Lanczos method using fixed probe-recursion
-  # This requires an optimizer that is tolerant to small imprecision in the gradient
-  # And it ends at a slightly different estimator
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 opt3$par - opt2$par
 
