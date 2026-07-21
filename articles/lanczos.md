@@ -122,20 +122,20 @@ opt_pen0 = nlminb( pen0$par, pen0$fn )
 opt_pen0
 #> $par
 #>         mu      logsd      logcv 
-#> -0.1051230 -0.1327639 -0.5981617 
+#> -0.1084795 -0.1284993 -0.6074894 
 #> 
 #> $objective
-#> [1] 36.46907
+#> [1] 36.46912
 #> 
 #> $convergence
 #> [1] 1
 #> 
 #> $iterations
-#> [1] 25
+#> [1] 11
 #> 
 #> $evaluations
 #> function gradient 
-#>       51      110 
+#>       31       35 
 #> 
 #> $message
 #> [1] "false convergence (8)"
@@ -363,11 +363,11 @@ knitr::kable( runtime, digits=2, caption="Run-times" )
 
 |         | x          |
 |:--------|:-----------|
-| RTMB    | 8.71 secs  |
-| Lanczos | 38.25 secs |
+| RTMB    | 10.31 secs |
+| Lanczos | 36.17 secs |
 
 Run-times {.table}
 
-Runtime for this vignette: 38.35 secs
+Runtime for this vignette: 36.3 secs
 
 ### Works cited

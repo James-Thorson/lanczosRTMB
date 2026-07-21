@@ -23,9 +23,6 @@ approximate:
 
 There’s many avenues for further improvement. These include:
 
-Improving a quasi-Newton inner optimizer using `Hq`, i.e., a variant of
-conjugate gradient;
-
 Moving the FD logic for the `obj$gr` to tape;
 
 Exploring a conjugate gradient algorithm for an implicit solution to the
