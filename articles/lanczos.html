@@ -173,20 +173,20 @@ factorization that is default in TMB:</p>
 <span><span class="va">opt_pen0</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1084795 -0.1284993 -0.6074894 </span></span>
+<span><span class="co">#&gt; -0.1051230 -0.1327639 -0.5981617 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 36.46912</span></span>
+<span><span class="co">#&gt; [1] 36.46907</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $convergence</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 11</span></span>
+<span><span class="co">#&gt; [1] 25</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       31       35 </span></span>
+<span><span class="co">#&gt;       51      110 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
@@ -422,19 +422,23 @@ total across samples:</p>
 <span><span class="co">#&gt;   9:     2013.6575: 0.876790  1.51700 0.782993</span></span>
 <span><span class="co">#&gt;  10:     2013.3776: 0.938107  1.56295 0.772027</span></span>
 <span><span class="co">#&gt;  11:     2011.8855: 0.927086  1.59856 0.839867</span></span>
-<span><span class="co">#&gt;  12:     2010.8796: 0.959770  1.72751 0.760672</span></span>
-<span><span class="co">#&gt;  13:     2009.4383:  1.02311  1.85599 0.819386</span></span>
+<span><span class="co">#&gt;  12:     2010.8797: 0.959770  1.72751 0.760672</span></span>
+<span><span class="co">#&gt;  13:     2009.4383:  1.02311  1.85599 0.819385</span></span>
 <span><span class="co">#&gt;  14:     2008.9140:  1.07910  1.99520 0.857520</span></span>
 <span><span class="co">#&gt;  15:     2008.8848:  1.09254  2.03390 0.865277</span></span>
 <span><span class="co">#&gt;  16:     2008.8843:  1.09379  2.03863 0.866307</span></span>
 <span><span class="co">#&gt;  17:     2008.8843:  1.09374  2.03871 0.866424</span></span>
 <span><span class="co">#&gt;  18:     2008.8843:  1.09371  2.03865 0.866449</span></span>
 <span><span class="va">opt_RTMB</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
+<p>We can see that the Hessian is dense:</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/graphics/image.html" class="external-link">image</a></span><span class="op">(</span> <span class="va">obj_RTMB</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">spHess</span><span class="op">(</span>random<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
+<p><img src="lanczos_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="700"></p>
 <p>Alternatively, we can fit this using Lanczos methods, which are less
 sensitive to the lack-of-sparsity. Here, we avoid constructing the
 gradient of the Laplace-Lanczos approximation to the log-marginal
 likelihood, pending improvements:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">start_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">obj</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_MakeADFun.html">lanczos_MakeADFun</a></span><span class="op">(</span></span>
 <span>  <span class="va">nll</span>,</span>
@@ -458,21 +462,24 @@ likelihood, pending improvements:</p>
 <span><span class="co">#&gt;   6:     2050.9328: 0.646392 0.937739 0.676878</span></span>
 <span><span class="co">#&gt;   7:     2045.3781: 0.856169  1.26234 0.651698</span></span>
 <span><span class="co">#&gt;   8:     2035.0220: 0.858334  1.46156 0.983830</span></span>
-<span><span class="co">#&gt;   9:     2031.8899: 0.969176  1.78968 0.810469</span></span>
-<span><span class="co">#&gt;  10:     2031.7189:  1.02657  1.82029 0.841792</span></span>
-<span><span class="co">#&gt;  11:     2031.7156:  1.01788  1.83338 0.784391</span></span>
-<span><span class="co">#&gt;  12:     2031.6318:  1.00672  1.83015 0.788011</span></span>
-<span><span class="co">#&gt;  13:     2031.6313:  1.00751  1.82936 0.788451</span></span>
-<span><span class="co">#&gt;  14:     2031.6313:  1.00752  1.82936 0.788452</span></span>
-<span><span class="co">#&gt;  15:     2031.6313:  1.00752  1.82935 0.788457</span></span>
-<span><span class="co">#&gt;  16:     2031.6313:  1.00752  1.82936 0.788453</span></span>
-<span><span class="co">#&gt;  17:     2031.6313:  1.00752  1.82936 0.788453</span></span>
-<span><span class="co">#&gt;  18:     2031.6313:  1.00752  1.82936 0.788453</span></span>
-<span><span class="co">#&gt;  19:     2031.6313:  1.00752  1.82936 0.788453</span></span>
-<span><span class="co">#&gt;  20:     2031.6313:  1.00752  1.82936 0.788453</span></span>
+<span><span class="co">#&gt;   9:     2031.8899: 0.969176  1.78968 0.810470</span></span>
+<span><span class="co">#&gt;  10:     2031.6987:  1.02808  1.82392 0.849464</span></span>
+<span><span class="co">#&gt;  11:     2031.5593:  1.02544  1.84969 0.811039</span></span>
+<span><span class="co">#&gt;  12:     2031.5074:  1.01228  1.85370 0.807976</span></span>
+<span><span class="co">#&gt;  13:     2031.4434:  1.01510  1.85422 0.821778</span></span>
+<span><span class="co">#&gt;  14:     2031.4434:  1.01530  1.85412 0.821696</span></span>
+<span><span class="co">#&gt;  15:     2031.4273:  1.01923  1.85288 0.828187</span></span>
+<span><span class="co">#&gt;  16:     2031.4273:  1.01923  1.85288 0.828181</span></span>
+<span><span class="co">#&gt;  17:     2031.4273:  1.01922  1.85287 0.828182</span></span>
+<span><span class="co">#&gt;  18:     2031.4273:  1.01923  1.85287 0.828183</span></span>
+<span><span class="co">#&gt;  19:     2031.4273:  1.01923  1.85288 0.828185</span></span>
+<span><span class="co">#&gt;  20:     2031.4273:  1.01923  1.85288 0.828185</span></span>
+<span><span class="co">#&gt;  21:     2031.4273:  1.01923  1.85288 0.828185</span></span>
+<span><span class="co">#&gt;  22:     2031.4272:  1.01923  1.85288 0.828184</span></span>
+<span><span class="co">#&gt;  23:     2031.4272:  1.01923  1.85288 0.828184</span></span>
 <span><span class="va">opt</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>Where we can compare the runtime for the two models:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">runtime</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  RTMB <span class="op">=</span> <span class="va">opt_RTMB</span><span class="op">$</span><span class="va">run</span>,</span>
 <span>  Lanczos <span class="op">=</span> <span class="va">opt</span><span class="op">$</span><span class="va">run</span></span>
@@ -487,15 +494,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">10.13 secs</td>
+<td align="left">8.67 secs</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">36.32 secs</td>
+<td align="left">37.39 secs</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 36.45 secs</p>
+<p>Runtime for this vignette: 57.42 secs</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
