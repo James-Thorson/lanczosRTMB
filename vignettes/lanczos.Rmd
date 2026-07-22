@@ -24,6 +24,7 @@ library(Matrix)
 library(RTMB)
 library(lanczosRTMB)
 library(numDeriv)
+library(memprof)
 ```
 
 # Generalized linear mixed model
@@ -269,7 +270,7 @@ Next, we fit a model that involves spatial change of support, which breaks spars
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 # Settings
 set.seed(123)
-nx = 40
+nx = 10
 ny = 100
 rho = 0.9
 
@@ -313,13 +314,15 @@ obj_RTMB = MakeADFun(
   random = "x",
   silent = TRUE
 )
-opt_RTMB = nlminb(
-  obj_RTMB$par,
-  obj_RTMB$fn,
-  obj_RTMB$gr,
-  control = list(trace = 1)
+fit_RTMB = with_monitor(
+  nlminb(
+    obj_RTMB$par,
+    obj_RTMB$fn,
+    obj_RTMB$gr,
+    control = list(trace = 1)
+  )
 )
-opt_RTMB$run_time = Sys.time() - start_time
+fit_RTMB$run_time = Sys.time() - start_time
 ```
 
 We can see that the Hessian is dense:
@@ -339,23 +342,33 @@ obj = lanczos_MakeADFun(
   make_gr = TRUE,
   silent = TRUE
 )
-opt = nlminb(
-  obj$par,
-  obj$fn,
-  \(x) obj$gr(x, method = "simple"),
-  control = list(trace = 1)
+fit_lanczos = with_monitor(
+  nlminb(
+    obj$par,
+    obj$fn,
+    \(x) obj$gr(x, method = "simple"),
+    control = list(trace = 1)
+  )
 )
-opt$run_time = Sys.time() - start_time
+fit_lanczos$run_time = Sys.time() - start_time
 ```
 
 Where we can compare the runtime for the two models:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 runtime = c(
-  RTMB = opt_RTMB$run,
-  Lanczos = opt$run
+  RTMB = fit_RTMB$run_time,
+  Lanczos = fit_lanczos$run_time
 )
 knitr::kable( runtime, digits=2, caption="Run-times" )
 ```
+
+And we can also compare memory use:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+par(mfrow = c(2,1) )
+plot(memprof:::used_memory_total_by_time(fit_RTMB$memory_use), type = "l", main = "RTMB")
+plot(memprof:::used_memory_total_by_time(fit_lanczos$memory_use), type = "l", main = "lanczos")
+```
+
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
 run_time = Sys.time() - vignette_start
