@@ -345,8 +345,8 @@ fit_lanczos = with_monitor({
   )
   nlminb(
     obj$par,
-    obj$fn,
-    \(x) obj$gr(x, method = "simple"),
+    \(x) obj$fn(x, orthogonalize = FALSE),
+    \(x) obj$gr(x, method = "simple", orthogonalize = FALSE),
     control = list(trace = 1)
   )
 })
