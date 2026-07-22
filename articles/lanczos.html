@@ -174,20 +174,20 @@ factorization that is default in TMB:</p>
 <span><span class="va">opt_pen0</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1084795 -0.1284993 -0.6074894 </span></span>
+<span><span class="co">#&gt; -0.1051230 -0.1327639 -0.5981617 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 36.46912</span></span>
+<span><span class="co">#&gt; [1] 36.46907</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $convergence</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 11</span></span>
+<span><span class="co">#&gt; [1] 25</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       31       35 </span></span>
+<span><span class="co">#&gt;       51      110 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
@@ -470,15 +470,17 @@ likelihood, pending improvements:</p>
 <span><span class="co">#&gt;   5:     4317.8220: 0.572487 0.943031 0.664725</span></span>
 <span><span class="co">#&gt;   6:     4241.6747: 0.867865  1.33917 0.795902</span></span>
 <span><span class="co">#&gt;   7:     4233.7632: 0.913843  1.76282 0.513434</span></span>
-<span><span class="co">#&gt;   8:     4207.2456:  1.15432  2.20977 0.575032</span></span>
-<span><span class="co">#&gt;   9:     4197.9787:  1.17506  2.14095  1.08121</span></span>
-<span><span class="co">#&gt;  10:     4197.7064:  1.14958  2.20339  1.07714</span></span>
-<span><span class="co">#&gt;  11:     4196.6089:  1.18898  2.25242  1.05250</span></span>
-<span><span class="co">#&gt;  12:     4196.4771:  1.21185  2.30709  1.06016</span></span>
-<span><span class="co">#&gt;  13:     4196.4713:  1.21173  2.30214  1.07852</span></span>
-<span><span class="co">#&gt;  14:     4196.4690:  1.21191  2.30541  1.07388</span></span>
-<span><span class="co">#&gt;  15:     4196.4690:  1.21188  2.30538  1.07398</span></span>
-<span><span class="co">#&gt;  16:     4196.4690:  1.21188  2.30538  1.07398</span></span>
+<span><span class="co">#&gt;   8:     4207.2454:  1.15432  2.20977 0.575037</span></span>
+<span><span class="co">#&gt;   9:     4197.9785:  1.17504  2.14093  1.08121</span></span>
+<span><span class="co">#&gt;  10:     4197.7042:  1.14963  2.20345  1.07708</span></span>
+<span><span class="co">#&gt;  11:     4196.6085:  1.18903  2.25257  1.05242</span></span>
+<span><span class="co">#&gt;  12:     4196.4770:  1.21183  2.30698  1.06026</span></span>
+<span><span class="co">#&gt;  13:     4196.4713:  1.21172  2.30213  1.07848</span></span>
+<span><span class="co">#&gt;  14:     4196.4690:  1.21191  2.30542  1.07388</span></span>
+<span><span class="co">#&gt;  15:     4196.4690:  1.21191  2.30542  1.07388</span></span>
+<span><span class="co">#&gt;  16:     4196.4690:  1.21191  2.30542  1.07388</span></span>
+<span><span class="co">#&gt;  17:     4196.4690:  1.21191  2.30542  1.07388</span></span>
+<span><span class="co">#&gt;  18:     4196.4690:  1.21191  2.30542  1.07388</span></span>
 <span><span class="va">fit_lanczos</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>Where we can compare the runtime for the two models:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -496,11 +498,11 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">26.65 secs</td>
+<td align="left">29.16 secs</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">82.97 secs</td>
+<td align="left">50.04 secs</td>
 </tr>
 </tbody>
 </table>
@@ -514,7 +516,31 @@ likelihood, pending improvements:</p>
 <span><span class="va">mem2</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span> <span class="op">=</span> <span class="va">mem2</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">mem2</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">mem2</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Lanczos"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="lanczos_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 2.3 mins</p>
+<p>which shows that Lanczos uses substantially less memory:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">max_memory</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  RTMB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">mem1</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>  Lanczos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">mem2</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="va">max_memory</span>, digits<span class="op">=</span><span class="fl">2</span>, caption<span class="op">=</span><span class="st">"Maximum memory use"</span> <span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Maximum memory use</caption>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">x</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">RTMB</td>
+<td align="right">994938880</td>
+</tr>
+<tr class="even">
+<td align="left">Lanczos</td>
+<td align="right">113315840</td>
+</tr>
+</tbody>
+</table>
+<p>Runtime for this vignette: 1.86 mins</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
