@@ -25,7 +25,10 @@ Suggests:
     TMB,
     rmarkdown,
     mvtnorm,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    memprof
+Remotes: 
+    mrc-ide/memprof
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
 LazyData: true
