@@ -270,7 +270,7 @@ Next, we fit a model that involves spatial change of support, which breaks spars
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 # Settings
 set.seed(123)
-nx = 10
+nx = 25
 ny = 100
 rho = 0.9
 
@@ -373,7 +373,7 @@ mem2[,'used'] = mem2[,'used'] - min(mem2[,'used'])
 plot( mem2, type = "l", main = "Lanczos")
 ```
 
-which shows that Lanczos uses substantially less memory:
+which shows that Lanczos uses similar memory:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 max_memory = c(
   RTMB = max(mem1[,'used']) / 1e9,
