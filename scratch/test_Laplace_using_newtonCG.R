@@ -1,13 +1,16 @@
 
+#remotes::install_github("mrc-ide/memprof")
+
 library(Matrix)
 library(RTMB)
 library(lanczosRTMB)
 library(numDeriv)
+library(memprof)
 
 # Settings
 set.seed(123)
-nx = 10^1
-ny = 10^2
+nx = 10
+ny = 100
 rho = 0.9
 
 # Simulate AR1 process approaching random walk (i.e., ill-conditioned inner problem)
@@ -93,31 +96,39 @@ obj = lanczos_MakeADFun(
 #  control = list(trace = 6),
 #  method = "L-BFGS-B"
 #)
-opt = nlminb(
-  obj$par,
-  \(x) obj$fn(x), # , gr_tol = 1e-8, smartsearch = TRUE ),
-  #\(par) obj$fn(par, gr_tol = 1e-06, e_ratio = 0.1, maxit_newton = 200 , maxit_CG = 200 ),
-  control = list(trace = 1)
+monitor = with_monitor(
+  nlminb(
+    obj$par,
+    \(x) obj$fn(x), # , gr_tol = 1e-8, smartsearch = TRUE ),
+    #\(par) obj$fn(par, gr_tol = 1e-06, e_ratio = 0.1, maxit_newton = 200 , maxit_CG = 200 ),
+    control = list(trace = 1)
+  ),
+  #monitor_file = file.path( species_dir, paste0("memprof_",models[mi,'name'],".txt") ),
+  overwrite = TRUE
 )
+opt = monitor$opt
 opt$run_time = Sys.time() - start_time
 
 # Try with gradient
 start_time = Sys.time()
-obj = lanczos_MakeADFun(
-  nll,
-  parlist,
-  random = "x",
-  k = 40,
-  make_gr = TRUE,
-  silent = TRUE,
-  pu_update = "implicit"
-)
-opt = nlminb(
-  obj$par,
-  \(x) obj$fn(x, gr_tol = 1e-8, smartsearch = TRUE ),
-  \(x) obj$gr(x, method = "simple", method.args = list(eps = 1e-8)),  # fixed_Q = FALSE,
-  control = list(trace = 1)
-)
+monitor = with_monitor({
+  obj = lanczos_MakeADFun(
+    nll,
+    parlist,
+    random = "x",
+    k = 40,
+    make_gr = TRUE,
+    silent = TRUE,
+    pu_update = "implicit"
+  )
+  nlminb(
+    obj$par,
+    \(x) obj$fn(x, orthogonalize = TRUE),
+    \(x) obj$gr(x, method = "simple", orthogonalize = TRUE),  # fixed_Q = FALSE,
+    control = list(trace = 1)
+  )
+})
+opt = monitor$result
 opt$run_time = Sys.time() - start_time
 
 # Try with FD gradient
@@ -140,14 +151,25 @@ opt$run_time = Sys.time() - start_time
 
 # Check with TMB
 start_time = Sys.time()
-obj2 = MakeADFun(
-  nll,
-  parlist,
-  random = "x",
-  silent = TRUE
-)
-opt2 = nlminb( obj2$par, obj2$fn, control = list(trace = 1) )
+monitor2 = with_monitor({
+  obj2 = MakeADFun(
+    nll,
+    parlist,
+    random = "x",
+    silent = TRUE
+  )
+  nlminb( obj2$par, obj2$fn, control = list(trace = 1) )
+})
+opt2 = monitor2$opt
 opt2$run_time = Sys.time() - start_time
+
+par(mfrow = c(2,1) )
+mem1 = memprof:::used_memory_total_by_time(monitor$memory_use)
+mem1[,'used'] = mem1[,'used'] - min(mem1[,'used'])
+plot( mem1, type = "l")
+mem2 = memprof:::used_memory_total_by_time(monitor2$memory_use)
+mem2[,'used'] = mem2[,'used'] - min(mem2[,'used'])
+plot( mem2, type = "l")
 
 ################
 # Debugging

@@ -270,7 +270,7 @@ Next, we fit a model that involves spatial change of support, which breaks spars
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 # Settings
 set.seed(123)
-nx = 50
+nx = 20
 ny = 100
 rho = 0.9
 
@@ -284,9 +284,9 @@ Qy = (Iy - rho * t(Py)) %*% (10 * Iy) %*% (Iy - rho * Py)
 Q = kronecker( Qy, Qx )
 x = RTMB:::rgmrf0( n= 1, Q = Q )[,1]
 y = rpois( nx*ny, lambda = exp(1 + x) )
-which_seen = sample( seq_len(nx*ny), size = nx*ny * 0.5, replace = FALSE)
+which_seen = sample( seq_len(nx*ny), size = nx*ny * 0.1, replace = FALSE)
 sumy = sum(y)
-#y[-which_seen] = NA
+y[-which_seen] = NA
 ```
 
 
