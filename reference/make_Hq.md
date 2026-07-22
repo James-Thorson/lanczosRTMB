@@ -138,13 +138,13 @@ x_new[which_random] = rnorm(length(which_random))
 
 system.time(Hq(q, x_new))
 #>    user  system elapsed 
-#>       0       0       0 
+#>   0.001   0.000   0.000 
 system.time(Hq2(q, x_new))
 #>    user  system elapsed 
-#>   0.006   0.000   0.006 
+#>   0.006   0.000   0.007 
 system.time(Hq2(q, x_new, update_H = FALSE))
 #>    user  system elapsed 
-#>   0.001   0.000   0.000 
+#>   0.000   0.000   0.001 
 system.time(Hq3(q, x_new))
 #>    user  system elapsed 
 #>       0       0       0 

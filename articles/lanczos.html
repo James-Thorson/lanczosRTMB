@@ -494,21 +494,25 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">7.12 secs</td>
+<td align="left">7.18 secs</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">32.92 secs</td>
+<td align="left">30.30 secs</td>
 </tr>
 </tbody>
 </table>
 <p>And we can also compare memory use:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">1</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">memprof</span><span class="fu">:::</span><span class="fu">used_memory_total_by_time</span><span class="op">(</span><span class="va">fit_RTMB</span><span class="op">$</span><span class="va">memory_use</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"RTMB"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">memprof</span><span class="fu">:::</span><span class="fu">used_memory_total_by_time</span><span class="op">(</span><span class="va">fit_lanczos</span><span class="op">$</span><span class="va">memory_use</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"lanczos"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">mem1</span> <span class="op">=</span> <span class="fu">memprof</span><span class="fu">:::</span><span class="fu">used_memory_total_by_time</span><span class="op">(</span><span class="va">fit_RTMB</span><span class="op">$</span><span class="va">memory_use</span><span class="op">)</span></span>
+<span><span class="va">mem1</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span> <span class="op">=</span> <span class="va">mem1</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">mem1</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">mem1</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"RTMB"</span><span class="op">)</span></span>
+<span><span class="va">mem2</span> <span class="op">=</span> <span class="fu">memprof</span><span class="fu">:::</span><span class="fu">used_memory_total_by_time</span><span class="op">(</span><span class="va">fit_lanczos</span><span class="op">$</span><span class="va">memory_use</span><span class="op">)</span></span>
+<span><span class="va">mem2</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span> <span class="op">=</span> <span class="va">mem2</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">mem2</span><span class="op">[</span>,<span class="st">'used'</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">mem2</span>, type <span class="op">=</span> <span class="st">"l"</span>, main <span class="op">=</span> <span class="st">"Lanczos"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="lanczos_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="576"></p>
-<p>Runtime for this vignette: 51.47 secs</p>
+<p>Runtime for this vignette: 50.05 secs</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>

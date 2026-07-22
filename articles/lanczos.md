@@ -490,8 +490,8 @@ knitr::kable( runtime, digits=2, caption="Run-times" )
 
 |         | x          |
 |:--------|:-----------|
-| RTMB    | 7.12 secs  |
-| Lanczos | 32.92 secs |
+| RTMB    | 7.18 secs  |
+| Lanczos | 30.30 secs |
 
 Run-times {.table}
 
@@ -500,12 +500,16 @@ And we can also compare memory use:
 ``` r
 
 par(mfrow = c(2,1) )
-plot(memprof:::used_memory_total_by_time(fit_RTMB$memory_use), type = "l", main = "RTMB")
-plot(memprof:::used_memory_total_by_time(fit_lanczos$memory_use), type = "l", main = "lanczos")
+mem1 = memprof:::used_memory_total_by_time(fit_RTMB$memory_use)
+mem1[,'used'] = mem1[,'used'] - min(mem1[,'used'])
+plot( mem1, type = "l", main = "RTMB")
+mem2 = memprof:::used_memory_total_by_time(fit_lanczos$memory_use)
+mem2[,'used'] = mem2[,'used'] - min(mem2[,'used'])
+plot( mem2, type = "l", main = "Lanczos")
 ```
 
 ![](lanczos_files/figure-html/unnamed-chunk-20-1.png)
 
-Runtime for this vignette: 51.47 secs
+Runtime for this vignette: 50.05 secs
 
 ### Works cited
