@@ -270,7 +270,7 @@ Next, we fit a model that involves spatial change of support, which breaks spars
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 # Settings
 set.seed(123)
-nx = 20
+nx = 10
 ny = 100
 rho = 0.9
 
@@ -308,20 +308,20 @@ We then fit this as normal in RTMB:
 
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 start_time = Sys.time()
-obj_RTMB = MakeADFun(
-  nll,
-  parlist,
-  random = "x",
-  silent = TRUE
-)
-fit_RTMB = with_monitor(
+fit_RTMB = with_monitor({
+  obj_RTMB = MakeADFun(
+    nll,
+    parlist,
+    random = "x",
+    silent = TRUE
+  )
   nlminb(
     obj_RTMB$par,
     obj_RTMB$fn,
     obj_RTMB$gr,
     control = list(trace = 1)
   )
-)
+})
 fit_RTMB$run_time = Sys.time() - start_time
 ```
 
@@ -334,22 +334,22 @@ Alternatively, we can fit this using Lanczos methods, which are less sensitive t
 
 ```{r, include = TRUE, warning=FALSE, message=FALSE}
 start_time = Sys.time()
-obj = lanczos_MakeADFun(
-  nll,
-  parlist,
-  random = "x",
-  k = 40,
-  make_gr = TRUE,
-  silent = TRUE
-)
-fit_lanczos = with_monitor(
+fit_lanczos = with_monitor({
+  obj = lanczos_MakeADFun(
+    nll,
+    parlist,
+    random = "x",
+    k = 40,
+    make_gr = TRUE,
+    silent = TRUE
+  )
   nlminb(
     obj$par,
     obj$fn,
     \(x) obj$gr(x, method = "simple"),
     control = list(trace = 1)
   )
-)
+})
 fit_lanczos$run_time = Sys.time() - start_time
 ```
 
@@ -376,10 +376,10 @@ plot( mem2, type = "l", main = "Lanczos")
 which shows that Lanczos uses substantially less memory:
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
 max_memory = c(
-  RTMB = max(mem1[,'used']),
-  Lanczos = max(mem2[,'used'])
+  RTMB = max(mem1[,'used']) / 1e9,
+  Lanczos = max(mem2[,'used']) / 1e9
 )
-knitr::kable( max_memory, digits=2, caption="Maximum memory use" )
+knitr::kable( max_memory, digits=2, caption="Maximum memory use (GB)" )
 ```
 
 
