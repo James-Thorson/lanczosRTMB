@@ -859,7 +859,7 @@ function( func,
   # get_inner = function(v){ RUN inner optimizer }
 
   # Objective function
-  get_nll = function(v, ..., what = "nll"){
+  get_nll = function(v, ..., what = "nll", orthogonalize = TRUE){
     # Define fixed effects and assign to global environment
     env$x[x_fixed] = v
     tape_pu$force.update()
@@ -904,7 +904,8 @@ function( func,
         k = env$k,
         m = env$m,
         return_extra = TRUE,
-        seed = env$seed
+        seed = env$seed,
+        orthogonalize = orthogonalize
       )
     }else{
       env$L = list( logdet = rep(0, env$m) )
@@ -960,7 +961,7 @@ function( func,
       )
     }
 
-    get_grad = function(v, ..., what = "nll", fixed_Q = FALSE ){
+    get_grad = function(v, ..., what = "nll", fixed_Q = FALSE, orthogonalize = TRUE ){
       # Run to do inner optimizer
       get_nll(v)   # FIXME:  Only need conditional MLE not Lanczos (unless using fixed_Q)
       pu = env$pu_last
@@ -1017,7 +1018,16 @@ function( func,
             env$x[x_profile_random] = pu + (P %*% (vnew-v))[,1]
           }
           # Apply in log-det
-          mean(lanczos_logdet(Hq = env$Hq_u, x = env$x[x_random], Q_list = Q_list, k = env$k, m = env$m, seed = env$seed))
+          logdet_m = lanczos_logdet(
+            Hq = env$Hq_u,
+            x = env$x[x_random],
+            Q_list = Q_list,
+            k = env$k,
+            m = env$m,
+            seed = env$seed,
+            orthogonalize = orthogonalize
+          )
+          mean(logdet_m)
         },
         x = v,
         ...
