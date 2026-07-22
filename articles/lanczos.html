@@ -174,20 +174,20 @@ factorization that is default in TMB:</p>
 <span><span class="va">opt_pen0</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1084795 -0.1284993 -0.6074894 </span></span>
+<span><span class="co">#&gt; -0.1051230 -0.1327639 -0.5981617 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 36.46912</span></span>
+<span><span class="co">#&gt; [1] 36.46907</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $convergence</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 11</span></span>
+<span><span class="co">#&gt; [1] 25</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       31       35 </span></span>
+<span><span class="co">#&gt;       51      110 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
@@ -371,7 +371,7 @@ change-in-support process:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Settings</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">nx</span> <span class="op">=</span> <span class="fl">25</span></span>
+<span><span class="va">nx</span> <span class="op">=</span> <span class="fl">50</span></span>
 <span><span class="va">ny</span> <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="va">rho</span> <span class="op">=</span> <span class="fl">0.9</span></span>
 <span></span>
@@ -385,7 +385,7 @@ change-in-support process:</p>
 <span><span class="va">Q</span> <span class="op">=</span> <span class="fu">kronecker</span><span class="op">(</span> <span class="va">Qy</span>, <span class="va">Qx</span> <span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">:::</span><span class="fu">rgmrf0</span><span class="op">(</span> n<span class="op">=</span> <span class="fl">1</span>, Q <span class="op">=</span> <span class="va">Q</span> <span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span> <span class="va">nx</span><span class="op">*</span><span class="va">ny</span>, lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">x</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="va">which_seen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">nx</span><span class="op">*</span><span class="va">ny</span><span class="op">)</span>, size <span class="op">=</span> <span class="va">nx</span><span class="op">*</span><span class="va">ny</span><span class="op">/</span><span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">which_seen</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">nx</span><span class="op">*</span><span class="va">ny</span><span class="op">)</span>, size <span class="op">=</span> <span class="va">nx</span><span class="op">*</span><span class="va">ny</span> <span class="op">*</span> <span class="fl">0.5</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">sumy</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="co">#y[-which_seen] = NA</span></span></code></pre></div>
 <p>We then define the joint likelihood that includes a term for the
@@ -418,26 +418,23 @@ total across samples:</p>
 <span>    control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   0:     6695.9923:  0.00000  0.00000  0.00000</span></span>
-<span><span class="co">#&gt;   1:     6553.9980: 0.0994045 0.00420131 0.0100547</span></span>
-<span><span class="co">#&gt;   2:     6480.2008: 0.192113 0.0314836 0.0357614</span></span>
-<span><span class="co">#&gt;   3:     6090.0149: 0.384639 0.664367 0.485641</span></span>
-<span><span class="co">#&gt;   4:     6050.5174: 0.567800 0.677494 0.515123</span></span>
-<span><span class="co">#&gt;   5:     5976.8525: 0.532551 0.847680 0.581331</span></span>
-<span><span class="co">#&gt;   6:     5893.1189: 0.743109  1.11859 0.724962</span></span>
-<span><span class="co">#&gt;   7:     5874.6455: 0.809255  1.61679 0.176454</span></span>
-<span><span class="co">#&gt;   8:     5843.9260: 0.756846  1.35265 0.869935</span></span>
-<span><span class="co">#&gt;   9:     5837.0556: 0.828967  1.36482 0.884478</span></span>
-<span><span class="co">#&gt;  10:     5828.5730: 0.812307  1.43648 0.896698</span></span>
-<span><span class="co">#&gt;  11:     5814.9003: 0.898049  1.55851 0.895360</span></span>
-<span><span class="co">#&gt;  12:     5795.1786: 0.998974  1.83899 0.906668</span></span>
-<span><span class="co">#&gt;  13:     5785.5759:  1.08507  2.02378  1.12443</span></span>
-<span><span class="co">#&gt;  14:     5783.3742:  1.15799  2.24198  1.08329</span></span>
-<span><span class="co">#&gt;  15:     5783.1478:  1.15832  2.24106  1.14629</span></span>
-<span><span class="co">#&gt;  16:     5783.1369:  1.15702  2.24079  1.15827</span></span>
-<span><span class="co">#&gt;  17:     5783.1365:  1.15674  2.24118  1.15868</span></span>
-<span><span class="co">#&gt;  18:     5783.1365:  1.15671  2.24123  1.15851</span></span>
-<span><span class="co">#&gt;  19:     5783.1365:  1.15671  2.24123  1.15850</span></span>
+<span><span class="co">#&gt;   0:     11585.137:  0.00000  0.00000  0.00000</span></span>
+<span><span class="co">#&gt;   1:     11280.528: 0.116180 -0.000609185 0.00684720</span></span>
+<span><span class="co">#&gt;   2:     11148.914: 0.228057 0.0229508 0.0286098</span></span>
+<span><span class="co">#&gt;   3:     10851.105: 0.258688 0.466795 0.307094</span></span>
+<span><span class="co">#&gt;   4:     10476.310: 0.899852  1.11807 0.823531</span></span>
+<span><span class="co">#&gt;   5:     10205.393: 0.931112  2.00206 0.258255</span></span>
+<span><span class="co">#&gt;   6:     10201.904:  1.43202  2.78587 -0.228253</span></span>
+<span><span class="co">#&gt;   7:     10143.336:  1.34085  2.75063 0.287436</span></span>
+<span><span class="co">#&gt;   8:     10130.384:  1.34518  2.56386 0.777932</span></span>
+<span><span class="co">#&gt;   9:     10122.159:  1.12418  2.10303 0.897446</span></span>
+<span><span class="co">#&gt;  10:     10120.618:  1.22142  2.45607 0.989237</span></span>
+<span><span class="co">#&gt;  11:     10117.132:  1.21825  2.37386 0.844320</span></span>
+<span><span class="co">#&gt;  12:     10116.973:  1.20385  2.33222 0.897951</span></span>
+<span><span class="co">#&gt;  13:     10116.950:  1.20351  2.33582 0.878163</span></span>
+<span><span class="co">#&gt;  14:     10116.949:  1.20474  2.33819 0.880936</span></span>
+<span><span class="co">#&gt;  15:     10116.949:  1.20447  2.33752 0.880821</span></span>
+<span><span class="co">#&gt;  16:     10116.949:  1.20448  2.33756 0.880803</span></span>
 <span><span class="va">fit_RTMB</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>We can see that the Hessian is dense:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -465,25 +462,24 @@ likelihood, pending improvements:</p>
 <span>    control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   0:     6700.4179:  0.00000  0.00000  0.00000</span></span>
-<span><span class="co">#&gt;   1:     6558.9301: 0.0994048 0.00408596 0.0100989</span></span>
-<span><span class="co">#&gt;   2:     6485.6350: 0.192093 0.0312778 0.0359720</span></span>
-<span><span class="co">#&gt;   3:     6102.0546: 0.379578 0.663808 0.488471</span></span>
-<span><span class="co">#&gt;   4:     6064.7262: 0.572814 0.673877 0.517953</span></span>
-<span><span class="co">#&gt;   5:     5986.5229: 0.524891 0.807029 0.653174</span></span>
-<span><span class="co">#&gt;   6:     5914.1339: 0.743371  1.13174 0.644615</span></span>
-<span><span class="co">#&gt;   7:     5906.5239: 0.793666  1.65720 0.0663996</span></span>
-<span><span class="co">#&gt;   8:     5863.2962: 0.762242  1.34634 0.784280</span></span>
-<span><span class="co">#&gt;   9:     5857.2336: 0.835181  1.37681 0.813692</span></span>
-<span><span class="co">#&gt;  10:     5845.8018: 0.821016  1.43142 0.876393</span></span>
-<span><span class="co">#&gt;  11:     5821.7346: 0.986174  1.73194 0.968901</span></span>
-<span><span class="co">#&gt;  12:     5820.3569:  1.12752  2.20733 0.652802</span></span>
-<span><span class="co">#&gt;  13:     5809.9740:  1.13352  2.18266  1.24038</span></span>
-<span><span class="co">#&gt;  14:     5809.2796:  1.10236  2.11329  1.16778</span></span>
-<span><span class="co">#&gt;  15:     5809.2561:  1.09407  2.08951  1.16689</span></span>
-<span><span class="co">#&gt;  16:     5809.2553:  1.09517  2.09205  1.16495</span></span>
-<span><span class="co">#&gt;  17:     5809.2553:  1.09529  2.09214  1.16503</span></span>
-<span><span class="co">#&gt;  18:     5809.2553:  1.09529  2.09210  1.16502</span></span>
+<span><span class="co">#&gt;   0:     11584.035:  0.00000  0.00000  0.00000</span></span>
+<span><span class="co">#&gt;   1:     11277.304: 0.116566 -0.000611598 0.00684935</span></span>
+<span><span class="co">#&gt;   2:     11144.670: 0.228821 0.0230301 0.0286407</span></span>
+<span><span class="co">#&gt;   3:     10844.526: 0.259725 0.468536 0.307739</span></span>
+<span><span class="co">#&gt;   4:     10465.468: 0.903415  1.12265 0.824562</span></span>
+<span><span class="co">#&gt;   5:     10197.118: 0.934592  2.00908 0.256601</span></span>
+<span><span class="co">#&gt;   6:     10153.502:  1.20543  2.32407 0.0621529</span></span>
+<span><span class="co">#&gt;   7:     10122.541:  1.15367  2.22944 0.507973</span></span>
+<span><span class="co">#&gt;   8:     10115.332:  1.17630  2.25539 0.965361</span></span>
+<span><span class="co">#&gt;   9:     10115.206:  1.17018  2.25643 0.963720</span></span>
+<span><span class="co">#&gt;  10:     10115.099:  1.17165  2.24565 0.950798</span></span>
+<span><span class="co">#&gt;  11:     10114.928:  1.15522  2.21626 0.947918</span></span>
+<span><span class="co">#&gt;  12:     10114.753:  1.16004  2.21837 0.914535</span></span>
+<span><span class="co">#&gt;  13:     10114.662:  1.15975  2.23184 0.890244</span></span>
+<span><span class="co">#&gt;  14:     10114.626:  1.15459  2.21493 0.875650</span></span>
+<span><span class="co">#&gt;  15:     10114.625:  1.15587  2.21777 0.876714</span></span>
+<span><span class="co">#&gt;  16:     10114.625:  1.15585  2.21777 0.876715</span></span>
+<span><span class="co">#&gt;  17:     10114.625:  1.15585  2.21777 0.876715</span></span>
 <span><span class="va">fit_lanczos</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>Where we can compare the runtime for the two models:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -501,11 +497,11 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">49.29 secs</td>
+<td align="left">2.55 mins</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">134.90 secs</td>
+<td align="left">4.93 mins</td>
 </tr>
 </tbody>
 </table>
@@ -535,15 +531,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="right">1.49</td>
+<td align="right">5.70</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="right">1.58</td>
+<td align="right">7.59</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 3.74 mins</p>
+<p>Runtime for this vignette: 9.45 mins</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
