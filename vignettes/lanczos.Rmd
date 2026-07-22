@@ -373,6 +373,15 @@ mem2[,'used'] = mem2[,'used'] - min(mem2[,'used'])
 plot( mem2, type = "l", main = "Lanczos")
 ```
 
+which shows that Lanczos uses substantially less memory:
+```{r, eval=TRUE, echo=TRUE, message=FALSE, fig.width=6, fig.height=6}
+max_memory = c(
+  RTMB = max(mem1[,'used']),
+  Lanczos = max(mem2[,'used'])
+)
+knitr::kable( max_memory, digits=2, caption="Maximum memory use" )
+```
+
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
 run_time = Sys.time() - vignette_start
