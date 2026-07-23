@@ -68,7 +68,7 @@ nll = function(p){
 }
 
 # Starting list of parameters
-parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0, eps = 0)
+parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0)
 ```
 
 Finally, we fit this model as a log-linked generalized linear mixed model (GLMM): 
@@ -79,8 +79,8 @@ what = "jnll"
 obj = RTMB::MakeADFun( 
   nll, 
   parlist,
-  map = list(eps = factor(NA)),
   random = "u",
+  profile = "mu",
   silent = TRUE
 )
 
@@ -93,18 +93,22 @@ opt
 We first show that we can re-fit the model using the marginal likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky factorization that is default in TMB:
 
 ```{r}
-parlist$eps = numeric()
-pen0 = lanczos_MakeADFun(
+lan_obj = lanczos_MakeADFun(
   nll, 
   parlist,
   random = "u",
+  profile = "mu",
   k = 10,
-  silent = TRUE
+  silent = TRUE,
 )
 
 # optimize 
-opt_pen0 = nlminb( pen0$par, pen0$fn )
-opt_pen0
+lan_opt = nlminb( 
+  lan_obj$par, 
+  \(x) lan_obj$fn(x, orthogonalize = FALSE), 
+  \(x) lan_obj$gr(x, method = "simple", orthogonalize = FALSE) 
+)
+lan_opt
 ```
 
 ## Fit as a penalized likelihood model

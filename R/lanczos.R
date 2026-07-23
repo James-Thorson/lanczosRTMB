@@ -855,6 +855,18 @@ function( func,
     )
   }
 
+  # Make for inner optimizer
+  if( length(c(x_random,x_profile)) > 0 ){
+    if( length(x_profile) == 0 ){
+      env$Hq_pu = env$Hq_u
+    }else{
+      env$Hq_pu = make_Hq(
+        tape = tape_pu,
+        x0 = unlist(parameters[names(parameters) %in% c(profile,random)])   # random might be in different order than parameters
+      )
+    }
+  }
+
   # FIXME
   # get_inner = function(v){ RUN inner optimizer }
 
@@ -876,7 +888,7 @@ function( func,
         par = env$pu_best,
         fn = tape_pu,
         gr = grad_pu,
-        Hq = env$Hq_u,
+        Hq = env$Hq_pu,
         silent = silent,
         ...
       )
@@ -939,7 +951,7 @@ function( func,
     tape_x$simplify()
 
     if( pu_update == "FD" ){
-      duhat_dv = tape_x$newton(random = x_random)$jacfun()
+      dpuhat_dv = tape_x$newton(random = c(x_profile_random))$jacfun()
     }else if( pu_update == "implicit" ){
       grad_x = tape_x$jacfun()
       pu = env$x[x_profile_random]
@@ -954,11 +966,11 @@ function( func,
       grad_dpudv$reorder()
 
       # Hessian-vector product for pu
-      env$Hq_pu = make_Hq(
-        tape = tape_x,
-        x0 = env$x,
-        which_random = x_profile_random
-      )
+      #env$Hq_pu = make_Hq(
+      #  tape = tape_x,
+      #  x0 = env$x,
+      #  which_random = x_profile_random
+      #)
     }
 
     get_grad = function(v, ..., what = "nll", fixed_Q = FALSE, orthogonalize = TRUE ){
@@ -980,7 +992,7 @@ function( func,
       # Get projection for EB of u given FD change in v
       if( pu_update == "FD" ){
         #duhat_dv$force.update()  # Updated automatically via taping and newton
-        P = duhat_dv(v)
+        P = dpuhat_dv(v)
       }else if( pu_update == "implicit" ){
         grad_dpudv$force.update()
         dpu_dv = grad_dpudv(v)
@@ -991,7 +1003,7 @@ function( func,
           FUN = \(q){
             CG(
               b = q,
-              Hq = \(q,update_H) env$Hq_pu( q=q, x = env$x ),
+              Hq = \(q,update_H) env$Hq_pu( q=q, x = env$x[x_profile_random] ),
               silent = TRUE,
               e = 1e-6
             )$x
