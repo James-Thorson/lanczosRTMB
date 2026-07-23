@@ -503,20 +503,24 @@ likelihood, pending improvements:</p>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   0:     504.62916:  0.00000  0.00000  0.00000</span></span>
 <span><span class="co">#&gt;   1:     495.84000: 0.140501 0.0608528 0.143617</span></span>
-<span><span class="co">#&gt;   2:     484.00910: 0.0781670 0.171923 0.310492</span></span>
-<span><span class="co">#&gt;   3:     435.28104: 0.713936 0.892293  1.68792</span></span>
-<span><span class="co">#&gt;   4:     411.81485: 0.561042  1.03815  1.46091</span></span>
-<span><span class="co">#&gt;   5:     409.46604: 0.810696  1.01627  1.27822</span></span>
-<span><span class="co">#&gt;   6:     398.33797: 0.783540  1.32307  1.31451</span></span>
-<span><span class="co">#&gt;   7:     395.88482: 0.965447  1.57414  1.32197</span></span>
-<span><span class="co">#&gt;   8:     394.12436: 0.998892  1.65219  1.13773</span></span>
-<span><span class="co">#&gt;   9:     393.89650: 0.976436  1.66961  1.14524</span></span>
-<span><span class="co">#&gt;  10:     393.82003: 0.996859  1.69031  1.14954</span></span>
-<span><span class="co">#&gt;  11:     393.81439:  1.00372  1.71890  1.14955</span></span>
-<span><span class="co">#&gt;  12:     393.79674:  1.00208  1.70484  1.16041</span></span>
-<span><span class="co">#&gt;  13:     393.79596:  1.00094  1.70288  1.16307</span></span>
-<span><span class="co">#&gt;  14:     393.79592:  1.00078  1.70283  1.16355</span></span>
-<span><span class="co">#&gt;  15:     393.79592:  1.00078  1.70283  1.16355</span></span>
+<span><span class="co">#&gt;   2:     484.00912: 0.0781670 0.171923 0.310492</span></span>
+<span><span class="co">#&gt;   3:     429.79732: 0.701082 0.931326  1.67274</span></span>
+<span><span class="co">#&gt;   4:     410.91823: 0.574677  1.06764  1.45547</span></span>
+<span><span class="co">#&gt;   5:     407.72421: 0.808705  1.04318  1.29300</span></span>
+<span><span class="co">#&gt;   6:     398.38571: 0.787095  1.32686  1.32169</span></span>
+<span><span class="co">#&gt;   7:     395.77869: 0.959268  1.55469  1.30693</span></span>
+<span><span class="co">#&gt;   8:     394.64467: 0.917065  1.56329  1.23188</span></span>
+<span><span class="co">#&gt;   9:     394.18690: 0.966088  1.63407  1.24047</span></span>
+<span><span class="co">#&gt;  10:     394.04184: 0.969016  1.63842  1.22129</span></span>
+<span><span class="co">#&gt;  11:     393.89573: 0.982408  1.65177  1.18630</span></span>
+<span><span class="co">#&gt;  12:     393.87290: 0.977789  1.66033  1.18429</span></span>
+<span><span class="co">#&gt;  13:     393.85375: 0.986425  1.66405  1.18110</span></span>
+<span><span class="co">#&gt;  14:     393.81559: 0.989258  1.68249  1.17428</span></span>
+<span><span class="co">#&gt;  15:     393.79706: 0.998969  1.69805  1.16666</span></span>
+<span><span class="co">#&gt;  16:     393.79594:  1.00087  1.70309  1.16378</span></span>
+<span><span class="co">#&gt;  17:     393.79592:  1.00081  1.70289  1.16363</span></span>
+<span><span class="co">#&gt;  18:     393.79589:  1.00078  1.70285  1.16355</span></span>
+<span><span class="co">#&gt;  19:     393.79589:  1.00078  1.70285  1.16355</span></span>
 <span><span class="va">fit_lanczos</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>Where we can compare the runtime for the two models:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -534,11 +538,11 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">3.11 mins</td>
+<td align="left">3.22 mins</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">1.48 mins</td>
+<td align="left">1.95 mins</td>
 </tr>
 </tbody>
 </table>
@@ -568,15 +572,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="right">1.01</td>
+<td align="right">1.00</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="right">0.97</td>
+<td align="right">1.06</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 5.06 mins</p>
+<p>Runtime for this vignette: 5.58 mins</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
