@@ -37,7 +37,7 @@ We first simulate data from a compound lognormal-Gamma process:
 
 ```{r settings}
 set.seed(123)
-n = 30
+n = 100
 n_sum = 3
 
 # log-linked normal deviates
@@ -111,7 +111,7 @@ lan_opt = nlminb(
 lan_opt
 ```
 
-## Fit as a penalized likelihood model
+## Steps within the Lanczos marginal likelihood calculation
 
 Next, we show that the model can be refitted using penalized likelihood, conditional upon fixed values for variance parameters:
 
@@ -120,8 +120,7 @@ Next, we show that the model can be refitted using penalized likelihood, conditi
 newmap = list(
   mu = factor(NA), 
   logsd = factor(NA), 
-  logcv = factor(NA),
-  eps = factor(NA)
+  logcv = factor(NA)
 )
 pen = RTMB::MakeADFun( 
   nll, 
@@ -158,7 +157,8 @@ Hq = make_Hq( GetTape(pen), opt_pen$par )
 lanczos_logdet( Hq, k = 10, m = 3 )
 
 # log-determinant for marginal likelihood
-H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
+is_random = names(obj$env$last.par.best) %in% "u"
+H = obj$env$spHess(par = obj$env$last.par.best)[is_random,is_random]
 Matrix::determinant( H )$modulus
 ```
 Using this log-determinant, we can also compare the log-marginal likelihood using Lanczos with the full calculation:
@@ -173,7 +173,7 @@ opt$obj
 
 ## Delta methods
 
-Alternatively, we can apply Lanczos methods to standard errors for parameters.  Here, we will sample the first three random effects
+After estimating estimating random effects using the penalized likelihood, we can apply Lanczos methods to standard errors for parameters conditional upon fixed effect estimates.  Here, we will sample the first three random effects
 
 ```{r}
 samples = lanczos_sample(
@@ -242,6 +242,7 @@ Finally, we can use the gradient of the log-likelihood with respect to a dummy v
 what = "biascorr"
 phat = obj$env$parList()
 phat$eps = 0.0001
+newmap$eps = factor(NA)
 pen_hi = RTMB::MakeADFun( 
   nll, 
   parameters = phat, 
@@ -260,6 +261,7 @@ nll_hi = lanczos_nll( pen_hi, k = 10, m = 10, seed = 123 )
 nll_mid = lanczos_nll( pen, k = 10, m = 10, seed = 123 )
 
 # Epsilon bias-correction estimator
+what = "jnll"
 sdrep = sdreport( obj, bias.correct = TRUE )
 
 #
