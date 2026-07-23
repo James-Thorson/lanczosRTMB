@@ -871,7 +871,7 @@ function( func,
   # get_inner = function(v){ RUN inner optimizer }
 
   # Objective function
-  get_nll = function(v, ..., what = "nll", orthogonalize = TRUE){
+  get_nll = function(v, what = "nll", orthogonalize = FALSE, ...){
     # Define fixed effects and assign to global environment
     env$x[x_fixed] = v
     tape_pu$force.update()
@@ -973,7 +973,7 @@ function( func,
       #)
     }
 
-    get_grad = function(v, ..., what = "nll", fixed_Q = FALSE, orthogonalize = TRUE ){
+    get_grad = function(v, method = "simple", method.args = list(), what = "nll", fixed_Q = FALSE, orthogonalize = FALSE ){
       # Run to do inner optimizer
       get_nll(v)   # FIXME:  Only need conditional MLE not Lanczos (unless using fixed_Q)
       pu = env$pu_last
@@ -1042,7 +1042,8 @@ function( func,
           mean(logdet_m)
         },
         x = v,
-        ...
+        method = method,
+        method.args = method.args
       )
 
       grad = grad_jnll + 0.5*grad_logdet
