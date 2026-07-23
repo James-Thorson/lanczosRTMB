@@ -1018,16 +1018,13 @@ function( func,
           env$x = x
           env$x[x_fixed] = vnew
           # How to update random effects
-          if( pu_update == "FD" ){
-            # Project based on central jacobian
+          if( pu_update %in% c("FD","implicit") ){
+            # Project based on central jacobian or implicit update
             env$x[x_profile_random] = pu + (P %*% (vnew-v))[,1]
           }else if( pu_update == "exact" ){
             # Recompute exactly
             get_nll( vnew )
             env$x[x_profile_random] = env$pu_last
-          }else if( pu_update == "implicit" ){
-            # Project based on implicit update
-            env$x[x_profile_random] = pu + (P %*% (vnew-v))[,1]
           }
           # Apply in log-det
           logdet_m = lanczos_logdet(
