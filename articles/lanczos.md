@@ -26,7 +26,7 @@ We first simulate data from a compound lognormal-Gamma process:
 ``` r
 
 set.seed(123)
-n = 30
+n = 100
 n_sum = 3
 
 # log-linked normal deviates
@@ -59,7 +59,7 @@ nll = function(p){
 }
 
 # Starting list of parameters
-parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0, eps = 0)
+parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0)
 ```
 
 Finally, we fit this model as a log-linked generalized linear mixed
@@ -72,8 +72,8 @@ what = "jnll"
 obj = RTMB::MakeADFun( 
   nll, 
   parlist,
-  map = list(eps = factor(NA)),
   random = "u",
+  profile = "mu",
   silent = TRUE
 )
 
@@ -81,24 +81,24 @@ obj = RTMB::MakeADFun(
 opt = nlminb( obj$par, obj$fn, obj$gr )
 opt
 #> $par
-#>         mu      logsd      logcv 
-#> -0.1052225 -0.1326400 -0.5984998 
+#>      logsd      logcv 
+#> -0.2336439 -0.3417072 
 #> 
 #> $objective
-#> [1] 36.46907
+#> [1] 149.7827
 #> 
 #> $convergence
 #> [1] 0
 #> 
 #> $iterations
-#> [1] 13
+#> [1] 11
 #> 
 #> $evaluations
 #> function gradient 
-#>       17       14 
+#>       14       11 
 #> 
 #> $message
-#> [1] "relative convergence (4)"
+#> [1] "both X-convergence and relative convergence (5)"
 ```
 
 ### Fit as marginal likelihood without Cholesky decomposition
@@ -109,40 +109,44 @@ factorization that is default in TMB:
 
 ``` r
 
-parlist$eps = numeric()
-pen0 = lanczos_MakeADFun(
+lan_obj = lanczos_MakeADFun(
   nll, 
   parlist,
   random = "u",
+  profile = "mu",
   k = 10,
-  silent = TRUE
+  silent = TRUE,
 )
 
 # optimize 
-opt_pen0 = nlminb( pen0$par, pen0$fn )
-opt_pen0
+lan_opt = nlminb( 
+  lan_obj$par, 
+  \(x) lan_obj$fn(x, orthogonalize = FALSE), 
+  \(x) lan_obj$gr(x, method = "simple", orthogonalize = FALSE) 
+)
+lan_opt
 #> $par
-#>         mu      logsd      logcv 
-#> -0.1084795 -0.1284993 -0.6074894 
+#>      logsd      logcv 
+#> -0.2336937 -0.3417089 
 #> 
 #> $objective
-#> [1] 36.46912
+#> [1] 149.7827
 #> 
 #> $convergence
-#> [1] 1
+#> [1] 0
 #> 
 #> $iterations
-#> [1] 11
+#> [1] 9
 #> 
 #> $evaluations
 #> function gradient 
-#>       31       35 
+#>       13        9 
 #> 
 #> $message
-#> [1] "false convergence (8)"
+#> [1] "relative convergence (4)"
 ```
 
-### Fit as a penalized likelihood model
+### Steps within the Lanczos marginal likelihood calculation
 
 Next, we show that the model can be refitted using penalized likelihood,
 conditional upon fixed values for variance parameters:
@@ -153,8 +157,7 @@ conditional upon fixed values for variance parameters:
 newmap = list(
   mu = factor(NA), 
   logsd = factor(NA), 
-  logcv = factor(NA),
-  eps = factor(NA)
+  logcv = factor(NA)
 )
 pen = RTMB::MakeADFun( 
   nll, 
@@ -184,7 +187,7 @@ opt_pen2 = newton_CG(
   gr = tape$jacfun(),
   Hq = Hq
 )
-#> value: 41.78943 mgc: 9.836576e-13 ustep: 0.9999
+#> value: 179.689 mgc: 1.376677e-14 ustep: 0.9999
 ```
 
 We can then use stochastic trace estimation and the Lanczos method to
@@ -195,12 +198,13 @@ approximate the log-determinant of the Hessian for random effects:
 # log-determinant using Lanczos
 Hq = make_Hq( GetTape(pen), opt_pen$par )
 lanczos_logdet( Hq, k = 10, m = 3 )
-#> [1] 44.4956 44.4956 44.4956
+#> [1] 123.9751 123.9751 123.9751
 
 # log-determinant for marginal likelihood
-H = obj$env$spHess(par = obj$env$last.par.best, random = TRUE)
+is_random = names(obj$env$last.par.best) %in% "u"
+H = obj$env$spHess(par = obj$env$last.par.best)[is_random,is_random]
 Matrix::determinant( H )$modulus
-#> [1] 44.4956
+#> [1] 123.9751
 #> attr(,"logarithm")
 #> [1] TRUE
 ```
@@ -213,17 +217,19 @@ likelihood using Lanczos with the full calculation:
 # Marginal likelihoods using Lanczos
 lanczos_nll( pen, k = 10, m = 10 )
 #>      nll   sd_nll 
-#> 36.46907  0.00000
+#> 149.7827   0.0000
 
 # Marginal likelihood using Laplace
 opt$obj
-#> [1] 36.46907
+#> [1] 149.7827
 ```
 
 ### Delta methods
 
-Alternatively, we can apply Lanczos methods to standard errors for
-parameters. Here, we will sample the first three random effects
+After estimating estimating random effects using the penalized
+likelihood, we can apply Lanczos methods to standard errors for
+parameters conditional upon fixed effect estimates. Here, we will sample
+the first three random effects
 
 ``` r
 
@@ -238,9 +244,9 @@ samples = lanczos_sample(
 #
 sdrep = sdreport( obj, ignore.parm.uncertainty = TRUE )
 as.list(sdrep, what = "Std. Error")$u[1:3]
-#> [1] 0.4839019 0.4864751 0.4066186
+#> [1] 0.6169927 0.5603973 0.4274568
 apply( samples, MARGIN = 1, FUN = sd)[1:3]
-#> [1] 0.4782002 0.4887318 0.4051458
+#> [1] 0.6102670 0.5559250 0.4235736
 ```
 
 Alternatively, we can apply Lanczos methods to approximate the Hessian
@@ -275,10 +281,10 @@ samples = lanczos_sample(
 # Compare SD of samples with the delta method
 sumexpu1 = apply( samples, MARGIN = 2, FUN = \(v)pen$report(v)$sumexpu )
 c( pen$report()$sumexpu, sd(sumexpu1) )
-#> [1] 4.0641214 0.9435151
+#> [1] 5.120785 1.242401
 summary(sdrep)['sumexpu',]
 #>   Estimate Std. Error 
-#>   4.064121   1.194484
+#>   5.120785   1.680983
 ```
 
 Alternatively, we can calculate the standard error for a derived
@@ -295,10 +301,10 @@ Var = lanczos_variance(
 
 # Compare with the delta method
 c( pen$report()$sumexpu, sqrt(Var) )
-#> [1] 4.064121 1.194484
+#> [1] 5.120785 1.668657
 summary(sdrep)['sumexpu',]
 #>   Estimate Std. Error 
-#>   4.064121   1.194484
+#>   5.120785   1.680983
 ```
 
 ### Epsilon methods
@@ -312,6 +318,7 @@ dummy variable epsilon to correct for retransformation bias:
 what = "biascorr"
 phat = obj$env$parList()
 phat$eps = 0.0001
+newmap$eps = factor(NA)
 pen_hi = RTMB::MakeADFun( 
   nll, 
   parameters = phat, 
@@ -330,15 +337,16 @@ nll_hi = lanczos_nll( pen_hi, k = 10, m = 10, seed = 123 )
 nll_mid = lanczos_nll( pen, k = 10, m = 10, seed = 123 )
 
 # Epsilon bias-correction estimator
+what = "jnll"
 sdrep = sdreport( obj, bias.correct = TRUE )
 
 #
 (nll_hi['nll'] - nll_mid['nll']) / (phat$eps)
 #>      nll 
-#> 4.733918
+#> 6.050397
 summary(sdrep)['sumexpu',]
 #>            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) 
-#>            4.064121            1.625808            4.734025                  NA
+#>            5.120785            1.801529            6.319429                  NA
 ```
 
 ## Spatial change of support
@@ -491,28 +499,21 @@ fit_lanczos = with_monitor({
   )
 })
 #>   0:     504.62916:  0.00000  0.00000  0.00000
-#>   1:     494.24479: 0.184217 0.0935038 0.197980
-#>   2:     475.40130: 0.122225 0.248647 0.430278
-#>   3:     440.81434: 0.370318 0.516002 0.871266
-#>   4:     435.35864: 0.345424 0.750697  1.02136
-#>   5:     416.89202: 0.578348 0.869157  1.12108
-#>   6:     404.21336: 0.645429  1.02247  1.34519
-#>   7:     401.56756: 0.808515  1.18678  1.18823
-#>   8:     400.38404: 0.765530  1.46247  1.20762
-#>   9:     395.95925:  1.00678  1.58732  1.27429
-#>  10:     395.05342:  1.05760  1.85270  1.20205
-#>  11:     394.75314:  1.05317  1.84670  1.06251
-#>  12:     394.30247:  1.03995  1.77818  1.06609
-#>  13:     394.20331: 0.988922  1.73120  1.07450
-#>  14:     394.00905:  1.00162  1.72134  1.09059
-#>  15:     393.90594:  1.00725  1.71939  1.11254
-#>  16:     393.80452:  1.00751  1.70567  1.16412
-#>  17:     393.79692:  1.00246  1.70312  1.16154
-#>  18:     393.79593:  1.00072  1.70269  1.16365
-#>  19:     393.79593:  1.00072  1.70274  1.16362
-#>  20:     393.79587:  1.00073  1.70274  1.16362
-#>  21:     393.79580:  1.00073  1.70274  1.16362
-#>  22:     393.79580:  1.00073  1.70274  1.16362
+#>   1:     495.84000: 0.140501 0.0608528 0.143617
+#>   2:     484.00910: 0.0781670 0.171923 0.310492
+#>   3:     435.28104: 0.713936 0.892293  1.68792
+#>   4:     411.81485: 0.561042  1.03815  1.46091
+#>   5:     409.46604: 0.810696  1.01627  1.27822
+#>   6:     398.33797: 0.783540  1.32307  1.31451
+#>   7:     395.88482: 0.965447  1.57414  1.32197
+#>   8:     394.12436: 0.998892  1.65219  1.13773
+#>   9:     393.89650: 0.976436  1.66961  1.14524
+#>  10:     393.82003: 0.996859  1.69031  1.14954
+#>  11:     393.81439:  1.00372  1.71890  1.14955
+#>  12:     393.79674:  1.00208  1.70484  1.16041
+#>  13:     393.79596:  1.00094  1.70288  1.16307
+#>  14:     393.79592:  1.00078  1.70283  1.16355
+#>  15:     393.79592:  1.00078  1.70283  1.16355
 fit_lanczos$run_time = Sys.time() - start_time
 ```
 
@@ -529,8 +530,8 @@ knitr::kable( runtime, digits=2, caption="Run-times" )
 
 |         | x         |
 |:--------|:----------|
-| RTMB    | 3.07 mins |
-| Lanczos | 2.97 mins |
+| RTMB    | 3.11 mins |
+| Lanczos | 1.48 mins |
 
 Run-times {.table}
 
@@ -562,11 +563,11 @@ knitr::kable( max_memory, digits=2, caption="Maximum memory use (GB)" )
 
 |         |    x |
 |:--------|-----:|
-| RTMB    | 1.03 |
-| Lanczos | 0.98 |
+| RTMB    | 1.01 |
+| Lanczos | 0.97 |
 
 Maximum memory use (GB) {.table}
 
-Runtime for this vignette: 6.5 mins
+Runtime for this vignette: 5.06 mins
 
 ### Works cited

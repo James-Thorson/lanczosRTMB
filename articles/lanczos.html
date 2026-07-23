@@ -87,7 +87,7 @@ linear mixed model.</p>
 <p>We first simulate data from a compound lognormal-Gamma process:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">n</span> <span class="op">=</span> <span class="fl">30</span></span>
+<span><span class="va">n</span> <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="va">n_sum</span> <span class="op">=</span> <span class="fl">3</span></span>
 <span></span>
 <span><span class="co"># log-linked normal deviates</span></span>
@@ -116,7 +116,7 @@ allowing us to calculate other outputs for later use:</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># Starting list of parameters</span></span>
-<span><span class="va">parlist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>u<span class="op">=</span><span class="va">u</span><span class="op">*</span><span class="fl">0</span>, mu <span class="op">=</span> <span class="fl">0</span>, logsd <span class="op">=</span> <span class="fl">0</span>, logcv <span class="op">=</span> <span class="fl">0</span>, eps <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">parlist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>u<span class="op">=</span><span class="va">u</span><span class="op">*</span><span class="fl">0</span>, mu <span class="op">=</span> <span class="fl">0</span>, logsd <span class="op">=</span> <span class="fl">0</span>, logcv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we fit this model as a log-linked generalized linear mixed
 model (GLMM):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -125,8 +125,8 @@ model (GLMM):</p>
 <span><span class="va">obj</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> </span>
 <span>  <span class="va">nll</span>, </span>
 <span>  <span class="va">parlist</span>,</span>
-<span>  map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  random <span class="op">=</span> <span class="st">"u"</span>,</span>
+<span>  profile <span class="op">=</span> <span class="st">"mu"</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -134,24 +134,24 @@ model (GLMM):</p>
 <span><span class="va">opt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">obj</span><span class="op">$</span><span class="va">par</span>, <span class="va">obj</span><span class="op">$</span><span class="va">fn</span>, <span class="va">obj</span><span class="op">$</span><span class="va">gr</span> <span class="op">)</span></span>
 <span><span class="va">opt</span></span>
 <span><span class="co">#&gt; $par</span></span>
-<span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1052225 -0.1326400 -0.5984998 </span></span>
+<span><span class="co">#&gt;      logsd      logcv </span></span>
+<span><span class="co">#&gt; -0.2336439 -0.3417072 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 36.46907</span></span>
+<span><span class="co">#&gt; [1] 149.7827</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $convergence</span></span>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 13</span></span>
+<span><span class="co">#&gt; [1] 11</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       17       14 </span></span>
+<span><span class="co">#&gt;       14       11 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
-<span><span class="co">#&gt; [1] "relative convergence (4)"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "both X-convergence and relative convergence (5)"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fit-as-marginal-likelihood-without-cholesky-decomposition">Fit as marginal likelihood without Cholesky decomposition<a class="anchor" aria-label="anchor" href="#fit-as-marginal-likelihood-without-cholesky-decomposition"></a>
@@ -160,40 +160,44 @@ model (GLMM):</p>
 likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky
 factorization that is default in TMB:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">parlist</span><span class="op">$</span><span class="va">eps</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">pen0</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_MakeADFun.html">lanczos_MakeADFun</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">lan_obj</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_MakeADFun.html">lanczos_MakeADFun</a></span><span class="op">(</span></span>
 <span>  <span class="va">nll</span>, </span>
 <span>  <span class="va">parlist</span>,</span>
 <span>  random <span class="op">=</span> <span class="st">"u"</span>,</span>
+<span>  profile <span class="op">=</span> <span class="st">"mu"</span>,</span>
 <span>  k <span class="op">=</span> <span class="fl">10</span>,</span>
-<span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># optimize </span></span>
-<span><span class="va">opt_pen0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> <span class="va">pen0</span><span class="op">$</span><span class="va">par</span>, <span class="va">pen0</span><span class="op">$</span><span class="va">fn</span> <span class="op">)</span></span>
-<span><span class="va">opt_pen0</span></span>
+<span><span class="va">lan_opt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nlminb.html" class="external-link">nlminb</a></span><span class="op">(</span> </span>
+<span>  <span class="va">lan_obj</span><span class="op">$</span><span class="va">par</span>, </span>
+<span>  \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">lan_obj</span><span class="op">$</span><span class="fu">fn</span><span class="op">(</span><span class="va">x</span>, orthogonalize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, </span>
+<span>  \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">lan_obj</span><span class="op">$</span><span class="fu">gr</span><span class="op">(</span><span class="va">x</span>, method <span class="op">=</span> <span class="st">"simple"</span>, orthogonalize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> </span>
+<span><span class="op">)</span></span>
+<span><span class="va">lan_opt</span></span>
 <span><span class="co">#&gt; $par</span></span>
-<span><span class="co">#&gt;         mu      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.1084795 -0.1284993 -0.6074894 </span></span>
+<span><span class="co">#&gt;      logsd      logcv </span></span>
+<span><span class="co">#&gt; -0.2336937 -0.3417089 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
-<span><span class="co">#&gt; [1] 36.46912</span></span>
+<span><span class="co">#&gt; [1] 149.7827</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $convergence</span></span>
-<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 11</span></span>
+<span><span class="co">#&gt; [1] 9</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       31       35 </span></span>
+<span><span class="co">#&gt;       13        9 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
-<span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "relative convergence (4)"</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="fit-as-a-penalized-likelihood-model">Fit as a penalized likelihood model<a class="anchor" aria-label="anchor" href="#fit-as-a-penalized-likelihood-model"></a>
+<h3 id="steps-within-the-lanczos-marginal-likelihood-calculation">Steps within the Lanczos marginal likelihood calculation<a class="anchor" aria-label="anchor" href="#steps-within-the-lanczos-marginal-likelihood-calculation"></a>
 </h3>
 <p>Next, we show that the model can be refitted using penalized
 likelihood, conditional upon fixed values for variance parameters:</p>
@@ -202,8 +206,7 @@ likelihood, conditional upon fixed values for variance parameters:</p>
 <span><span class="va">newmap</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>, </span>
 <span>  logsd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>, </span>
-<span>  logcv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>,</span>
-<span>  eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span>
+<span>  logcv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">pen</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> </span>
 <span>  <span class="va">nll</span>, </span>
@@ -229,19 +232,20 @@ ever forming the full Hessian matrix:</p>
 <span>  gr <span class="op">=</span> <span class="va">tape</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Hq <span class="op">=</span> <span class="va">Hq</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; value: 41.78943 mgc: 9.836576e-13 ustep: 0.9999</span></span></code></pre></div>
+<span><span class="co">#&gt; value: 179.689 mgc: 1.376677e-14 ustep: 0.9999</span></span></code></pre></div>
 <p>We can then use stochastic trace estimation and the Lanczos method to
 approximate the log-determinant of the Hessian for random effects:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># log-determinant using Lanczos</span></span>
 <span><span class="va">Hq</span> <span class="op">=</span> <span class="fu"><a href="../reference/make_Hq.html">make_Hq</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/pkg/RTMB/man/Tape.html" class="external-link">GetTape</a></span><span class="op">(</span><span class="va">pen</span><span class="op">)</span>, <span class="va">opt_pen</span><span class="op">$</span><span class="va">par</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/lanczos_logdet.html">lanczos_logdet</a></span><span class="op">(</span> <span class="va">Hq</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">3</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 44.4956 44.4956 44.4956</span></span>
+<span><span class="co">#&gt; [1] 123.9751 123.9751 123.9751</span></span>
 <span></span>
 <span><span class="co"># log-determinant for marginal likelihood</span></span>
-<span><span class="va">H</span> <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">spHess</span><span class="op">(</span>par <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="va">last.par.best</span>, random <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">is_random</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="va">last.par.best</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"u"</span></span>
+<span><span class="va">H</span> <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">spHess</span><span class="op">(</span>par <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="va">last.par.best</span><span class="op">)</span><span class="op">[</span><span class="va">is_random</span>,<span class="va">is_random</span><span class="op">]</span></span>
 <span><span class="fu">Matrix</span><span class="fu">::</span><span class="fu">determinant</span><span class="op">(</span> <span class="va">H</span> <span class="op">)</span><span class="op">$</span><span class="va">modulus</span></span>
-<span><span class="co">#&gt; [1] 44.4956</span></span>
+<span><span class="co">#&gt; [1] 123.9751</span></span>
 <span><span class="co">#&gt; attr(,"logarithm")</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>Using this log-determinant, we can also compare the log-marginal
@@ -250,17 +254,19 @@ likelihood using Lanczos with the full calculation:</p>
 <code class="sourceCode R"><span><span class="co"># Marginal likelihoods using Lanczos</span></span>
 <span><span class="fu"><a href="../reference/lanczos_nll.html">lanczos_nll</a></span><span class="op">(</span> <span class="va">pen</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span>
 <span><span class="co">#&gt;      nll   sd_nll </span></span>
-<span><span class="co">#&gt; 36.46907  0.00000</span></span>
+<span><span class="co">#&gt; 149.7827   0.0000</span></span>
 <span></span>
 <span><span class="co"># Marginal likelihood using Laplace</span></span>
 <span><span class="va">opt</span><span class="op">$</span><span class="va">obj</span></span>
-<span><span class="co">#&gt; [1] 36.46907</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 149.7827</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="delta-methods">Delta methods<a class="anchor" aria-label="anchor" href="#delta-methods"></a>
 </h3>
-<p>Alternatively, we can apply Lanczos methods to standard errors for
-parameters. Here, we will sample the first three random effects</p>
+<p>After estimating estimating random effects using the penalized
+likelihood, we can apply Lanczos methods to standard errors for
+parameters conditional upon fixed effect estimates. Here, we will sample
+the first three random effects</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_sample.html">lanczos_sample</a></span><span class="op">(</span></span>
 <span>   Hq <span class="op">=</span> <span class="va">Hq</span>,</span>
@@ -273,9 +279,9 @@ parameters. Here, we will sample the first three random effects</p>
 <span><span class="co">#</span></span>
 <span><span class="va">sdrep</span> <span class="op">=</span> <span class="fu">sdreport</span><span class="op">(</span> <span class="va">obj</span>, ignore.parm.uncertainty <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">sdrep</span>, what <span class="op">=</span> <span class="st">"Std. Error"</span><span class="op">)</span><span class="op">$</span><span class="va">u</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
-<span><span class="co">#&gt; [1] 0.4839019 0.4864751 0.4066186</span></span>
+<span><span class="co">#&gt; [1] 0.6169927 0.5603973 0.4274568</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span> <span class="va">samples</span>, MARGIN <span class="op">=</span> <span class="fl">1</span>, FUN <span class="op">=</span> <span class="va">sd</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
-<span><span class="co">#&gt; [1] 0.4782002 0.4887318 0.4051458</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.6102670 0.5559250 0.4235736</span></span></code></pre></div>
 <p>Alternatively, we can apply Lanczos methods to approximate the
 Hessian with respect to a derived quantity. This involves calculating
 the gradient for the derived quantity with respect to coefficients:</p>
@@ -302,10 +308,10 @@ errors:</p>
 <span><span class="co"># Compare SD of samples with the delta method</span></span>
 <span><span class="va">sumexpu1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span> <span class="va">samples</span>, MARGIN <span class="op">=</span> <span class="fl">2</span>, FUN <span class="op">=</span> \<span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="va">pen</span><span class="op">$</span><span class="fu">report</span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">$</span><span class="va">sumexpu</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="va">pen</span><span class="op">$</span><span class="fu">report</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">sumexpu</span>, <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">sumexpu1</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4.0641214 0.9435151</span></span>
+<span><span class="co">#&gt; [1] 5.120785 1.242401</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sdrep</span><span class="op">)</span><span class="op">[</span><span class="st">'sumexpu'</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;   Estimate Std. Error </span></span>
-<span><span class="co">#&gt;   4.064121   1.194484</span></span></code></pre></div>
+<span><span class="co">#&gt;   5.120785   1.680983</span></span></code></pre></div>
 <p>Alternatively, we can calculate the standard error for a derived
 quantity using Lanczos within the delta method:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -318,10 +324,10 @@ quantity using Lanczos within the delta method:</p>
 <span></span>
 <span><span class="co"># Compare with the delta method</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="va">pen</span><span class="op">$</span><span class="fu">report</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">sumexpu</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">Var</span><span class="op">)</span> <span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4.064121 1.194484</span></span>
+<span><span class="co">#&gt; [1] 5.120785 1.668657</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sdrep</span><span class="op">)</span><span class="op">[</span><span class="st">'sumexpu'</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;   Estimate Std. Error </span></span>
-<span><span class="co">#&gt;   4.064121   1.194484</span></span></code></pre></div>
+<span><span class="co">#&gt;   5.120785   1.680983</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="epsilon-methods">Epsilon methods<a class="anchor" aria-label="anchor" href="#epsilon-methods"></a>
@@ -333,6 +339,7 @@ to a dummy variable epsilon to correct for retransformation bias:</p>
 <span><span class="va">what</span> <span class="op">=</span> <span class="st">"biascorr"</span></span>
 <span><span class="va">phat</span> <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">parList</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">phat</span><span class="op">$</span><span class="va">eps</span> <span class="op">=</span> <span class="fl">0.0001</span></span>
+<span><span class="va">newmap</span><span class="op">$</span><span class="va">eps</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span>
 <span><span class="va">pen_hi</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> </span>
 <span>  <span class="va">nll</span>, </span>
 <span>  parameters <span class="op">=</span> <span class="va">phat</span>, </span>
@@ -351,15 +358,16 @@ to a dummy variable epsilon to correct for retransformation bias:</p>
 <span><span class="va">nll_mid</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_nll.html">lanczos_nll</a></span><span class="op">(</span> <span class="va">pen</span>, k <span class="op">=</span> <span class="fl">10</span>, m <span class="op">=</span> <span class="fl">10</span>, seed <span class="op">=</span> <span class="fl">123</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Epsilon bias-correction estimator</span></span>
+<span><span class="va">what</span> <span class="op">=</span> <span class="st">"jnll"</span></span>
 <span><span class="va">sdrep</span> <span class="op">=</span> <span class="fu">sdreport</span><span class="op">(</span> <span class="va">obj</span>, bias.correct <span class="op">=</span> <span class="cn">TRUE</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co">#</span></span>
 <span><span class="op">(</span><span class="va">nll_hi</span><span class="op">[</span><span class="st">'nll'</span><span class="op">]</span> <span class="op">-</span> <span class="va">nll_mid</span><span class="op">[</span><span class="st">'nll'</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">phat</span><span class="op">$</span><span class="va">eps</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      nll </span></span>
-<span><span class="co">#&gt; 4.733918</span></span>
+<span><span class="co">#&gt; 6.050397</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">sdrep</span><span class="op">)</span><span class="op">[</span><span class="st">'sumexpu'</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt;            Estimate          Std. Error Est. (bias.correct) Std. (bias.correct) </span></span>
-<span><span class="co">#&gt;            4.064121            1.625808            4.734025                  NA</span></span></code></pre></div>
+<span><span class="co">#&gt;            5.120785            1.801529            6.319429                  NA</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -494,28 +502,21 @@ likelihood, pending improvements:</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   0:     504.62916:  0.00000  0.00000  0.00000</span></span>
-<span><span class="co">#&gt;   1:     494.24479: 0.184217 0.0935038 0.197980</span></span>
-<span><span class="co">#&gt;   2:     475.40130: 0.122225 0.248647 0.430278</span></span>
-<span><span class="co">#&gt;   3:     440.81434: 0.370318 0.516002 0.871266</span></span>
-<span><span class="co">#&gt;   4:     435.35864: 0.345424 0.750697  1.02136</span></span>
-<span><span class="co">#&gt;   5:     416.89202: 0.578348 0.869157  1.12108</span></span>
-<span><span class="co">#&gt;   6:     404.21336: 0.645429  1.02247  1.34519</span></span>
-<span><span class="co">#&gt;   7:     401.56756: 0.808515  1.18678  1.18823</span></span>
-<span><span class="co">#&gt;   8:     400.38404: 0.765530  1.46247  1.20762</span></span>
-<span><span class="co">#&gt;   9:     395.95925:  1.00678  1.58732  1.27429</span></span>
-<span><span class="co">#&gt;  10:     395.05342:  1.05760  1.85270  1.20205</span></span>
-<span><span class="co">#&gt;  11:     394.75314:  1.05317  1.84670  1.06251</span></span>
-<span><span class="co">#&gt;  12:     394.30247:  1.03995  1.77818  1.06609</span></span>
-<span><span class="co">#&gt;  13:     394.20331: 0.988922  1.73120  1.07450</span></span>
-<span><span class="co">#&gt;  14:     394.00905:  1.00162  1.72134  1.09059</span></span>
-<span><span class="co">#&gt;  15:     393.90594:  1.00725  1.71939  1.11254</span></span>
-<span><span class="co">#&gt;  16:     393.80452:  1.00751  1.70567  1.16412</span></span>
-<span><span class="co">#&gt;  17:     393.79692:  1.00246  1.70312  1.16154</span></span>
-<span><span class="co">#&gt;  18:     393.79593:  1.00072  1.70269  1.16365</span></span>
-<span><span class="co">#&gt;  19:     393.79593:  1.00072  1.70274  1.16362</span></span>
-<span><span class="co">#&gt;  20:     393.79587:  1.00073  1.70274  1.16362</span></span>
-<span><span class="co">#&gt;  21:     393.79580:  1.00073  1.70274  1.16362</span></span>
-<span><span class="co">#&gt;  22:     393.79580:  1.00073  1.70274  1.16362</span></span>
+<span><span class="co">#&gt;   1:     495.84000: 0.140501 0.0608528 0.143617</span></span>
+<span><span class="co">#&gt;   2:     484.00910: 0.0781670 0.171923 0.310492</span></span>
+<span><span class="co">#&gt;   3:     435.28104: 0.713936 0.892293  1.68792</span></span>
+<span><span class="co">#&gt;   4:     411.81485: 0.561042  1.03815  1.46091</span></span>
+<span><span class="co">#&gt;   5:     409.46604: 0.810696  1.01627  1.27822</span></span>
+<span><span class="co">#&gt;   6:     398.33797: 0.783540  1.32307  1.31451</span></span>
+<span><span class="co">#&gt;   7:     395.88482: 0.965447  1.57414  1.32197</span></span>
+<span><span class="co">#&gt;   8:     394.12436: 0.998892  1.65219  1.13773</span></span>
+<span><span class="co">#&gt;   9:     393.89650: 0.976436  1.66961  1.14524</span></span>
+<span><span class="co">#&gt;  10:     393.82003: 0.996859  1.69031  1.14954</span></span>
+<span><span class="co">#&gt;  11:     393.81439:  1.00372  1.71890  1.14955</span></span>
+<span><span class="co">#&gt;  12:     393.79674:  1.00208  1.70484  1.16041</span></span>
+<span><span class="co">#&gt;  13:     393.79596:  1.00094  1.70288  1.16307</span></span>
+<span><span class="co">#&gt;  14:     393.79592:  1.00078  1.70283  1.16355</span></span>
+<span><span class="co">#&gt;  15:     393.79592:  1.00078  1.70283  1.16355</span></span>
 <span><span class="va">fit_lanczos</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>Where we can compare the runtime for the two models:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -533,11 +534,11 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">3.07 mins</td>
+<td align="left">3.11 mins</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">2.97 mins</td>
+<td align="left">1.48 mins</td>
 </tr>
 </tbody>
 </table>
@@ -567,15 +568,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="right">1.03</td>
+<td align="right">1.01</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="right">0.98</td>
+<td align="right">0.97</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 6.5 mins</p>
+<p>Runtime for this vignette: 5.06 mins</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
