@@ -160,11 +160,11 @@ obj2 = MakeADFun( nll, parlist, random = "u", silent = TRUE )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
 #>         mu      logsd      logcv 
-#> -0.1585893  0.1860319 -5.8937339 
+#> -0.1585565  0.1860354 -5.8049725 
 
 # Fit again using FD gradient for Lanczos method using fixed probe-recursion
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 opt3$par - opt2$par
 #>            mu         logsd         logcv 
-#> -0.0000965794  0.0001031144 -0.0002845940 
+#> -9.657959e-05  1.031146e-04 -2.845946e-04 
 ```
