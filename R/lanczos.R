@@ -17,7 +17,7 @@
 #'
 #' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
 #' @importFrom Matrix sparseMatrix Diagonal Matrix t .bdiag mat2triplet
-#' @importFrom stats optim rnorm sd na.omit
+#' @importFrom stats optim rnorm sd na.omit setNames
 #' @importFrom numDeriv grad
 #'
 #' @examples
