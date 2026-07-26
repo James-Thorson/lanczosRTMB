@@ -9,9 +9,10 @@ user-supplied joint likelihood and designated random effects
 lanczos_MakeADFun(
   func,
   parameters,
+  map = NULL,
   random,
-  k,
   profile = NULL,
+  k,
   m = 3,
   method = "newton_CG",
   seed = 123,
@@ -31,19 +32,24 @@ lanczos_MakeADFun(
 
   Parameter list (or parameter vector) used by `func`.
 
+- map:
+
+  List defining how to optionally collect and fix parameters, defined
+  the same as in TMB
+
 - random:
 
   Character vector defining the random effect parameters. See also
   `regexp`.
 
-- k:
-
-  dimension for Kyrlov subspace
-
 - profile:
 
   Parameters to profile out of the likelihood (this subset will be
   appended to `random` with Laplace approximation disabled).
+
+- k:
+
+  dimension for Kyrlov subspace
 
 - m:
 

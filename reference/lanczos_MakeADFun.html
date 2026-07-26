@@ -48,9 +48,10 @@ a user-supplied joint likelihood and designated random effects</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lanczos_MakeADFun</span><span class="op">(</span></span>
 <span>  <span class="va">func</span>,</span>
 <span>  <span class="va">parameters</span>,</span>
+<span>  map <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">random</span>,</span>
-<span>  <span class="va">k</span>,</span>
 <span>  profile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">k</span>,</span>
 <span>  m <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"newton_CG"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
@@ -72,16 +73,21 @@ a user-supplied joint likelihood and designated random effects</p>
 <dd><p>Parameter list (or parameter vector) used by <code>func</code>.</p></dd>
 
 
+<dt id="arg-map">map<a class="anchor" aria-label="anchor" href="#arg-map"></a></dt>
+<dd><p>List defining how to optionally collect and fix parameters, defined the same
+as in TMB</p></dd>
+
+
 <dt id="arg-random">random<a class="anchor" aria-label="anchor" href="#arg-random"></a></dt>
 <dd><p>Character vector defining the random effect parameters. See also <code>regexp</code>.</p></dd>
 
 
-<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
-<dd><p>dimension for Kyrlov subspace</p></dd>
-
-
 <dt id="arg-profile">profile<a class="anchor" aria-label="anchor" href="#arg-profile"></a></dt>
 <dd><p>Parameters to profile out of the likelihood (this subset will be appended to <code>random</code> with Laplace approximation disabled).</p></dd>
+
+
+<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
+<dd><p>dimension for Kyrlov subspace</p></dd>
 
 
 <dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>

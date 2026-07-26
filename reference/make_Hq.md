@@ -60,10 +60,11 @@ sparse Hessian, store the update in the local environment and then
 calculate the HVP. `update_H = FALSE` is then useful when repeadly using
 the same Hessian in a HVP.
 
-When `method = "FD-on-verse"`, `make_Hq` instead calculates a two-sided
-finite-difference approximation to a forward-on-reverse autodiff
-calculation, using `delta = 1e-6` forward-on-reverse (and FD of autodiff
-gradients) is efficient given that `grad_u(f) %** q` has length of one.
+When `method = "FD-on-reverse"`, `make_Hq` instead calculates a
+two-sided finite-difference approximation to a forward-on-reverse
+autodiff calculation, using `delta = 1e-6` forward-on-reverse (and FD of
+autodiff gradients) is efficient given that `grad_u(f) %** q` has length
+of one.
 
 `qprime` is defined internally where `qprime[which_random] = q` and
 `qprime[!which_random] = 0`, where `length(qprime)` is equal to
@@ -138,10 +139,10 @@ x_new[which_random] = rnorm(length(which_random))
 
 system.time(Hq(q, x_new))
 #>    user  system elapsed 
-#>   0.001   0.000   0.001 
+#>       0       0       0 
 system.time(Hq2(q, x_new))
 #>    user  system elapsed 
-#>   0.007   0.000   0.007 
+#>   0.006   0.000   0.006 
 system.time(Hq2(q, x_new, update_H = FALSE))
 #>    user  system elapsed 
 #>       0       0       0 
