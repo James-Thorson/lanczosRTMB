@@ -292,7 +292,7 @@ function( par,
   ## Solve problem with accuracy when u apprach 0
   decrease <- function(u)ifelse(u>1e-10,1-increase(1-u),(1-u0)*power*u)
   ##plot(increase,0,1,ylim=c(0,1));plot(decrease,0,1,add=TRUE);abline(0,1)
-  ustep = increase(ustep)
+  #ustep = increase(ustep)
 
   for( newton_iter in seq_len(maxit_newton) ){
     # CG for H^-1 grad
