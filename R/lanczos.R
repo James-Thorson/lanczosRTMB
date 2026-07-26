@@ -16,7 +16,7 @@
 #' @param tol numerical tolerance for stopping algorithm given that no more terms are identifiable
 #'
 #' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
-#' @importFrom Matrix sparseMatrix Diagonal Matrix t
+#' @importFrom Matrix sparseMatrix Diagonal Matrix t .bdiag mat2triplet
 #' @importFrom stats optim rnorm sd na.omit
 #' @importFrom numDeriv grad
 #'
@@ -767,11 +767,11 @@ function( obj,
 lanczos_MakeADFun <-
 function( func,
           parameters,
+          map = NULL,
           random,
-          k,
           profile = NULL,
+          k,
           m = 3,
-          #do_grad = FALSE,
           method = "newton_CG",
           seed = 123,
           make_gr = TRUE,
@@ -779,14 +779,51 @@ function( func,
           silent = TRUE ){
 
   # vectors
+  #  par = unlist(parameters) ... i.e., includes mapped-off and mirrored values
   #  p = profile
   #  u = random
   #  v = fixed
   #  x = (p,u,v)
   pu_update = match.arg(pu_update)
 
+  #
+  map2 = map
+  for(i in seq_along(parameters) ){
+    parname = names(parameters)[i]
+    if( parname %in% names(map) ){
+      if( length(map2[[parname]]) != length(parameters[[parname]]) ){
+        stop("length wrong")
+      }
+    }else{
+      # Bind missing slots with correct name
+      map2 = setNames(
+        c( map2, list(factor(seq_along(parameters[[parname]]))) ),
+        c( names(map2), parname )
+      )
+    }
+  }
+  map2 = map2[names(parameters)]
+  map_list = NULL
+  for(i in seq_along(parameters) ){
+    triplet = data.frame(
+      to = seq_along(parameters[[i]]),
+      from = as.numeric(map2[[i]])
+    )
+    triplet = na.omit(triplet)
+    map_list[[i]] = sparseMatrix(
+      i = triplet$to,
+      j = triplet$from,
+      x = rep(1, nrow(triplet)),
+      dims = c( length(parameters[[i]]), nlevels(map2[[i]]) )
+    )
+  }
+  map_matix = Matrix::.bdiag( map_list )
+  map_table = mat2triplet( map_matix )
+
   # save stuff in env
   env = new.env(parent = emptyenv())
+  env$par = unlist(parameters)
+  names(env$par) = unlist(sapply( seq_along(parameters), \(i) rep(names(parameters)[i], length(parameters[[i]])) ))
   env$k = k
   env$m = m
   env$func = func
@@ -794,8 +831,8 @@ function( func,
   env$random = random
   env$seed = seed
   # convert parameters (list) to x (vector) and rename
-  env$x = unlist(parameters)
-  names(env$x) = unlist(sapply( seq_along(parameters), \(i) rep(names(parameters)[i], length(parameters[[i]])) ))
+  match_unique = match( unique(map_table$j), map_table$j )
+  env$x = env$par[ map_table$i ][ match_unique ]
 
   # Globals
   env$fixed = setdiff( names(parameters), c(random,profile) )
@@ -811,11 +848,15 @@ function( func,
   jnll_vec = function( vec, parnames ){
     "c" <- ADoverload("c")
     "[<-" <- ADoverload("[<-")
+    # Inject vec into x
     x = DataEval(fetch_x)
     x[which(names(x) %in% parnames)] = vec
+    # Expand x for mirrored values, and inject into par
+    par = env$par
+    par[ map_table$i ] = x[ map_table$j ]
     parlist = parameters
     for(i in seq_along(parlist)){
-      parlist[[i]][] = x[which(names(x)==names(parameters)[i])]
+      parlist[[i]][] = par[which(names(par)==names(parameters)[i])]
     }
     func( parlist )
   }
@@ -823,7 +864,8 @@ function( func,
   # Get tape w.r.t. profile and random effects for optimizing inner problem
   tape_pu = MakeTape(
     f = cmb( jnll_vec, parnames = c(random, profile) ),
-    x = unlist(parameters[names(parameters) %in% c(random, profile)])  # random might be in different order than parameters
+    #x = unlist(parameters[names(parameters) %in% c(random, profile)])  # random might be in different order than parameters
+    x = env$x[x_profile_random]
   )
   tape_pu$simplify()
   tape_pu$reorder()
