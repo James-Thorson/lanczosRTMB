@@ -706,6 +706,8 @@ function( obj,
 #' @inheritParams TMB::MakeADFun
 #' @param method whether to use [newton_CG] or a gradient-based low-memory option
 #'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
+#' @param map List defining how to optionally collect and fix parameters, defined the same
+#'   as in TMB
 #' @param make_gr whether to make approximated gradient using fixed probes
 #'   (slow for large models)
 #' @param pu_update when make_gr=TRUE, whether to update random effects for proposed fixed effects

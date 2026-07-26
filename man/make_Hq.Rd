@@ -46,7 +46,7 @@ or \code{update_H = TRUE} to recalculate the sparse Hessian, store the update in
 environment and then calculate the HVP. \code{update_H = FALSE} is then useful when repeadly
 using the same Hessian in a HVP.
 
-When \code{method = "FD-on-verse"}, \code{make_Hq} instead calculates a two-sided finite-difference
+When \code{method = "FD-on-reverse"}, \code{make_Hq} instead calculates a two-sided finite-difference
 approximation to a forward-on-reverse autodiff calculation, using \code{delta = 1e-6}
 forward-on-reverse (and FD of autodiff gradients) is efficient given that
 \verb{grad_u(f) \%** q} has length of one.

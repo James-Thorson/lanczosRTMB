@@ -7,9 +7,10 @@
 lanczos_MakeADFun(
   func,
   parameters,
+  map = NULL,
   random,
-  k,
   profile = NULL,
+  k,
   m = 3,
   method = "newton_CG",
   seed = 123,
@@ -23,11 +24,14 @@ lanczos_MakeADFun(
 
 \item{parameters}{Parameter list (or parameter vector) used by \code{func}.}
 
+\item{map}{List defining how to optionally collect and fix parameters, defined the same
+as in TMB}
+
 \item{random}{Character vector defining the random effect parameters. See also \code{regexp}.}
 
-\item{k}{dimension for Kyrlov subspace}
-
 \item{profile}{Parameters to profile out of the likelihood (this subset will be appended to \code{random} with Laplace approximation disabled).}
+
+\item{k}{dimension for Kyrlov subspace}
 
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
