@@ -158,7 +158,7 @@ function( Hq,
 #' environment and then calculate the HVP. \code{update_H = FALSE} is then useful when repeadly
 #' using the same Hessian in a HVP.
 #'
-#' When \code{method = "FD-on-verse"}, \code{make_Hq} instead calculates a two-sided finite-difference
+#' When \code{method = "FD-on-reverse"}, \code{make_Hq} instead calculates a two-sided finite-difference
 #' approximation to a forward-on-reverse autodiff calculation, using \code{delta = 1e-6}
 #' forward-on-reverse (and FD of autodiff gradients) is efficient given that
 #' `grad_u(f) %** q` has length of one.
@@ -308,17 +308,21 @@ function( tape,
     }
   }else if(method == "FD-on-reverse"){
     Hq <- function(q, x = x0, update_H = TRUE){
-      delta = 1e-6
-      env$qprime[which_random] = q
-      # Use length-1 FD
       denom = sqrt(sum(q^2))
-      qnorm = q / denom
-      # Define values to evaluate FD
-      xleft = xright = x
-      xleft[which_random] = xleft[which_random] + delta*qnorm
-      xright[which_random] = xright[which_random] - delta*qnorm
-      diff = (dfdx(xleft)[which_random] - dfdx(xright)[which_random]) / (2*delta)
-      return(diff * denom)
+      if(denom==0){
+        return(0*q)
+      }else{
+        delta = 1e-6
+        env$qprime[which_random] = q
+        # Use length-1 FD
+        qnorm = q / denom
+        # Define values to evaluate FD
+        xleft = xright = x
+        xleft[which_random] = xleft[which_random] + delta*qnorm
+        xright[which_random] = xright[which_random] - delta*qnorm
+        diff = (dfdx(xleft)[which_random] - dfdx(xright)[which_random]) / (2*delta)
+        return(diff * denom)
+      }
     }
   }
 
