@@ -704,8 +704,9 @@ function( obj,
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
 #' @inheritParams TMB::MakeADFun
-#' @param method whether to use [newton_CG] or a gradient-based low-memory option
+#' @param inner_optimizer whether to use [newton_CG] or a gradient-based low-memory option
 #'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
+#' @param method method for computing Hessian-vector-product, see \code{make_Hq}
 #' @param map List defining how to optionally collect and fix parameters, defined the same
 #'   as in TMB
 #' @param make_gr whether to make approximated gradient using fixed probes
@@ -774,7 +775,8 @@ function( func,
           profile = NULL,
           k,
           m = 3,
-          method = "newton_CG",
+          inner_optimizer = "newton_CG",
+          method = c("reverse-on-reverse","sparse","FD-on-reverse"),
           seed = 123,
           make_gr = TRUE,
           pu_update = c("implicit", "FD", "exact"),
@@ -787,6 +789,7 @@ function( func,
   #  v = fixed
   #  x = (p,u,v)
   pu_update = match.arg(pu_update)
+  method = match.arg(method)
 
   #
   map2 = map
@@ -899,7 +902,8 @@ function( func,
 
     env$Hq_u = make_Hq(
       tape = tape_u,
-      x0 = unlist(parameters[names(parameters) %in% random])   # random might be in different order than parameters
+      x0 = unlist(parameters[names(parameters) %in% random]),   # random might be in different order than parameters
+      method = method
     )
   }
 
@@ -910,7 +914,8 @@ function( func,
     }else{
       env$Hq_pu = make_Hq(
         tape = tape_pu,
-        x0 = unlist(parameters[names(parameters) %in% c(profile,random)])   # random might be in different order than parameters
+        x0 = unlist(parameters[names(parameters) %in% c(profile,random)]),   # random might be in different order than parameters,
+        method = method
       )
     }
   }
@@ -931,7 +936,7 @@ function( func,
     }
 
     # Run inner and assign pu to environment
-    if( method == "newton_CG" ){
+    if( inner_optimizer == "newton_CG" ){
       inner_opt = newton_CG(
         par = env$pu_best,
         fn = tape_pu,
