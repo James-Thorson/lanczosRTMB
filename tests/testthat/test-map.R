@@ -17,7 +17,7 @@ test_that("map is working ", {
     map = list( par = factor(c(1,2,NA,4)) ),
     k = 10,
     random = NULL,
-    method = "optim",
+    inner_optimizer = "optim",
     make_gr = FALSE
   )
   obj0 = MakeADFun(
@@ -35,7 +35,7 @@ test_that("map is working ", {
     map = list( par = factor(c(1,2,2,4)) ),
     k = 10,
     random = NULL,
-    method = "optim",
+    inner_optimizer = "optim",
     make_gr = FALSE
   )
   obj0 = MakeADFun(
