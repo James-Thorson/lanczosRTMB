@@ -997,7 +997,7 @@ function( func,
   if( isTRUE(make_gr) ){
     # Get cross-grad
     tape_x = MakeTape(
-      cmb( jnll_vec, parnames = c(fixed, random, profile) ),
+      cmb( jnll_vec, parnames = c(env$fixed, env$random, env$profile) ),
       env$x
     )
     #tape_x =  MakeTape(
