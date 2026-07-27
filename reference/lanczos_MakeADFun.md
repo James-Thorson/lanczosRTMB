@@ -14,7 +14,8 @@ lanczos_MakeADFun(
   profile = NULL,
   k,
   m = 3,
-  method = "newton_CG",
+  inner_optimizer = "newton_CG",
+  method = c("reverse-on-reverse", "sparse", "FD-on-reverse"),
   seed = 123,
   make_gr = TRUE,
   pu_update = c("implicit", "FD", "exact"),
@@ -56,13 +57,17 @@ lanczos_MakeADFun(
   number of probe-vectors to use for approximating average and standard
   deviation of log-determinant
 
-- method:
+- inner_optimizer:
 
   whether to use
   [newton_CG](https://james-thorson.github.io/lanczosRTMB/reference/newton_CG.md)
   or a gradient-based low-memory option specifically "L-BFGS-B" in
   [optim](https://rdrr.io/r/stats/optim.html) to optimize the inner
   problem
+
+- method:
+
+  method for computing Hessian-vector-product, see `make_Hq`
 
 - seed:
 
@@ -166,11 +171,11 @@ obj2 = MakeADFun( nll, parlist, random = "u", silent = TRUE )
 opt2 = nlminb( obj2$par, obj2$fn, obj2$gr )
 opt$par - opt2$par
 #>         mu      logsd      logcv 
-#> -0.1585565  0.1860354 -5.8049725 
+#> -0.1585893  0.1860319 -5.8937339 
 
 # Fit again using FD gradient for Lanczos method using fixed probe-recursion
 opt3 = optim( obj$par, obj$fn, obj$gr, method = "BFGS" )
 opt3$par - opt2$par
 #>            mu         logsd         logcv 
-#> -9.657959e-05  1.031146e-04 -2.845946e-04 
+#> -0.0000965794  0.0001031144 -0.0002845940 
 ```
