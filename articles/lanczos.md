@@ -531,8 +531,8 @@ knitr::kable( runtime, digits=2, caption="Run-times" )
 
 |         | x         |
 |:--------|:----------|
-| RTMB    | 3.12 mins |
-| Lanczos | 1.55 mins |
+| RTMB    | 3.16 mins |
+| Lanczos | 1.66 mins |
 
 Run-times {.table}
 
@@ -564,11 +564,11 @@ knitr::kable( max_memory, digits=2, caption="Maximum memory use (GB)" )
 
 |         |    x |
 |:--------|-----:|
-| RTMB    | 1.00 |
-| Lanczos | 1.07 |
+| RTMB    | 1.01 |
+| Lanczos | 0.98 |
 
 Maximum memory use (GB) {.table}
 
-Runtime for this vignette: 5.07 mins
+Runtime for this vignette: 5.22 mins
 
 ### Works cited
