@@ -1032,7 +1032,7 @@ function( func,
         "[<-" <- ADoverload("[<-")
         x = DataEval(fetch_x)
         x[x_fixed] = v
-        env$x = x   # env$x assignment leads to crash (due to taping?)
+        #env$x = x   # env$x assignment leads to crash (due to taping?)
         grad_x(x)[x_profile_random]
       }
       grad_dpudv = MakeTape(dpu_dv, env$x[x_fixed])$jacfun(sparse=TRUE)
