@@ -60,9 +60,10 @@ lanczos_MakeADFun(
 - inner_optimizer:
 
   whether to use
-  [newton_CG](https://james-thorson.github.io/lanczosRTMB/reference/newton_CG.md)
-  or a gradient-based low-memory option specifically "L-BFGS-B" in
-  [optim](https://rdrr.io/r/stats/optim.html) to optimize the inner
+  [newton_CG](https://james-thorson.github.io/lanczosRTMB/reference/newton_CG.md),
+  a gradient-based low-memory option specifically "L-BFGS-B" in
+  [optim](https://rdrr.io/r/stats/optim.html), or
+  [nlminb](https://rdrr.io/r/stats/nlminb.html) to optimize the inner
   problem
 
 - HVP_method:
