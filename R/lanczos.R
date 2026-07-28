@@ -706,7 +706,8 @@ function( obj,
 #' @inheritParams TMB::MakeADFun
 #' @param inner_optimizer whether to use [newton_CG] or a gradient-based low-memory option
 #'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
-#' @param method method for computing Hessian-vector-product, see \code{make_Hq}
+#' @param HVP_method method for computing Hessian-vector-product,
+#'   passed as \code{method} to \code{make_Hq}
 #' @param map List defining how to optionally collect and fix parameters, defined the same
 #'   as in TMB
 #' @param make_gr whether to make approximated gradient using fixed probes
@@ -776,7 +777,7 @@ function( func,
           k,
           m = 3,
           inner_optimizer = "newton_CG",
-          method = c("reverse-on-reverse","sparse","FD-on-reverse"),
+          HVP_method = c("reverse-on-reverse","sparse","FD-on-reverse"),
           seed = 123,
           make_gr = TRUE,
           pu_update = c("implicit", "FD", "exact", "implicit_FD"),
@@ -789,9 +790,9 @@ function( func,
   #  v = fixed
   #  x = (p,u,v)
   pu_update = match.arg(pu_update)
-  method = match.arg(method)
+  HVP_method = match.arg(HVP_method)
 
-  #
+  # Parse map argument to make a look-up table
   map2 = map
   for(i in seq_along(parameters) ){
     parname = names(parameters)[i]
@@ -800,7 +801,7 @@ function( func,
         stop("length wrong")
       }
     }else{
-      # Bind missing slots with correct name
+      # Add missing slots with correct name
       map2 = setNames(
         c( map2, list(factor(seq_along(parameters[[parname]]))) ),
         c( names(map2), parname )
@@ -903,7 +904,7 @@ function( func,
     env$Hq_u = make_Hq(
       tape = tape_u,
       x0 = unlist(parameters[names(parameters) %in% random]),   # random might be in different order than parameters
-      method = method
+      method = HVP_method
     )
   }
 
@@ -915,7 +916,7 @@ function( func,
       env$Hq_pu = make_Hq(
         tape = tape_pu,
         x0 = unlist(parameters[names(parameters) %in% c(profile,random)]),   # random might be in different order than parameters,
-        method = method
+        method = HVP_method
       )
     }
   }

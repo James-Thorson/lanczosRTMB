@@ -13,7 +13,7 @@ lanczos_MakeADFun(
   k,
   m = 3,
   inner_optimizer = "newton_CG",
-  method = c("reverse-on-reverse", "sparse", "FD-on-reverse"),
+  HVP_method = c("reverse-on-reverse", "sparse", "FD-on-reverse"),
   seed = 123,
   make_gr = TRUE,
   pu_update = c("implicit", "FD", "exact", "implicit_FD"),
@@ -40,7 +40,8 @@ deviation of log-determinant}
 \item{inner_optimizer}{whether to use \link{newton_CG} or a gradient-based low-memory option
 specifically "L-BFGS-B" in \link{optim} to optimize the inner problem}
 
-\item{method}{method for computing Hessian-vector-product, see \code{make_Hq}}
+\item{HVP_method}{method for computing Hessian-vector-product,
+passed as \code{method} to \code{make_Hq}}
 
 \item{seed}{if not NULL, then sets the seed.  This is helfpul given that
 the Hutchinson probe vectors are randomly sampled, and comparisons have
