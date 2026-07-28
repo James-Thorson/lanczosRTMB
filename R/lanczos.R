@@ -876,15 +876,6 @@ function( func,
   tape_pu$simplify()
   tape_pu$reorder()
 
-  # get tape w.r.t. fixed given random effects
-  tape_v = MakeTape(
-    f = cmb( jnll_vec, parnames = env$fixed ),
-    x = env$x[x_fixed]
-  )
-  tape_v$simplify()
-  tape_v$reorder()
-  grad_v = tape_v$jacfun()
-
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
   grad_pu = tape_pu$jacfun()
   grad_pu$simplify()
@@ -896,14 +887,14 @@ function( func,
     # Hq using reduced tape (maybe faster than using tape_x)
     tape_u = MakeTape(
       f = cmb( jnll_vec, parnames = random ),
-      x = unlist(parameters[names(parameters) %in% random]) # random might be in different order than parameters
+      x = env$x[x_random] # random might be in different order than parameters
     )
     tape_u$simplify()
     tape_u$reorder()
 
     env$Hq_u = make_Hq(
       tape = tape_u,
-      x0 = unlist(parameters[names(parameters) %in% random]),   # random might be in different order than parameters
+      x0 = env$x[x_random],
       method = HVP_method
     )
   }
@@ -915,14 +906,14 @@ function( func,
     }else{
       env$Hq_pu = make_Hq(
         tape = tape_pu,
-        x0 = unlist(parameters[names(parameters) %in% c(profile,random)]),   # random might be in different order than parameters,
+        x0 = env$x[x_profile_random],
         method = HVP_method
       )
     }
   }
 
   # FIXME
-  # get_inner = function(v){ RUN inner optimizer }
+  # optimize_inner = function(v){ RUN inner optimizer }
 
   # Objective function
   get_nll = function(v, what = "nll", orthogonalize = FALSE, ...){
@@ -995,7 +986,21 @@ function( func,
     return( out )
   }
 
+  ##############
+  # Make gradient function
+  ##############
+
   if( isTRUE(make_gr) ){
+    # get tape w.r.t. fixed given random effects
+    tape_v = MakeTape(
+      f = cmb( jnll_vec, parnames = env$fixed ),
+      x = env$x[x_fixed]
+    )
+    tape_v$simplify()
+    tape_v$reorder()
+    grad_v = tape_v$jacfun()
+    grad_v$simplify()
+    grad_v$reorder()
 
     # Get mapped tape for x
     tape_x = MakeTape(
