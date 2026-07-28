@@ -955,7 +955,7 @@ function( func,
   #################
   get_nll = function(v, what = "nll", orthogonalize = FALSE, ...){
     # Define fixed effects and assign to global environment
-    inner_opt = optimize_inner( v )
+    inner_opt = optimize_inner( v, ... )
     env$x[x_profile_random] = inner_opt$par
 
     # Have to assign into env(Hq)$mle to evaluate at right point
