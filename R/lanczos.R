@@ -868,18 +868,18 @@ function( func,
   }
 
   # Get tape w.r.t. profile and random effects for optimizing inner problem
-  tape_pu = MakeTape(
+  env$tape_pu = MakeTape(
     f = cmb( jnll_vec, parnames = c(random, profile) ),
     #x = unlist(parameters[names(parameters) %in% c(random, profile)])  # random might be in different order than parameters
     x = env$x[x_profile_random]
   )
-  tape_pu$simplify()
-  tape_pu$reorder()
+  env$tape_pu$simplify()
+  env$tape_pu$reorder()
 
   # Get gradient of tape w.r.t. fixed and random effects for optimizing inner problem
-  grad_pu = tape_pu$jacfun()
-  grad_pu$simplify()
-  grad_pu$reorder()
+  env$grad_pu = env$tape_pu$jacfun()
+  env$grad_pu$simplify()
+  env$grad_pu$reorder()
 
   # Make function for Hessian w.r.t. random effects (not profiled vars)
   # Hessian-vector product, for Lanczos log-det of Laplace w.r.t. random effects
@@ -929,8 +929,8 @@ function( func,
     if( inner_optimizer == "newton_CG" ){
       inner_opt = newton_CG(
         par = env$pu_best,
-        fn = tape_pu,
-        gr = grad_pu,
+        fn = env$tape_pu,
+        gr = env$grad_pu,
         Hq = env$Hq_pu,
         silent = silent,
         ...
@@ -938,8 +938,8 @@ function( func,
     }else{
       inner_opt = optim(
         par = env$pu_best,
-        fn = tape_pu,
-        gr = grad_pu,
+        fn = env$tape_pu,
+        gr = env$grad_pu,
         method = "L-BFGS-B",
         ...
       )
