@@ -926,7 +926,7 @@ function( func,
     }
 
     start_grad = env$grad_pu( env$pu_best )
-    if( mean(abs(start_grad)) > inner_tol )
+    if( mean(abs(start_grad)) > inner_tol ){
       # Run inner and assign pu to environment
       if( inner_optimizer == "newton_CG" ){
         inner_opt = newton_CG(
