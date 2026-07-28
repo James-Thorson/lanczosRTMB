@@ -15,7 +15,7 @@ lanczos_MakeADFun(
   k,
   m = 3,
   inner_optimizer = "newton_CG",
-  method = c("reverse-on-reverse", "sparse", "FD-on-reverse"),
+  HVP_method = c("reverse-on-reverse", "sparse", "FD-on-reverse"),
   seed = 123,
   make_gr = TRUE,
   pu_update = c("implicit", "FD", "exact", "implicit_FD"),
@@ -65,9 +65,10 @@ lanczos_MakeADFun(
   [optim](https://rdrr.io/r/stats/optim.html) to optimize the inner
   problem
 
-- method:
+- HVP_method:
 
-  method for computing Hessian-vector-product, see `make_Hq`
+  method for computing Hessian-vector-product, passed as `method` to
+  `make_Hq`
 
 - seed:
 

@@ -54,7 +54,7 @@ a user-supplied joint likelihood and designated random effects</p>
 <span>  <span class="va">k</span>,</span>
 <span>  m <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  inner_optimizer <span class="op">=</span> <span class="st">"newton_CG"</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"reverse-on-reverse"</span>, <span class="st">"sparse"</span>, <span class="st">"FD-on-reverse"</span><span class="op">)</span>,</span>
+<span>  HVP_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"reverse-on-reverse"</span>, <span class="st">"sparse"</span>, <span class="st">"FD-on-reverse"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
 <span>  make_gr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  pu_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"implicit"</span>, <span class="st">"FD"</span>, <span class="st">"exact"</span>, <span class="st">"implicit_FD"</span><span class="op">)</span>,</span>
@@ -101,8 +101,9 @@ deviation of log-determinant</p></dd>
 specifically "L-BFGS-B" in <a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a> to optimize the inner problem</p></dd>
 
 
-<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>method for computing Hessian-vector-product, see <code>make_Hq</code></p></dd>
+<dt id="arg-hvp-method">HVP_method<a class="anchor" aria-label="anchor" href="#arg-hvp-method"></a></dt>
+<dd><p>method for computing Hessian-vector-product,
+passed as <code>method</code> to <code>make_Hq</code></p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
