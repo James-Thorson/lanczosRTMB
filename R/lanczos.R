@@ -603,7 +603,7 @@ function( Hq,
     if( is.null(Q_list) ){
       L[[mi]] = lanczos( Hq = Hq, x = x, q = q, k = max(k), orthogonalize = orthogonalize )
     }else{
-      L[[mi]] = lanczos_fixedQ( Hq = Hq, x = x, Q = Q_list[[m]] )
+      L[[mi]] = lanczos_fixedQ( Hq = Hq, x = x, Q = Q_list[[mi]] )
     }
     Tri[[mi]] = tridiag(L[[mi]]$alpha, L[[mi]]$beta)
     eig[[mi]] = eigen(Tri[[mi]], symmetric = TRUE)
@@ -912,12 +912,10 @@ function( func,
     }
   }
 
-  # FIXME
-  # optimize_inner = function(v){ RUN inner optimizer }
-
-  # Objective function
-  get_nll = function(v, what = "nll", orthogonalize = FALSE, ...){
-    # Define fixed effects and assign to global environment
+  ##################
+  # Optimize inner problem
+  #################
+  optimize_inner = function(v){
     env$x[x_fixed] = v
     tape_pu$force.update()
     grad_pu$force.update()
@@ -949,6 +947,15 @@ function( func,
     #if( max(abs(inner_opt$par - inner_opt2$par)) > 1e-5 ){
     #  stop("Check math")
     #}
+    return(inner_opt)
+  }
+
+  ##################
+  # Calculate negative log-marginal likelihood
+  #################
+  get_nll = function(v, what = "nll", orthogonalize = FALSE, ...){
+    # Define fixed effects and assign to global environment
+    inner_opt = optimize_inner( v )
     env$x[x_profile_random] = inner_opt$par
 
     # Have to assign into env(Hq)$mle to evaluate at right point
@@ -1065,8 +1072,16 @@ function( func,
     }
 
     get_grad = function(v, method = "simple", method.args = list(), what = "nll", fixed_Q = FALSE, orthogonalize = FALSE ){
-      # Run to do inner optimizer
-      get_nll(v)   # FIXME:  Only need conditional MLE not Lanczos (unless using fixed_Q)
+
+      # Optimize inner problem
+      if( isTRUE(fixed_Q) ){
+        # get inner MLE and Lanczos Q
+        get_nll(v)
+      }else{
+        # Get inner MLE
+        inner_opt = optimize_inner(v)
+      }
+
       pu = env$pu_last
       env$x[x_fixed] = v
       env$x[x_profile_random] = pu
