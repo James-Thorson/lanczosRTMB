@@ -905,7 +905,7 @@ function( func,
       env$Hq_pu = env$Hq_u
     }else{
       env$Hq_pu = make_Hq(
-        tape = tape_pu,
+        tape = env$tape_pu,
         x0 = env$x[x_profile_random],
         method = HVP_method
       )
@@ -917,8 +917,8 @@ function( func,
   #################
   optimize_inner = function(v, ...){
     env$x[x_fixed] = v
-    tape_pu$force.update()
-    grad_pu$force.update()
+    env$tape_pu$force.update()
+    env$grad_pu$force.update()
 
     if( is.null(env$pu_best) ){
       env$pu_best = env$x[x_profile_random]
