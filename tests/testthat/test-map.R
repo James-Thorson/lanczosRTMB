@@ -26,7 +26,7 @@ test_that("map is working ", {
     map = list( par = factor(c(1,2,NA,4)) )
   )
   # Compare the estimates and speed
-  expect_equal( obj$par, obj0$par, tol = 1e-2 )
+  expect_equal( as.numeric(obj$par), as.numeric(obj0$par), tol = 1e-2 )
 
   # Map off
   obj = lanczos_MakeADFun(
@@ -44,7 +44,7 @@ test_that("map is working ", {
     map = list( par = factor(c(1,2,2,4)) )
   )
   # Compare the estimates and speed
-  expect_equal( obj$par, obj0$par, tol = 1e-2 )
+  expect_equal( as.numeric(obj$par), as.numeric(obj0$par), tol = 1e-2 )
 
 })
 
