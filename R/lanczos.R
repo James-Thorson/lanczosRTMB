@@ -941,7 +941,7 @@ function( func,
         fn = tape_pu,
         gr = grad_pu,
         method = "L-BFGS-B",
-        control = list(trace=ifelse(silent,0,1), maxit = 1e3, factr = 1e-2)
+        ...
       )
     }
     #if( max(abs(inner_opt$par - inner_opt2$par)) > 1e-5 ){
