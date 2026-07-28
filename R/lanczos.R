@@ -915,7 +915,7 @@ function( func,
   ##################
   # Optimize inner problem
   #################
-  optimize_inner = function(v){
+  optimize_inner = function(v, ...){
     env$x[x_fixed] = v
     tape_pu$force.update()
     grad_pu$force.update()
