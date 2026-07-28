@@ -915,7 +915,7 @@ function( func,
   ##################
   # Optimize inner problem
   #################
-  optimize_inner = function(v, ...){
+  optimize_inner = function(v, inner_tol = 0.001, ...){
     env$x[x_fixed] = v
     env$tape_pu$force.update()
     env$grad_pu$force.update()
@@ -925,31 +925,39 @@ function( func,
       env$nll_best = Inf
     }
 
-    # Run inner and assign pu to environment
-    if( inner_optimizer == "newton_CG" ){
-      inner_opt = newton_CG(
-        par = env$pu_best,
-        fn = env$tape_pu,
-        gr = env$grad_pu,
-        Hq = env$Hq_pu,
-        silent = silent,
-        ...
-      )
-    }else if( inner_optimizer == "nlminb" ){
-      inner_opt = nlminb(
-        start = env$pu_best,
-        obj = env$tape_pu,
-        grad = env$grad_pu,
-        ...
-      )
-      inner_opt$value = inner_opt$objective
+    start_grad = env$grad_pu( env$pu_best )
+    if( mean(abs(start_grad)) > inner_tol )
+      # Run inner and assign pu to environment
+      if( inner_optimizer == "newton_CG" ){
+        inner_opt = newton_CG(
+          par = env$pu_best,
+          fn = env$tape_pu,
+          gr = env$grad_pu,
+          Hq = env$Hq_pu,
+          silent = silent,
+          ...
+        )
+      }else if( inner_optimizer == "nlminb" ){
+        inner_opt = nlminb(
+          start = env$pu_best,
+          obj = env$tape_pu,
+          grad = env$grad_pu,
+          ...
+        )
+        inner_opt$value = inner_opt$objective
+      }else{
+        inner_opt = optim(
+          par = env$pu_best,
+          fn = env$tape_pu,
+          gr = env$grad_pu,
+          method = "L-BFGS-B",
+          ...
+        )
+      }
     }else{
-      inner_opt = optim(
+      inner_opt = list(
         par = env$pu_best,
-        fn = env$tape_pu,
-        gr = env$grad_pu,
-        method = "L-BFGS-B",
-        ...
+        value = env$tape_pu( env$pu_best )
       )
     }
     #if( max(abs(inner_opt$par - inner_opt2$par)) > 1e-5 ){
@@ -961,9 +969,9 @@ function( func,
   ##################
   # Calculate negative log-marginal likelihood
   #################
-  get_nll = function(v, what = "nll", orthogonalize = FALSE, ...){
+  get_nll = function(v, what = "nll", orthogonalize = FALSE, inner_tol = 0.001, ...){
     # Define fixed effects and assign to global environment
-    inner_opt = optimize_inner( v, ... )
+    inner_opt = optimize_inner( v, inner_tol = inner_tol, ... )
     env$x[x_profile_random] = inner_opt$par
 
     # Have to assign into env(Hq)$mle to evaluate at right point
@@ -1079,15 +1087,16 @@ function( func,
       }
     }
 
-    get_grad = function(v, method = "simple", method.args = list(), what = "nll", fixed_Q = FALSE, orthogonalize = FALSE ){
+    get_grad = function(v, method = "simple", method.args = list(), what = "nll", fixed_Q = FALSE,
+                        orthogonalize = FALSE, inner_tol = 0.001 ){
 
       # Optimize inner problem
       if( isTRUE(fixed_Q) ){
         # get inner MLE and Lanczos Q
-        get_nll(v)
+        get_nll(v, inner_tol = inner_tol)
       }else{
         # Get inner MLE
-        inner_opt = optimize_inner(v)
+        inner_opt = optimize_inner(v, inner_tol = inner_tol)
       }
 
       pu = env$pu_last
