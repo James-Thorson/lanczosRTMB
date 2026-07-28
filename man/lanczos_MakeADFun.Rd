@@ -37,8 +37,8 @@ as in TMB}
 \item{m}{number of probe-vectors to use for approximating average and standard
 deviation of log-determinant}
 
-\item{inner_optimizer}{whether to use \link{newton_CG} or a gradient-based low-memory option
-specifically "L-BFGS-B" in \link{optim} to optimize the inner problem}
+\item{inner_optimizer}{whether to use \link{newton_CG}, a gradient-based low-memory option
+specifically "L-BFGS-B" in \link{optim}, or \link{nlminb} to optimize the inner problem}
 
 \item{HVP_method}{method for computing Hessian-vector-product,
 passed as \code{method} to \code{make_Hq}}

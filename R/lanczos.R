@@ -17,7 +17,7 @@
 #'
 #' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
 #' @importFrom Matrix sparseMatrix Diagonal Matrix t .bdiag mat2triplet
-#' @importFrom stats optim rnorm sd na.omit setNames
+#' @importFrom stats optim rnorm sd na.omit setNames nlminb
 #' @importFrom numDeriv grad
 #'
 #' @examples
@@ -704,8 +704,8 @@ function( obj,
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
 #' @inheritParams TMB::MakeADFun
-#' @param inner_optimizer whether to use [newton_CG] or a gradient-based low-memory option
-#'   specifically "L-BFGS-B" in [optim] to optimize the inner problem
+#' @param inner_optimizer whether to use [newton_CG], a gradient-based low-memory option
+#'   specifically "L-BFGS-B" in [optim], or [nlminb] to optimize the inner problem
 #' @param HVP_method method for computing Hessian-vector-product,
 #'   passed as \code{method} to \code{make_Hq}
 #' @param map List defining how to optionally collect and fix parameters, defined the same
@@ -935,6 +935,14 @@ function( func,
         silent = silent,
         ...
       )
+    }else if( inner_optimizer == "nlminb" ){
+      inner_opt = nlminb(
+        start = env$pu_best,
+        obj = env$tape_pu,
+        grad = env$grad_pu,
+        ...
+      )
+      inner_opt$value = inner_opt$objective
     }else{
       inner_opt = optim(
         par = env$pu_best,
