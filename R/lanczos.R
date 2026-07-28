@@ -779,7 +779,7 @@ function( func,
           method = c("reverse-on-reverse","sparse","FD-on-reverse"),
           seed = 123,
           make_gr = TRUE,
-          pu_update = c("implicit", "FD", "exact"),
+          pu_update = c("implicit", "FD", "exact", "implicit_FD"),
           silent = TRUE ){
 
   # vectors
@@ -1003,39 +1003,57 @@ function( func,
     )
     tape_x$simplify()
 
-    if( pu_update %in% c("implicit", "implicit_FD") ){
-      # Option-1
-      grad_x = tape_x$jacfun()
-      pu = env$x[x_profile_random]
-      dpu_dv = function(v){
-        "[<-" <- ADoverload("[<-")
-        x = DataEval(fetch_x)
-        x[x_fixed] = v
-        grad_x(x)[x_profile_random]
-      }
-      # Option-2 ... avoid making new grad-tape
-      #dpu_dv = function(v){
-      #  "[<-" <- ADoverload("[<-")
-      #  x = DataEval(fetch_x)
-      #  x[x_fixed] = v
-      #  pu = x[x_profile_random]
-      #  grad_pu(pu)[1,]
-      #}
-    }
+    #if( pu_update %in% c("implicit", "implicit_FD") ){
+    #  # Option-1
+    #  grad_x = tape_x$jacfun()
+    #  #pu = env$x[x_profile_random]
+    #  dpu_dv = function(v){
+    #    "[<-" <- ADoverload("[<-")
+    #    x = DataEval(fetch_x)
+    #    x[x_fixed] = v
+    #    grad_x(x)[x_profile_random]
+    #  }
+    #  # Option-2 ... avoid making new grad-tape
+    #  #dpu_dv = function(v){
+    #  #  "[<-" <- ADoverload("[<-")
+    #  #  x = DataEval(fetch_x)
+    #  #  x[x_fixed] = v
+    #  #  pu = x[x_profile_random]
+    #  #  grad_pu(pu)[1,]
+    #  #}
+    #}
 
     if( pu_update == "FD" ){
       dpuhat_dv = tape_x$newton(random = c(x_profile_random))$jacfun()
     }
     if( pu_update == "implicit" ){
+      grad_x = tape_x$jacfun()
+      dpu_dv = function(v){
+        "[<-" <- ADoverload("[<-")
+        x = DataEval(fetch_x)
+        x[x_fixed] = v
+        env$x = x   # env$x assignment leads to crash (due to taping?)
+        grad_x(x)[x_profile_random]
+      }
       grad_dpudv = MakeTape(dpu_dv, env$x[x_fixed])$jacfun(sparse=TRUE)
       grad_dpudv$simplify()
       grad_dpudv$reorder()
     }
     if( pu_update == "implicit_FD" ){
+      grad_x = tape_x$jacfun()
+      dpu_dv = function(v){
+        "[<-" <- ADoverload("[<-")
+        x = DataEval(fetch_x)
+        x[x_fixed] = v
+        env$x = x   # Need env$x assignment
+        grad_x(x)[x_profile_random]
+      }
       grad_dpudv = function(v){
         env$x[x_fixed] = v
         jacobian(
-          func = dpu_dv
+          func = dpu_dv,
+          x = v,
+          method = "simple"
         )
       }
     }
@@ -1060,7 +1078,8 @@ function( func,
       if( pu_update == "FD" ){
         #duhat_dv$force.update()  # Updated automatically via taping and newton
         P = dpuhat_dv(v)
-      }else if( pu_update == "implicit" ){
+      }
+      if( pu_update %in% c("implicit","implicit_FD") ){
         grad_dpudv$force.update()
         dpu_dv = grad_dpudv(v)
         # dpuhat_dv = H^-1 dpu_dv
@@ -1085,10 +1104,11 @@ function( func,
           env$x = x
           env$x[x_fixed] = vnew
           # How to update random effects
-          if( pu_update %in% c("FD","implicit") ){
+          if( pu_update %in% c("FD","implicit","implicit_FD") ){
             # Project based on central jacobian or implicit update
             env$x[x_profile_random] = pu + (P %*% (vnew-v))[,1]
-          }else if( pu_update == "exact" ){
+          }
+          if( pu_update == "exact" ){
             # Recompute exactly
             get_nll( vnew )
             env$x[x_profile_random] = env$pu_last

@@ -16,7 +16,7 @@ lanczos_MakeADFun(
   method = c("reverse-on-reverse", "sparse", "FD-on-reverse"),
   seed = 123,
   make_gr = TRUE,
-  pu_update = c("implicit", "FD", "exact"),
+  pu_update = c("implicit", "FD", "exact", "implicit_FD"),
   silent = TRUE
 )
 }
