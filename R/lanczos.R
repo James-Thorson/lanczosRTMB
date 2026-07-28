@@ -18,7 +18,7 @@
 #' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
 #' @importFrom Matrix sparseMatrix Diagonal Matrix t .bdiag mat2triplet
 #' @importFrom stats optim rnorm sd na.omit setNames nlminb
-#' @importFrom numDeriv grad
+#' @importFrom numDeriv grad jacobian
 #'
 #' @examples
 #' H = diag(exp(rnorm(5)))
@@ -838,7 +838,13 @@ function( func,
   env$seed = seed
   # convert parameters (list) to x (vector) and rename
   match_unique = match( unique(map_table$j), map_table$j )
-  env$x = env$par[ map_table$i ][ match_unique ]
+  #env$x = env$par[ map_table$i ][ match_unique ]
+  env$x = tapply(
+    env$par[ map_table$i ],
+    INDEX = factor( map_table$j, levels = seq_len(ncol(map_matix)) ),
+    FUN = mean
+  )
+  names(env$x) = names(env$par[ map_table$i ])[ match_unique ]
 
   # Globals
   env$fixed = setdiff( names(parameters), c(random,profile) )
