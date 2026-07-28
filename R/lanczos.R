@@ -995,20 +995,16 @@ function( func,
   }
 
   if( isTRUE(make_gr) ){
-    # Get cross-grad
+
+    # Get mapped tape for x
     tape_x = MakeTape(
       cmb( jnll_vec, parnames = c(env$fixed, env$random, env$profile) ),
       env$x
     )
-    #tape_x =  MakeTape(
-    #  f = cmb( jnll_vec, parnames = names(parameters) ),
-    #  x = env$x
-    #)
     tape_x$simplify()
 
-    if( pu_update == "FD" ){
-      dpuhat_dv = tape_x$newton(random = c(x_profile_random))$jacfun()
-    }else if( pu_update == "implicit" ){
+    if( pu_update %in% c("implicit", "implicit_FD") ){
+      # Option-1
       grad_x = tape_x$jacfun()
       pu = env$x[x_profile_random]
       dpu_dv = function(v){
@@ -1017,16 +1013,31 @@ function( func,
         x[x_fixed] = v
         grad_x(x)[x_profile_random]
       }
+      # Option-2 ... avoid making new grad-tape
+      #dpu_dv = function(v){
+      #  "[<-" <- ADoverload("[<-")
+      #  x = DataEval(fetch_x)
+      #  x[x_fixed] = v
+      #  pu = x[x_profile_random]
+      #  grad_pu(pu)[1,]
+      #}
+    }
+
+    if( pu_update == "FD" ){
+      dpuhat_dv = tape_x$newton(random = c(x_profile_random))$jacfun()
+    }
+    if( pu_update == "implicit" ){
       grad_dpudv = MakeTape(dpu_dv, env$x[x_fixed])$jacfun(sparse=TRUE)
       grad_dpudv$simplify()
       grad_dpudv$reorder()
-
-      # Hessian-vector product for pu
-      #env$Hq_pu = make_Hq(
-      #  tape = tape_x,
-      #  x0 = env$x,
-      #  which_random = x_profile_random
-      #)
+    }
+    if( pu_update == "implicit_FD" ){
+      grad_dpudv = function(v){
+        env$x[x_fixed] = v
+        jacobian(
+          func = dpu_dv
+        )
+      }
     }
 
     get_grad = function(v, method = "simple", method.args = list(), what = "nll", fixed_Q = FALSE, orthogonalize = FALSE ){
