@@ -1080,7 +1080,7 @@ function( func,
         P = dpuhat_dv(v)
       }
       if( pu_update %in% c("implicit","implicit_FD") ){
-        grad_dpudv$force.update()
+        if(pu_update == "implicit") grad_dpudv$force.update()
         dpu_dv = grad_dpudv(v)
         # dpuhat_dv = H^-1 dpu_dv
         P = -1 * apply(
