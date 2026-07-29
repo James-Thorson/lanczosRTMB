@@ -43,6 +43,10 @@ function( Hq,
           V = matrix(1, nrow=length(x), ncol = 0),
           tol = 1e-12 ) {
 
+  # Check that V columns are orthogonal
+  if( ncol(V) > 1 ){
+    stopifnot(all.equal(t(V)%*%V, diag(ncol(V))))
+  }
   n = length(q)
   Q = matrix(0, n, k)
   alpha = numeric(k)
@@ -69,14 +73,17 @@ function( Hq,
         proj = sum(Q[,i] * w)
         w = w - proj * Q[,i]
       }
+      if(ncol(V)>0) w = w - (V %*% (t(V) %*% w))[,1]
       for (i in 1:j) {
         proj = sum(Q[,i] * w)
         w = w - proj * Q[,i]
       }
+      if(ncol(V)>0) w = w - (V %*% (t(V) %*% w))[,1]
     }else{
       # Orthogonalize with previous
       # (accumulates errors but faster)
       w = w - alpha[j] * q
+      if(ncol(V)>0) w = w - (V %*% (t(V) %*% w))[,1]
     }
 
     if (j < k) {
