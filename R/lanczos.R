@@ -14,6 +14,8 @@
 #' @param orthogonalize Whether to do two-pass Gram-Schmidt re-normalization
 #'        (much slower)
 #' @param tol numerical tolerance for stopping algorithm given that no more terms are identifiable
+#' @param V deflation matrix, where we transform probes \eqn{q' = (I-V V^T) q}
+#'    and the Hessian by \eqn{(I-V V^T) H (I-V V^T)} to eliminate axes in \eqn{V}
 #'
 #' @importFrom RTMB MakeADFun sdreport GetTape MakeTape DataEval ADoverload
 #' @importFrom Matrix sparseMatrix Diagonal Matrix t .bdiag mat2triplet
@@ -38,6 +40,7 @@ function( Hq,
           k,
           x = attr(Hq,"env")$x0,
           orthogonalize = FALSE,
+          V = matrix(1, nrow=length(x), ncol = 0),
           tol = 1e-12 ) {
 
   n = length(q)
@@ -45,6 +48,7 @@ function( Hq,
   alpha = numeric(k)
   beta  = numeric(k-1)
 
+  if(ncol(V)>0) q = q - (V %*% (t(V) %*% q))[,1]
   q = q / sqrt(sum(q*q))
   Q[,1] = q
   q_prev = rep(0, n)
@@ -52,6 +56,7 @@ function( Hq,
 
   for (j in 1:k) {
     w = Hq(q, x)
+    if(ncol(V)>0) w = w - (V %*% (t(V) %*% w))[,1]
     alpha[j] = sum(q * w)
 
     if (j > 1) {
@@ -921,7 +926,7 @@ function( func,
   ##################
   # Optimize inner problem
   #################
-  optimize_inner = function(v, inner_tol = 0.001, ...){
+  optimize_inner = function(v, inner_tol = 0, ...){
     env$x[x_fixed] = v
     env$tape_pu$force.update()
     env$grad_pu$force.update()
@@ -975,7 +980,7 @@ function( func,
   ##################
   # Calculate negative log-marginal likelihood
   #################
-  get_nll = function(v, what = "nll", orthogonalize = FALSE, inner_tol = 0.001, ...){
+  get_nll = function(v, what = "nll", orthogonalize = FALSE, inner_tol = 0, ...){
     # Define fixed effects and assign to global environment
     inner_opt = optimize_inner( v, inner_tol = inner_tol, ... )
     env$x[x_profile_random] = inner_opt$par
@@ -1094,7 +1099,7 @@ function( func,
     }
 
     get_grad = function(v, method = "simple", method.args = list(), what = "nll", fixed_Q = FALSE,
-                        orthogonalize = FALSE, inner_tol = 0.001 ){
+                        orthogonalize = FALSE, inner_tol = 0 ){
 
       # Optimize inner problem
       if( isTRUE(fixed_Q) ){

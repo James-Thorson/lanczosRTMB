@@ -4,7 +4,15 @@
 \alias{lanczos}
 \title{Calculate Lanczos approximation}
 \usage{
-lanczos(Hq, q, k, x = attr(Hq, "env")$x0, orthogonalize = FALSE, tol = 1e-12)
+lanczos(
+  Hq,
+  q,
+  k,
+  x = attr(Hq, "env")$x0,
+  orthogonalize = FALSE,
+  V = matrix(1, nrow = length(x), ncol = 0),
+  tol = 1e-12
+)
 }
 \arguments{
 \item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
@@ -17,6 +25,9 @@ lanczos(Hq, q, k, x = attr(Hq, "env")$x0, orthogonalize = FALSE, tol = 1e-12)
 
 \item{orthogonalize}{Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)}
+
+\item{V}{deflation matrix, where we transform probes \eqn{q' = (I-V V^T) q}
+and the Hessian by \eqn{(I-V V^T) H (I-V V^T)} to eliminate axes in \eqn{V}}
 
 \item{tol}{numerical tolerance for stopping algorithm given that no more terms are identifiable}
 }
