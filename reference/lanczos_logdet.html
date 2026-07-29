@@ -51,6 +51,7 @@
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  orthogonalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  Q_list <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  V <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  return_extra <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -95,6 +96,12 @@ lower variance using a fixed seed.</p></dd>
 <dt id="arg-q-list">Q_list<a class="anchor" aria-label="anchor" href="#arg-q-list"></a></dt>
 <dd><p>optional list of probes returned by a prior Lanczos run.  This
 then uses fixed probes to speed up evaluations during gradients.</p></dd>
+
+
+<dt id="arg-v">V<a class="anchor" aria-label="anchor" href="#arg-v"></a></dt>
+<dd><p>deflation matrix, where we transform probes \(q' = (I-V V^T) q\)
+and the Hessian by \((I-V V^T) H (I-V V^T)\) to eliminate axes in \(V\).
+We then add back to the log-determinant contribution for those axes deterministically.</p></dd>
 
 
 <dt id="arg-return-extra">return_extra<a class="anchor" aria-label="anchor" href="#arg-return-extra"></a></dt>

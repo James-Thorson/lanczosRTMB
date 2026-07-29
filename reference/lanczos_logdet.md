@@ -15,6 +15,7 @@ lanczos_logdet(
   seed = NULL,
   orthogonalize = TRUE,
   Q_list = NULL,
+  V = matrix(1, nrow = length(x), ncol = 0),
   return_extra = FALSE
 )
 ```
@@ -58,6 +59,13 @@ lanczos_logdet(
 
   optional list of probes returned by a prior Lanczos run. This then
   uses fixed probes to speed up evaluations during gradients.
+
+- V:
+
+  deflation matrix, where we transform probes \\q' = (I-V V^T) q\\ and
+  the Hessian by \\(I-V V^T) H (I-V V^T)\\ to eliminate axes in \\V\\.
+  We then add back to the log-determinant contribution for those axes
+  deterministically.
 
 - return_extra:
 

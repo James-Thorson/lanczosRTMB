@@ -6,7 +6,12 @@ calculations
 ## Usage
 
 ``` r
-lanczos_fixedQ(Hq, Q, x = attr(Hq, "env")$x0)
+lanczos_fixedQ(
+  Hq,
+  Q,
+  x = attr(Hq, "env")$x0,
+  V = matrix(1, nrow = length(x), ncol = 0)
+)
 ```
 
 ## Arguments
@@ -23,3 +28,8 @@ lanczos_fixedQ(Hq, Q, x = attr(Hq, "env")$x0)
 - x:
 
   parameter vector used when calculating the Hessian matrix
+
+- V:
+
+  deflation matrix, where we transform probes \\q' = (I-V V^T) q\\ and
+  the Hessian by \\(I-V V^T) H (I-V V^T)\\ to eliminate axes in \\V\\
