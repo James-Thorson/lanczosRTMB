@@ -73,7 +73,7 @@ C = t(V) %*% H %*% V
 # wprime = (I-P) w
 # where wprime = (I-P) H (I-P)  %*% (I-P) q
 
-L = lanczos(
+L_deflated = lanczos(
   Hq = Hq,
   q = q,
   k = k,
@@ -81,10 +81,10 @@ L = lanczos(
   x = rep(0,nx),
   orthogonalize = TRUE
 )
-Tri = tridiag(L$alpha, L$beta)
+Tri_deflated = tridiag(L_deflated$alpha, L_deflated$beta)
 
 # Approximate log-det
-weight_logdet(Tri, nx - ncol(V)) + sum(log(eigen(C)$values))
+weight_logdet(Tri_deflated, nx - ncol(V)) + sum(log(eigen(C)$values))
 
 ##################
 # Compare variance
