@@ -5,7 +5,15 @@ Calculate Q, alpha and beta for Lanzos approximation
 ## Usage
 
 ``` r
-lanczos(Hq, q, k, x = attr(Hq, "env")$x0, orthogonalize = FALSE, tol = 1e-12)
+lanczos(
+  Hq,
+  q,
+  k,
+  x = attr(Hq, "env")$x0,
+  orthogonalize = FALSE,
+  V = matrix(1, nrow = length(x), ncol = 0),
+  tol = 1e-12
+)
 ```
 
 ## Arguments
@@ -30,6 +38,11 @@ lanczos(Hq, q, k, x = attr(Hq, "env")$x0, orthogonalize = FALSE, tol = 1e-12)
 - orthogonalize:
 
   Whether to do two-pass Gram-Schmidt re-normalization (much slower)
+
+- V:
+
+  deflation matrix, where we transform probes \\q' = (I-V V^T) q\\ and
+  the Hessian by \\(I-V V^T) H (I-V V^T)\\ to eliminate axes in \\V\\
 
 - tol:
 
