@@ -210,7 +210,7 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  4.578387 14.134818
+#> [1] 2.190584 9.450100
 # newton_CG finds a slightly better fit
 c(opt1$value, opt2$value)
 #> [1] -1220.341 -1220.467
