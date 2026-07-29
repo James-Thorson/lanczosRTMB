@@ -4,7 +4,12 @@
 \alias{lanczos_fixedQ}
 \title{Calculate Lanczos approximation using fixed Q}
 \usage{
-lanczos_fixedQ(Hq, Q, x = attr(Hq, "env")$x0)
+lanczos_fixedQ(
+  Hq,
+  Q,
+  x = attr(Hq, "env")$x0,
+  V = matrix(1, nrow = length(x), ncol = 0)
+)
 }
 \arguments{
 \item{Hq}{function that calculates the product \code{H \%*\% q} given probe \code{q} and parameters \code{x}}
@@ -12,6 +17,9 @@ lanczos_fixedQ(Hq, Q, x = attr(Hq, "env")$x0)
 \item{Q}{matrix of fixed probes}
 
 \item{x}{parameter vector used when calculating the Hessian matrix}
+
+\item{V}{deflation matrix, where we transform probes \eqn{q' = (I-V V^T) q}
+and the Hessian by \eqn{(I-V V^T) H (I-V V^T)} to eliminate axes in \eqn{V}}
 }
 \description{
 Recalculate Lanczos approximation using fixed Q to speed up gradient calculations

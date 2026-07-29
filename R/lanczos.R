@@ -119,8 +119,10 @@ function( Hq,
 lanczos_fixedQ <-
 function( Hq,
           Q,
-          x = attr(Hq,"env")$x0 ) {
+          x = attr(Hq,"env")$x0,
+          V = matrix(1, nrow=length(x), ncol = 0) ) {
 
+  if(ncol(V) > 0) stop("`V` not implemented in `lanczos_fixedQ`")
   n = nrow(Q)
   k = ncol(Q)
   alpha = numeric(k)
@@ -538,6 +540,9 @@ function( Hq,
 #' @inheritParams make_Hq
 #' @param m number of probe-vectors to use for approximating average and standard
 #'        deviation of log-determinant
+#' @param V deflation matrix, where we transform probes \eqn{q' = (I-V V^T) q}
+#'    and the Hessian by \eqn{(I-V V^T) H (I-V V^T)} to eliminate axes in \eqn{V}.
+#'    We then add back to the log-determinant contribution for those axes deterministically.
 #' @param seed if not NULL, then sets the seed.  This is helfpul given that
 #'    the Hutchinson probe vectors are randomly sampled, and comparisons have
 #'    lower variance using a fixed seed.
@@ -597,6 +602,7 @@ function( Hq,
           seed = NULL,
           orthogonalize = TRUE,
           Q_list = NULL,
+          V = matrix(1, nrow=length(x), ncol = 0),
           return_extra = FALSE ) {
 
   if( !is.null(seed) ){
@@ -605,6 +611,7 @@ function( Hq,
   if( !is.null(Q_list) ){
     m = length(Q_list)
   }
+  nv = ncol(V)
   n = length(which_random)
   q_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
   logdet = numeric(m)
@@ -613,15 +620,21 @@ function( Hq,
   for (mi in 1:m) {
     q = q_m[,mi]
     if( is.null(Q_list) ){
-      L[[mi]] = lanczos( Hq = Hq, x = x, q = q, k = max(k), orthogonalize = orthogonalize )
+      L[[mi]] = lanczos( Hq = Hq, x = x, q = q, k = max(k), orthogonalize = orthogonalize, V = V  )
     }else{
-      L[[mi]] = lanczos_fixedQ( Hq = Hq, x = x, Q = Q_list[[mi]] )
+      L[[mi]] = lanczos_fixedQ( Hq = Hq, x = x, Q = Q_list[[mi]], V = V )
     }
     Tri[[mi]] = tridiag(L[[mi]]$alpha, L[[mi]]$beta)
     eig[[mi]] = eigen(Tri[[mi]], symmetric = TRUE)
     which_pos[[mi]] = which( eig[[mi]]$values > 0 )
     log_quad = sum(log(eig[[mi]]$values[which_pos[[mi]]]) * eig[[mi]]$vectors[1, which_pos[[mi]]]^2)
-    logdet[mi] = log_quad * n
+    logdet[mi] = log_quad * (n - nv)
+  }
+
+  if( nv > 0 ){
+    C = t(V) %*% apply(V, MARGIN = 2, FUN = Hq, x = x)
+    fixed_logdet = sum(log(eigen(C, symmetric = TRUE)$values))
+    logdet = logdet + fixed_logdet
   }
 
   #

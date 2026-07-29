@@ -13,6 +13,7 @@ lanczos_logdet(
   seed = NULL,
   orthogonalize = TRUE,
   Q_list = NULL,
+  V = matrix(1, nrow = length(x), ncol = 0),
   return_extra = FALSE
 )
 }
@@ -38,6 +39,10 @@ lower variance using a fixed seed.}
 
 \item{Q_list}{optional list of probes returned by a prior Lanczos run.  This
 then uses fixed probes to speed up evaluations during gradients.}
+
+\item{V}{deflation matrix, where we transform probes \eqn{q' = (I-V V^T) q}
+and the Hessian by \eqn{(I-V V^T) H (I-V V^T)} to eliminate axes in \eqn{V}.
+We then add back to the log-determinant contribution for those axes deterministically.}
 
 \item{return_extra}{whether to return probes and other internal constructions.}
 }
