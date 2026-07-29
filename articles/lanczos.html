@@ -178,7 +178,7 @@ factorization that is default in TMB:</p>
 <span><span class="va">lan_opt</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.2336606 -0.3417257 </span></span>
+<span><span class="co">#&gt; -0.2336601 -0.3417262 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
 <span><span class="co">#&gt; [1] 149.7827</span></span>
@@ -232,7 +232,7 @@ ever forming the full Hessian matrix:</p>
 <span>  gr <span class="op">=</span> <span class="va">tape</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Hq <span class="op">=</span> <span class="va">Hq</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; value: 179.689 mgc: 1.332268e-14 ustep: 0.9999</span></span></code></pre></div>
+<span><span class="co">#&gt; value: 179.689 mgc: 1.376677e-14 ustep: 0.9999</span></span></code></pre></div>
 <p>We can then use stochastic trace estimation and the Lanczos method to
 approximate the log-determinant of the Hessian for random effects:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -458,22 +458,22 @@ total across samples:</p>
 <span><span class="co">#&gt;  29:     454.42133: 0.371305 0.419146  1.20799</span></span>
 <span><span class="co">#&gt;  30:     454.37635: 0.371305 0.419146  1.20799</span></span>
 <span><span class="co">#&gt;  31:     454.24229: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  32:     454.20564: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  33:     454.11492: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  34:     453.25780: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  35:     452.97190: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  36:     452.64528: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  37:     452.64517: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  38:     452.64511: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  39:     452.64509: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  40:     452.64507: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  41:     452.64507: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  42:     452.64506: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  43:     452.64506: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  44:     452.64506: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  45:     452.64506: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  46:     452.64506: 0.371305 0.419146  1.20799</span></span>
-<span><span class="co">#&gt;  47:     452.64506: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  32:     454.20563: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  33:     454.11491: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  34:     453.25758: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  35:     452.97127: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  36:     452.64310: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  37:     452.64299: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  38:     452.64293: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  39:     452.64290: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  40:     452.64289: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  41:     452.64288: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  42:     452.64288: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  43:     452.64288: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  44:     452.64288: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  45:     452.64288: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  46:     452.64288: 0.371305 0.419146  1.20799</span></span>
+<span><span class="co">#&gt;  47:     452.64288: 0.371305 0.419146  1.20799</span></span>
 <span><span class="va">fit_RTMB</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>We can see that the Hessian is dense:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -538,11 +538,11 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">3.34 mins</td>
+<td align="left">3.33 mins</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">1.03 mins</td>
+<td align="left">1.81 mins</td>
 </tr>
 </tbody>
 </table>
@@ -572,15 +572,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="right">0.99</td>
+<td align="right">1.00</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="right">0.97</td>
+<td align="right">0.98</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 4.82 mins</p>
+<p>Runtime for this vignette: 5.56 mins</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
