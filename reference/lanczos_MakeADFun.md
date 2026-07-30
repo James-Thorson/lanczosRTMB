@@ -19,7 +19,8 @@ lanczos_MakeADFun(
   seed = 123,
   make_gr = TRUE,
   pu_update = c("implicit", "FD", "exact", "implicit_FD"),
-  silent = TRUE
+  silent = TRUE,
+  tmb_obj = NULL
 )
 ```
 
@@ -96,6 +97,13 @@ lanczos_MakeADFun(
 - silent:
 
   Disable all tracing information?
+
+- tmb_obj:
+
+  optional output from `MakeADFun`, e.g., from an existing TMB or RTMB
+  object. Supplying `tmb_obj` then is used in place of (and overrides)
+  `func` and `map`, and allows `lanczos_MakeADFun` to be used for a TMB
+  model.
 
 ## Value
 

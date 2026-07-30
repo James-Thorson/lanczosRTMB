@@ -58,7 +58,8 @@ a user-supplied joint likelihood and designated random effects</p>
 <span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
 <span>  make_gr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  pu_update <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"implicit"</span>, <span class="st">"FD"</span>, <span class="st">"exact"</span>, <span class="st">"implicit_FD"</span><span class="op">)</span>,</span>
-<span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  tmb_obj <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -129,6 +130,12 @@ pu_update="FD" can be very slow for dense inner-Hessians.</p></dd>
 
 <dt id="arg-silent">silent<a class="anchor" aria-label="anchor" href="#arg-silent"></a></dt>
 <dd><p>Disable all tracing information?</p></dd>
+
+
+<dt id="arg-tmb-obj">tmb_obj<a class="anchor" aria-label="anchor" href="#arg-tmb-obj"></a></dt>
+<dd><p>optional output from <code>MakeADFun</code>, e.g., from an existing TMB or RTMB object.
+Supplying <code>tmb_obj</code> then is used in place of (and overrides) <code>func</code> and <code>map</code>,
+and allows <code>lanczos_MakeADFun</code> to be used for a TMB model.</p></dd>
 
 </dl></div>
     <div class="section level2">
