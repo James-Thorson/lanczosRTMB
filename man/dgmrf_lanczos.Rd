@@ -57,6 +57,6 @@ dgmrf(x, Q = Q, log = TRUE)
 dgmrf_lanczos(x, Q = Q, k = 20, log = TRUE)
 
 # Log-density using incomplete Cholesky
-dgmrf_icpl(x, Q = Q, log = TRUE)
+# dgmrf_icpl(x, Q = Q, log = TRUE)
 
 }
