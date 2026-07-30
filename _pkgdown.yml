@@ -15,9 +15,15 @@ reference:
   contents:
   - tridiag
 
+- title: 'Core function'
+  desc: |
+    User-level function that combines computational and optimization tools
+  contents:
+  - lanczos_MakeADFun
+
 - title: 'Approximate properties'
   desc: |
-    Core tools, using Lanczos to approximate model properties
+    Copmutational tools, using Lanczos to approximate model properties
   contents:
   - lanczos_logdet
   - lanczos_nll
@@ -25,18 +31,23 @@ reference:
   - lanczos_variance
   - lanczos_dgmrf
 
+- title: 'Optimization tools'
+  desc: |
+    Optimization tools using Krylov subspaces
+  contents:
+  - CG
+  - newton_CG
+
 - title: 'Helper functions'
   desc: |
     Helper tools, used for components of an analysis
   contents:
   - lanczos
   - make_Hq
+  - estimate_diag_hutchinson
 
 - title: 'Experimental and development'
   desc: |
     Experimental tools, under development.
   contents:
-  - lanczos_MakeADFun
   - lanczos_fixedQ
-  - CG
-  - newton_CG
