@@ -22,6 +22,7 @@ newton_CG(
   beta = 0.5,
   line_steps = 20,
   smartsearch = TRUE,
+  smart_x0 = TRUE,
   ustep = 1,
   power = 0.5,
   u0 = 1e-04,
@@ -85,6 +86,10 @@ newton_CG(
 - smartsearch:
 
   Turn on adaptive stepsize algorithm for non-convex problems?
+
+- smart_x0:
+
+  whether to use previous solution as x0 for next CG iteration
 
 - ustep:
 
@@ -210,7 +215,7 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  6.611778 17.393219
+#> [1]  6.62211 17.30393
 # newton_CG finds a slightly better fit
 c(opt1$value, opt2$value)
 #> [1] -1220.361 -1220.468
