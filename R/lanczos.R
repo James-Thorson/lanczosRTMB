@@ -833,20 +833,6 @@ function( func,
 
   # make tape for mapped stuff
   if( is.null(tmb_obj) ){
-    env$func = func
-    func_x = function( func, x ){
-      "c" <- ADoverload("c")
-      "[<-" <- ADoverload("[<-")
-      par = env$par
-      par[ map_table$i ] = x[ map_table$j ]
-      parlist = parameters
-      for(i in seq_along(parlist)){
-        parlist[[i]][] = par[which(names(par)==names(parameters)[i])]
-      }
-      func( parlist )
-    }
-    tape_x = MakeTape( func_x, env$x )
-
     # Parse map argument to make a look-up table
     map2 = map
     for(i in seq_along(parameters) ){
@@ -890,6 +876,21 @@ function( func,
       FUN = mean
     )
     names(env$x) = names(env$par[ map_table$i ])[ match_unique ]
+
+    # Create mapped tape
+    env$func = func
+    func_x = function( func, x ){
+      "c" <- ADoverload("c")
+      "[<-" <- ADoverload("[<-")
+      par = env$par
+      par[ map_table$i ] = x[ map_table$j ]
+      parlist = parameters
+      for(i in seq_along(parlist)){
+        parlist[[i]][] = par[which(names(par)==names(parameters)[i])]
+      }
+      func( parlist )
+    }
+    tape_x = MakeTape( func_x, env$x )
   }else{
     tape_x = GetTape(tmb_obj)
     env$x = tmb_obj$env$par
