@@ -8,9 +8,9 @@ CG(
   b,
   Hq,
   x = 0 * b,
-  Minv = Diagonal(n = length(b)),
   max.it = length(b),
   e = 1e-10,
+  Minv = NULL,
   stop_if_nonPD = TRUE,
   silent = TRUE
 )
@@ -22,11 +22,11 @@ CG(
 
 \item{x}{initial guess for solution}
 
-\item{Minv}{preconditioner matrix (uses Identity by default)}
-
 \item{max.it}{maximum iterations (often should be less than \code{length(b)})}
 
 \item{e}{error criterion}
+
+\item{Minv}{preconditioner matrix (uses Identity by default)}
 
 \item{stop_if_nonPD}{whether to stop CG if recusion is not positive definite}
 
