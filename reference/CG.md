@@ -13,9 +13,9 @@ CG(
   b,
   Hq,
   x = 0 * b,
-  Minv = Diagonal(n = length(b)),
   max.it = length(b),
   e = 1e-10,
+  Minv = NULL,
   stop_if_nonPD = TRUE,
   silent = TRUE
 )
@@ -36,10 +36,6 @@ CG(
 
   initial guess for solution
 
-- Minv:
-
-  preconditioner matrix (uses Identity by default)
-
 - max.it:
 
   maximum iterations (often should be less than `length(b)`)
@@ -47,6 +43,10 @@ CG(
 - e:
 
   error criterion
+
+- Minv:
+
+  preconditioner matrix (uses Identity by default)
 
 - stop_if_nonPD:
 

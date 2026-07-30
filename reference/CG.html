@@ -55,9 +55,9 @@ Adapted from <code>mcmcsae::CG</code> under GPL-3 licence to use Hessian-vector 
 <span>  <span class="va">b</span>,</span>
 <span>  <span class="va">Hq</span>,</span>
 <span>  x <span class="op">=</span> <span class="fl">0</span> <span class="op">*</span> <span class="va">b</span>,</span>
-<span>  Minv <span class="op">=</span> <span class="fu">Diagonal</span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  max.it <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span>,</span>
 <span>  e <span class="op">=</span> <span class="fl">1e-10</span>,</span>
+<span>  Minv <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  stop_if_nonPD <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -79,16 +79,16 @@ Adapted from <code>mcmcsae::CG</code> under GPL-3 licence to use Hessian-vector 
 <dd><p>initial guess for solution</p></dd>
 
 
-<dt id="arg-minv">Minv<a class="anchor" aria-label="anchor" href="#arg-minv"></a></dt>
-<dd><p>preconditioner matrix (uses Identity by default)</p></dd>
-
-
 <dt id="arg-max-it">max.it<a class="anchor" aria-label="anchor" href="#arg-max-it"></a></dt>
 <dd><p>maximum iterations (often should be less than <code>length(b)</code>)</p></dd>
 
 
 <dt id="arg-e">e<a class="anchor" aria-label="anchor" href="#arg-e"></a></dt>
 <dd><p>error criterion</p></dd>
+
+
+<dt id="arg-minv">Minv<a class="anchor" aria-label="anchor" href="#arg-minv"></a></dt>
+<dd><p>preconditioner matrix (uses Identity by default)</p></dd>
 
 
 <dt id="arg-stop-if-nonpd">stop_if_nonPD<a class="anchor" aria-label="anchor" href="#arg-stop-if-nonpd"></a></dt>
