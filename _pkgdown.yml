@@ -30,7 +30,7 @@ reference:
   - lanczos_nll
   - lanczos_sample
   - lanczos_variance
-  - lanczos_dgmrf
+  - dgmrf_lanczos
 
 - title: 'Optimization tools'
   desc: |
