@@ -109,7 +109,8 @@ function( b,
     #z = (Minv %*% r)[,1]
     z <- if (is.null(Minv)) r else (Minv %*% r)[,1]
     rz_new <- sum(r * z)
-    discr <- sum(z * z)
+    #discr <- sum(z * z)
+    discr <- sum(r * r) # Use original residual (not preconditioned) to preserve stop-rule ratio
     if( isTRUE(e > 0) && isTRUE(discr < e) ){
       status = 2
       break
@@ -155,6 +156,8 @@ function( b,
 #' @param diagnostics whether to provide extra diagnostics for each Newton iteration
 #' @param silent Be silent or print progress?
 #' @param smart_x0 whether to use previous solution as x0 for next CG iteration
+#' @param jacobi_preconditioner_probes How many Hutchinson probes to use to estimate diag(H),
+#'   where this is then used in a Jacobi preconditioner (use 0 to disable Jacobi preconditioner)
 #'
 #' @details
 #' This minimizer approximates Newton steps \eqn{x_{i+1} = x_{i} - H(x_i)^{-1} g(x_i)},
@@ -261,6 +264,7 @@ function( par,
           line_steps = 20,
           smartsearch = TRUE,
           smart_x0 = TRUE,
+          jacobi_preconditioner_probes = 10,
           ustep = 1, ## Start out optimistic: Newton step
           power = 0.5, ## decrease=function(u)const*u^power
           u0 = 1e-4,  ## Increase u=0 to this value
@@ -269,7 +273,7 @@ function( par,
           diagnostics = FALSE,
           silent = FALSE ){
 
-  if(line_steps<1)stop("`line_steps` must be 1 or greater")
+  if(line_steps<1) stop("`line_steps` must be 1 or greater")
   start_time = Sys.time()
   norm <- function(x) sqrt(sum(x^2))
   x = par
@@ -278,6 +282,7 @@ function( par,
   nll = fn(x)
   t = 0  # Trust region regulization t >= 0
   fail = 0
+  d_hat = NULL   # no cached diagonal yet for Jacobi preconditioner
   status_iter = nll_iter = grad_iter = ustep_iter = stepsize_iter = CG_iter = rep(NA, maxit_newton)
 
   ## Adaptive stepsize algorithm (smartsearch)
@@ -292,6 +297,18 @@ function( par,
   ## Properties of algorithm:
   ## * ustep must converge towards 1 (because 1 <==> Positive definite hessian)
 
+  #
+  make_jacobi_precond <- function(d_hat, shift = 0, rel_floor = 1e-3) {
+    d_shifted <- d_hat + shift
+    # Scale reference: use the *median of positive entries* or the max,
+    # not a quantile of the (noisy) small values themselves
+    scale_ref <- median(d_shifted[d_shifted > 0])
+    if(is.na(scale_ref) || scale_ref == 0) scale_ref <- max(abs(d_shifted))  # fallback if everything's non-positive
+    floor_val <- rel_floor * scale_ref
+    d_reg <- pmax(d_shifted, floor_val)
+    inv_d <- 1 / d_reg
+    Diagonal( n = length(d_hat), x = inv_d )
+  }
   ## power<1 - controls the boundary *repulsion*
   increase <- function(u)u0+(1-u0)*u^power
   ##decrease <- function(u)1-increase(1-u)
@@ -302,6 +319,20 @@ function( par,
 
   for( newton_iter in seq_len(maxit_newton) ){
     Hq_regularized = function(q,update_H=TRUE) Hq(q,x,update_H) + phi(ustep)*q
+
+    # Refresh Jacobi diagonal ONLY if last iteration's CG confirmed no negative curvature
+    if( (jacobi_preconditioner_probes >= 1) && (newton_iter > 1) && (status_iter[newton_iter - 1] %in% c(1,2)) ){
+      d_hat <- estimate_diag_hutchinson(Hq, x = x, n = length(par), n_probes = jacobi_preconditioner_probes)
+    }else{
+      d_hat = NULL
+    }
+
+    # only use preconditioner if last CG seemed PD
+    if( is.null(d_hat) ){
+      Minv = NULL   # fall back to identity / no preconditioner until first PD signal arrives
+    }else{
+      Minv = make_jacobi_precond(d_hat, shift = phi(ustep))
+    }
 
     # Update start value for CG solve
     if( (newton_iter==1) || isFALSE(smart_x0) ){
@@ -332,6 +363,7 @@ function( par,
       max.it = maxit_CG,
       #e = e_ratio * sum(grad^2)
       e = max(e_ratio * sum(grad^2), 1e-8),
+      Minv = Minv,
       stop_if_nonPD = stop_if_nonPD
     )
     CG_iter[newton_iter] = step$k
@@ -438,3 +470,23 @@ function( par,
   }
   return(out)
 }
+
+#' @title
+#' Estimate diag(H) using Hutchinson probes
+#'
+#' @export
+estimate_diag_hutchinson =
+function( Hq,
+          n_probes = 30,
+          x = attr(Hq,"env")$x0,
+          n = length(attr(Hq,"env")$which_random) ) {
+
+  d_sum <- rep(0, n)
+  for (p in seq_len(n_probes)) {
+    z <- sample(c(-1, 1), n, replace = TRUE)
+    Hz <- Hq(z, x, update_H = (p == 1))   # only refactor/retape on first probe
+    d_sum <- d_sum + z * Hz
+  }
+  d_sum / n_probes
+}
+

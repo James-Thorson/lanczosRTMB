@@ -18,6 +18,7 @@ newton_CG(
   line_steps = 20,
   smartsearch = TRUE,
   smart_x0 = TRUE,
+  jacobi_preconditioner_probes = 10,
   ustep = 1,
   power = 0.5,
   u0 = 1e-04,
@@ -54,6 +55,9 @@ newton_CG(
 \item{smartsearch}{Turn on adaptive stepsize algorithm for non-convex problems?}
 
 \item{smart_x0}{whether to use previous solution as x0 for next CG iteration}
+
+\item{jacobi_preconditioner_probes}{How many Hutchinson probes to use to estimate diag(H),
+where this is then used in a Jacobi preconditioner (use 0 to disable Jacobi preconditioner)}
 
 \item{ustep}{Adaptive stepsize initial guess between 0 and 1.}
 
