@@ -835,6 +835,8 @@ function( func,
   if( is.null(tmb_obj) ){
     env$func = func
     func_x = function( func, x ){
+      "c" <- ADoverload("c")
+      "[<-" <- ADoverload("[<-")
       par = env$par
       par[ map_table$i ] = x[ map_table$j ]
       parlist = parameters
