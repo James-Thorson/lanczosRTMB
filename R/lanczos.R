@@ -1118,16 +1118,18 @@ function( func,
       }
     }
 
-    get_grad = function(v, method = "simple", method.args = list(), what = "nll", fixed_Q = FALSE,
-                        orthogonalize = FALSE, inner_tol = 0 ){
+    get_grad = function(
+      v, method = "simple", method.args = list(), what = "nll",
+      fixed_Q = FALSE, orthogonalize = FALSE, inner_tol = 0, ...
+    ){
 
       # Optimize inner problem
       if( isTRUE(fixed_Q) ){
         # get inner MLE and Lanczos Q
-        get_nll(v, inner_tol = inner_tol)
+        get_nll(v, inner_tol = inner_tol, ...)
       }else{
         # Get inner MLE
-        inner_opt = optimize_inner(v, inner_tol = inner_tol)
+        inner_opt = optimize_inner(v, inner_tol = inner_tol, ...)
       }
 
       pu = env$pu_last

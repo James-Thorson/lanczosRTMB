@@ -72,9 +72,10 @@ CG <-
 function( b,
           Hq,
           x = 0 * b,
-          Minv = Diagonal(n = length(b)),
+          #Minv = Diagonal(n = length(b)),
           max.it = length(b),
           e = 1e-10,
+          Minv = NULL,
           stop_if_nonPD = TRUE,
           silent = TRUE ){
   # NOTES: could use Sturm with bisection to detect minimum eigenvalue for Lanczos, rather than min(eigen(H)$values)
@@ -84,7 +85,8 @@ function( b,
   "[<-" <- ADoverload("[<-")
 
   r <- b - Hq(x)
-  z = (Minv %*% r)[,1]      # Avoid as.vector (which drops adtype?)
+  #z = (Minv %*% r)[,1]      # Avoid as.vector (which drops adtype?)
+  z <- if (is.null(Minv)) r else (Minv %*% r)[,1]
   p <- z
   rz_old <- sum(r * z)
   alpha = beta = rep(0, max.it)      # use initial 0 (instead of NA) to allow taping
@@ -104,7 +106,8 @@ function( b,
     }
     x <- x + alpha[k] * p
     r <- r - alpha[k] * Ap
-    z = (Minv %*% r)[,1]
+    #z = (Minv %*% r)[,1]
+    z <- if (is.null(Minv)) r else (Minv %*% r)[,1]
     rz_new <- sum(r * z)
     discr <- sum(z * z)
     if( isTRUE(e > 0) && isTRUE(discr < e) ){
@@ -269,6 +272,7 @@ function( par,
   norm <- function(x) sqrt(sum(x^2))
   x = par
   grad = as.vector(gr(x))
+  grad_norm = sqrt(sum(grad^2))
   nll = fn(x)
   t = 0  # Trust region regulization t >= 0
   fail = 0
@@ -295,10 +299,34 @@ function( par,
   #ustep = increase(ustep)
 
   for( newton_iter in seq_len(maxit_newton) ){
+    Hq_regularized = function(q,update_H=TRUE) Hq(q,x,update_H) + phi(ustep)*q
+
+    # Update start value for CG solve
+    if( newton_iter == 1 ){
+      x0 = 0 * grad
+    }else{
+      # candidate warm start: previous solution, optionally rescaled (don't apply stepsize)
+      #grad_ratio = grad_norm / grad_norm_prev
+      #x0_candidate = x_prev * grad_ratio
+      x0_candidate = x_prev
+
+      # Compute residuals
+      r_candidate = grad - Hq_regularized(x0_candidate)
+      r_zero = grad                                 # residual if x0 = 0
+
+      # Check whether to use previous solution
+      if (sum(r_candidate^2) < sum(r_zero^2)) {
+        x0 = x0_candidate
+      } else {
+        x0 = 0 * grad
+      }
+    }
+
     # CG for H^-1 grad
     step = CG(
       b = grad,
-      Hq = \(q,update_H=TRUE) Hq(q,x,update_H) + phi(ustep)*q,
+      x = x0,
+      Hq = Hq_regularized,
       max.it = maxit_CG,
       #e = e_ratio * sum(grad^2)
       e = max(e_ratio * sum(grad^2), 1e-8),
@@ -307,6 +335,10 @@ function( par,
     CG_iter[newton_iter] = step$k
     status_iter[newton_iter] = step$status
     ustep_iter[newton_iter] = ustep
+
+    # Cache stuff for next initial condition on CG
+    grad_norm_prev = sqrt(sum(grad^2))
+    x_prev = step$x
 
     # Update trust-region
     Tri = tridiag( step$alpha, step$beta[seq_len(length(step$alpha)-1)] )
@@ -377,8 +409,9 @@ function( par,
     #}
 
     # Update stuff
-    grad_iter[newton_iter] = sqrt(sum(grad^2))
-    if( grad_iter[newton_iter] < gr_tol ){
+    grad_norm = sqrt(sum(grad^2))
+    grad_iter[newton_iter] = grad_norm
+    if( grad_norm < gr_tol ){
       break
     }
   }
