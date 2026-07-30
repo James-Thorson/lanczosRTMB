@@ -23,6 +23,7 @@ newton_CG(
   line_steps = 20,
   smartsearch = TRUE,
   smart_x0 = TRUE,
+  jacobi_preconditioner_probes = 10,
   ustep = 1,
   power = 0.5,
   u0 = 1e-04,
@@ -90,6 +91,12 @@ newton_CG(
 - smart_x0:
 
   whether to use previous solution as x0 for next CG iteration
+
+- jacobi_preconditioner_probes:
+
+  How many Hutchinson probes to use to estimate diag(H), where this is
+  then used in a Jacobi preconditioner (use 0 to disable Jacobi
+  preconditioner)
 
 - ustep:
 
@@ -215,8 +222,8 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  6.62211 17.30393
+#> [1]  7.533009 16.675458
 # newton_CG finds a slightly better fit
 c(opt1$value, opt2$value)
-#> [1] -1220.361 -1220.468
+#> [1] -1220.361 -1220.471
 ```

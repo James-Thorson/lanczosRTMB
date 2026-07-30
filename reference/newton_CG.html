@@ -65,6 +65,7 @@ line-search for each step.</p>
 <span>  line_steps <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  smartsearch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  smart_x0 <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  jacobi_preconditioner_probes <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  ustep <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  power <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  u0 <span class="op">=</span> <span class="fl">1e-04</span>,</span>
@@ -130,6 +131,11 @@ line-search for each step.</p>
 
 <dt id="arg-smart-x-">smart_x0<a class="anchor" aria-label="anchor" href="#arg-smart-x-"></a></dt>
 <dd><p>whether to use previous solution as x0 for next CG iteration</p></dd>
+
+
+<dt id="arg-jacobi-preconditioner-probes">jacobi_preconditioner_probes<a class="anchor" aria-label="anchor" href="#arg-jacobi-preconditioner-probes"></a></dt>
+<dd><p>How many Hutchinson probes to use to estimate diag(H),
+where this is then used in a Jacobi preconditioner (use 0 to disable Jacobi preconditioner)</p></dd>
 
 
 <dt id="arg-ustep">ustep<a class="anchor" aria-label="anchor" href="#arg-ustep"></a></dt>
@@ -249,10 +255,10 @@ This smartsearch behavior controlled by <code>u0</code>, <code>ustep</code>,
 <span class="r-plt img"><img src="newton_CG-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">opt1</span><span class="op">$</span><span class="va">runtime</span>, <span class="va">opt2</span><span class="op">$</span><span class="va">runtime</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Time differences in secs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6.62211 17.30393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  7.533009 16.675458</span>
 <span class="r-in"><span><span class="co"># newton_CG finds a slightly better fit</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">opt1</span><span class="op">$</span><span class="va">value</span>, <span class="va">opt2</span><span class="op">$</span><span class="va">value</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1220.361 -1220.468</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1220.361 -1220.471</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

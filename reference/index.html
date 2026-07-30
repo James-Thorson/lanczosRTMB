@@ -35,9 +35,25 @@
     </div>
 
     <div class="section level2">
+      <h2 id="core-function">Core function<a class="anchor" aria-label="anchor" href="#core-function"></a></h2>
+
+      <div class="section-desc"><p>User-level function that combines computational and optimization tools</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="lanczos_MakeADFun.html">lanczos_MakeADFun()</a></code>
+
+        </dt>
+        <dd>Approximate log-marginal likelihood using Lanczos method</dd>
+      </dl></div><div class="section level2">
       <h2 id="approximate-properties">Approximate properties<a class="anchor" aria-label="anchor" href="#approximate-properties"></a></h2>
 
-      <div class="section-desc"><p>Core tools, using Lanczos to approximate model properties</p></div>
+      <div class="section-desc"><p>Copmutational tools, using Lanczos to approximate model properties</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -79,6 +95,29 @@
         </dt>
         <dd>Approximate the log-density of a GMRF using Lanczos</dd>
       </dl></div><div class="section level2">
+      <h2 id="optimization-tools">Optimization tools<a class="anchor" aria-label="anchor" href="#optimization-tools"></a></h2>
+
+      <div class="section-desc"><p>Optimization tools using Krylov subspaces</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="CG.html">CG()</a></code>
+
+        </dt>
+        <dd>Truncated conjugate gradient using Hessian-vector products</dd>
+
+        <dt>
+
+          <code><a href="newton_CG.html">newton_CG()</a></code>
+
+        </dt>
+        <dd>Nonlinear minimizer using line search with approximated Newton solution</dd>
+      </dl></div><div class="section level2">
       <h2 id="helper-functions">Helper functions<a class="anchor" aria-label="anchor" href="#helper-functions"></a></h2>
 
       <div class="section-desc"><p>Helper tools, used for components of an analysis</p></div>
@@ -101,6 +140,13 @@
 
         </dt>
         <dd>Make function to calculate H %*% q</dd>
+
+        <dt>
+
+          <code><a href="estimate_diag_hutchinson.html">estimate_diag_hutchinson()</a></code>
+
+        </dt>
+        <dd>Estimate diag(H) using Hutchinson probes</dd>
       </dl></div><div class="section level2">
       <h2 id="experimental-and-development">Experimental and development<a class="anchor" aria-label="anchor" href="#experimental-and-development"></a></h2>
 
@@ -113,31 +159,10 @@
 
       <dl><dt>
 
-          <code><a href="lanczos_MakeADFun.html">lanczos_MakeADFun()</a></code>
-
-        </dt>
-        <dd>Approximate log-marginal likelihood using Lanczos method</dd>
-
-        <dt>
-
           <code><a href="lanczos_fixedQ.html">lanczos_fixedQ()</a></code>
 
         </dt>
         <dd>Calculate Lanczos approximation using fixed Q</dd>
-
-        <dt>
-
-          <code><a href="CG.html">CG()</a></code>
-
-        </dt>
-        <dd>Truncated conjugate gradient using Hessian-vector products</dd>
-
-        <dt>
-
-          <code><a href="newton_CG.html">newton_CG()</a></code>
-
-        </dt>
-        <dd>Nonlinear minimizer using line search with approximated Newton solution</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
