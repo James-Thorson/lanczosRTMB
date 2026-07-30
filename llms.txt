@@ -49,7 +49,7 @@ Copmutational tools, using Lanczos to approximate model properties
   : Sample from Lanczos method
 - [`lanczos_variance()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_variance.md)
   : Estimate variance using Lanczos method
-- [`lanczos_dgmrf()`](https://james-thorson.github.io/lanczosRTMB/reference/lanczos_dgmrf.md)
+- [`dgmrf_lanczos()`](https://james-thorson.github.io/lanczosRTMB/reference/dgmrf_lanczos.md)
   : Approximate the log-density of a GMRF using Lanczos
 
 ## Optimization tools
@@ -61,6 +61,8 @@ Optimization tools using Krylov subspaces
 - [`newton_CG()`](https://james-thorson.github.io/lanczosRTMB/reference/newton_CG.md)
   : Nonlinear minimizer using line search with approximated Newton
   solution
+- [`dgmrf_icpl()`](https://james-thorson.github.io/lanczosRTMB/reference/dgmrf_icpl.md)
+  : Approximate the log-density of a GMRF using incomplete Cholesky
 
 ## Helper functions
 

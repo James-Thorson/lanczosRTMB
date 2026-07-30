@@ -23,8 +23,8 @@ newton_CG(
   line_steps = 20,
   smartsearch = TRUE,
   smart_x0 = TRUE,
-  jacobi_preconditioner_probes = 10,
-  ustep = 1,
+  jacobi_preconditioner_probes = 0,
+  ustep = 0.9,
   power = 0.5,
   u0 = 1e-04,
   stop_if_nonPD = smartsearch,
@@ -222,8 +222,8 @@ matplot( cbind(opt1$par, opt2$par), type = "l", col = c("black","blue","red"), l
 
 c(opt1$runtime, opt2$runtime)
 #> Time differences in secs
-#> [1]  7.533009 16.675458
+#> [1]  6.537297 17.802782
 # newton_CG finds a slightly better fit
 c(opt1$value, opt2$value)
-#> [1] -1220.361 -1220.471
+#> [1] -1220.361 -1220.468
 ```

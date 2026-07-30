@@ -61,5 +61,5 @@ T = tridiag(L$alpha, L$beta)
 
 # Should match H if and only if L$m = nrow(H)
 range(L$Q %*% T %*% t(L$Q) - H)
-#> [1] -3.341163e-16  2.220446e-16
+#> [1] -1.332268e-15  6.046062e-16
 ```

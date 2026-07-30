@@ -178,7 +178,7 @@ factorization that is default in TMB:</p>
 <span><span class="va">lan_opt</span></span>
 <span><span class="co">#&gt; $par</span></span>
 <span><span class="co">#&gt;      logsd      logcv </span></span>
-<span><span class="co">#&gt; -0.2336651 -0.3417218 </span></span>
+<span><span class="co">#&gt; -0.2327620 -0.3430976 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $objective</span></span>
 <span><span class="co">#&gt; [1] 149.7827</span></span>
@@ -187,11 +187,11 @@ factorization that is default in TMB:</p>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $iterations</span></span>
-<span><span class="co">#&gt; [1] 8</span></span>
+<span><span class="co">#&gt; [1] 6</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $evaluations</span></span>
 <span><span class="co">#&gt; function gradient </span></span>
-<span><span class="co">#&gt;       21        8 </span></span>
+<span><span class="co">#&gt;       22        6 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $message</span></span>
 <span><span class="co">#&gt; [1] "false convergence (8)"</span></span></code></pre></div>
@@ -232,7 +232,7 @@ ever forming the full Hessian matrix:</p>
 <span>  gr <span class="op">=</span> <span class="va">tape</span><span class="op">$</span><span class="fu">jacfun</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Hq <span class="op">=</span> <span class="va">Hq</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; value: 179.689 mgc: 1.376677e-14 ustep: 0.9999</span></span></code></pre></div>
+<span><span class="co">#&gt; value: 179.689 mgc: 1.376677e-14 ustep: 0.6837039</span></span></code></pre></div>
 <p>We can then use stochastic trace estimation and the Lanczos method to
 approximate the log-determinant of the Hessian for random effects:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -501,13 +501,30 @@ likelihood, pending improvements:</p>
 <span>    control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trace <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   0:     504.62853:  0.00000  0.00000  0.00000</span></span>
-<span><span class="co">#&gt;   1:     497.77874: 0.102646 0.0301943 0.101369</span></span>
-<span><span class="co">#&gt;   2:     489.64338: 0.0607666 0.103722 0.222048</span></span>
-<span><span class="co">#&gt;   3:     476.11692: 0.228643 0.197727 0.445375</span></span>
-<span><span class="co">#&gt;   4:     430.95017: 0.517800 0.964140  1.72812</span></span>
-<span><span class="co">#&gt;   5:     415.42154:  1.07504  2.29354  1.23963</span></span>
-<span><span class="co">#&gt;   6:     415.42154:  1.07504  2.29354  1.23963</span></span>
+<span><span class="co">#&gt;   0:     504.62928:  0.00000  0.00000  0.00000</span></span>
+<span><span class="co">#&gt;   1:     498.57082: 0.107825 0.0420841 0.0843670</span></span>
+<span><span class="co">#&gt;   2:     493.55486: 0.0267849 0.109494 0.181339</span></span>
+<span><span class="co">#&gt;   3:     452.13808: 0.300358 0.338692 0.756802</span></span>
+<span><span class="co">#&gt;   4:     450.08335: 0.0217868 0.300875  1.36896</span></span>
+<span><span class="co">#&gt;   5:     429.58182: 0.300890 0.441773  1.49423</span></span>
+<span><span class="co">#&gt;   6:     413.28835: 0.492771 0.450419  1.21755</span></span>
+<span><span class="co">#&gt;   7:     408.71548: 0.420855 0.488219  1.21419</span></span>
+<span><span class="co">#&gt;   8:     408.68569: 0.420462 0.488565  1.21357</span></span>
+<span><span class="co">#&gt;   9:     408.62288: 0.419685 0.489246  1.21231</span></span>
+<span><span class="co">#&gt;  10:     408.56772: 0.419863 0.490415  1.21119</span></span>
+<span><span class="co">#&gt;  11:     408.55136: 0.419711 0.490536  1.21093</span></span>
+<span><span class="co">#&gt;  12:     408.51233: 0.419407 0.490768  1.21041</span></span>
+<span><span class="co">#&gt;  13:     408.51231: 0.419416 0.490776  1.21041</span></span>
+<span><span class="co">#&gt;  14:     408.51196: 0.419413 0.490778  1.21040</span></span>
+<span><span class="co">#&gt;  15:     408.51151: 0.419408 0.490782  1.21039</span></span>
+<span><span class="co">#&gt;  16:     408.47716: 0.419242 0.490893  1.21009</span></span>
+<span><span class="co">#&gt;  17:     408.47714: 0.419243 0.490894  1.21009</span></span>
+<span><span class="co">#&gt;  18:     408.47702: 0.419243 0.490895  1.21009</span></span>
+<span><span class="co">#&gt;  19:     408.47678: 0.419241 0.490896  1.21009</span></span>
+<span><span class="co">#&gt;  20:     408.47639: 0.419237 0.490898  1.21008</span></span>
+<span><span class="co">#&gt;  21:     408.47433: 0.419230 0.490902  1.21007</span></span>
+<span><span class="co">#&gt;  22:     408.16149: 0.419101 0.490965  1.20981</span></span>
+<span><span class="co">#&gt;  23:     408.16149: 0.419101 0.490965  1.20981</span></span>
 <span><span class="va">fit_lanczos</span><span class="op">$</span><span class="va">run_time</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">start_time</span></span></code></pre></div>
 <p>Where we can compare the runtime for the two models:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -525,11 +542,11 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">3.20 mins</td>
+<td align="left">3.14 mins</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">9.89 mins</td>
+<td align="left">1.44 mins</td>
 </tr>
 </tbody>
 </table>
@@ -563,11 +580,11 @@ likelihood, pending improvements:</p>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="right">1.03</td>
+<td align="right">1.10</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 13.5 mins</p>
+<p>Runtime for this vignette: 5 mins</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
