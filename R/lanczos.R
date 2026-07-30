@@ -879,7 +879,7 @@ function( func,
 
     # Create mapped tape
     env$func = func
-    func_x = function( func, x ){
+    func_x = function( x ){
       "c" <- ADoverload("c")
       "[<-" <- ADoverload("[<-")
       par = env$par
