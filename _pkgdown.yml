@@ -14,6 +14,7 @@ reference:
 - title: internal
   contents:
   - tridiag
+  - logdet_icpl
 
 - title: 'Core function'
   desc: |
@@ -37,6 +38,7 @@ reference:
   contents:
   - CG
   - newton_CG
+  - dgmrf_icpl
 
 - title: 'Helper functions'
   desc: |

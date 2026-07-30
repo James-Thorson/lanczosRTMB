@@ -264,8 +264,8 @@ function( par,
           line_steps = 20,
           smartsearch = TRUE,
           smart_x0 = TRUE,
-          jacobi_preconditioner_probes = 10,
-          ustep = 1, ## Start out optimistic: Newton step
+          jacobi_preconditioner_probes = 0, # Doesn't seem to help so disabled by default
+          ustep = 0.9, ## Start out with some regularization
           power = 0.5, ## decrease=function(u)const*u^power
           u0 = 1e-4,  ## Increase u=0 to this value
           stop_if_nonPD = smartsearch,
