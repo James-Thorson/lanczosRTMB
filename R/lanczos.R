@@ -729,6 +729,9 @@ function( obj,
 #' @inheritParams lanczos_logdet
 #' @inheritParams RTMB::MakeADFun
 #' @inheritParams TMB::MakeADFun
+#' @param tmb_obj optional output from \code{MakeADFun}, e.g., from an existing TMB or RTMB object.
+#'   Supplying \code{tmb_obj} then is used in place of (and overrides) \code{func} and \code{map},
+#'   and allows \code{lanczos_MakeADFun} to be used for a TMB model.
 #' @param inner_optimizer whether to use [newton_CG], a gradient-based low-memory option
 #'   specifically "L-BFGS-B" in [optim], or [nlminb] to optimize the inner problem
 #' @param HVP_method method for computing Hessian-vector-product,
@@ -806,7 +809,8 @@ function( func,
           seed = 123,
           make_gr = TRUE,
           pu_update = c("implicit", "FD", "exact", "implicit_FD"),
-          silent = TRUE ){
+          silent = TRUE,
+          tmb_obj = NULL ){
 
   # vectors
   #  par = unlist(parameters) ... i.e., includes mapped-off and mirrored values
@@ -817,59 +821,77 @@ function( func,
   pu_update = match.arg(pu_update)
   HVP_method = match.arg(HVP_method)
 
-  # Parse map argument to make a look-up table
-  map2 = map
-  for(i in seq_along(parameters) ){
-    parname = names(parameters)[i]
-    if( parname %in% names(map) ){
-      if( length(map2[[parname]]) != length(parameters[[parname]]) ){
-        stop("length wrong")
-      }
-    }else{
-      # Add missing slots with correct name
-      map2 = setNames(
-        c( map2, list(factor(seq_along(parameters[[parname]]))) ),
-        c( names(map2), parname )
-      )
-    }
-  }
-  map2 = map2[names(parameters)]
-  map_list = NULL
-  for(i in seq_along(parameters) ){
-    triplet = data.frame(
-      to = seq_along(parameters[[i]]),
-      from = as.numeric(map2[[i]])
-    )
-    triplet = na.omit(triplet)
-    map_list[[i]] = sparseMatrix(
-      i = triplet$to,
-      j = triplet$from,
-      x = rep(1, nrow(triplet)),
-      dims = c( length(parameters[[i]]), nlevels(map2[[i]]) )
-    )
-  }
-  map_matix = Matrix::.bdiag( map_list )
-  map_table = mat2triplet( map_matix )
-
   # save stuff in env
   env = new.env(parent = emptyenv())
   env$par = unlist(parameters)
   names(env$par) = unlist(sapply( seq_along(parameters), \(i) rep(names(parameters)[i], length(parameters[[i]])) ))
   env$k = k
   env$m = m
-  env$func = func
   env$profile = profile
   env$random = random
   env$seed = seed
-  # convert parameters (list) to x (vector) and rename
-  match_unique = match( unique(map_table$j), map_table$j )
-  #env$x = env$par[ map_table$i ][ match_unique ]
-  env$x = tapply(
-    env$par[ map_table$i ],
-    INDEX = factor( map_table$j, levels = seq_len(ncol(map_matix)) ),
-    FUN = mean
-  )
-  names(env$x) = names(env$par[ map_table$i ])[ match_unique ]
+
+  # make tape for mapped stuff
+  if( is.null(tmb_obj) ){
+    env$func = func
+    func_x = function( func, x ){
+      par = env$par
+      par[ map_table$i ] = x[ map_table$j ]
+      parlist = parameters
+      for(i in seq_along(parlist)){
+        parlist[[i]][] = par[which(names(par)==names(parameters)[i])]
+      }
+      func( parlist )
+    }
+    tape_x = MakeTape( func_x, env$x )
+
+    # Parse map argument to make a look-up table
+    map2 = map
+    for(i in seq_along(parameters) ){
+      parname = names(parameters)[i]
+      if( parname %in% names(map) ){
+        if( length(map2[[parname]]) != length(parameters[[parname]]) ){
+          stop("length wrong")
+        }
+      }else{
+        # Add missing slots with correct name
+        map2 = setNames(
+          c( map2, list(factor(seq_along(parameters[[parname]]))) ),
+          c( names(map2), parname )
+        )
+      }
+    }
+    map2 = map2[names(parameters)]
+    map_list = NULL
+    for(i in seq_along(parameters) ){
+      triplet = data.frame(
+        to = seq_along(parameters[[i]]),
+        from = as.numeric(map2[[i]])
+      )
+      triplet = na.omit(triplet)
+      map_list[[i]] = sparseMatrix(
+        i = triplet$to,
+        j = triplet$from,
+        x = rep(1, nrow(triplet)),
+        dims = c( length(parameters[[i]]), nlevels(map2[[i]]) )
+      )
+    }
+    map_matix = Matrix::.bdiag( map_list )
+    map_table = mat2triplet( map_matix )
+
+    # convert parameters (list) to x (vector) and rename
+    match_unique = match( unique(map_table$j), map_table$j )
+    #env$x = env$par[ map_table$i ][ match_unique ]
+    env$x = tapply(
+      env$par[ map_table$i ],
+      INDEX = factor( map_table$j, levels = seq_len(ncol(map_matix)) ),
+      FUN = mean
+    )
+    names(env$x) = names(env$par[ map_table$i ])[ match_unique ]
+  }else{
+    tape_x = GetTape(tmb_obj)
+    env$x = tmb_obj$env$par
+  }
 
   # Globals
   env$fixed = setdiff( names(parameters), c(random,profile) )
@@ -889,13 +911,14 @@ function( func,
     x = DataEval(fetch_x)
     x[which(names(x) %in% parnames)] = vec
     # Expand x for mirrored values, and inject into par
-    par = env$par
-    par[ map_table$i ] = x[ map_table$j ]
-    parlist = parameters
-    for(i in seq_along(parlist)){
-      parlist[[i]][] = par[which(names(par)==names(parameters)[i])]
-    }
-    func( parlist )
+    #par = env$par
+    #par[ map_table$i ] = x[ map_table$j ]
+    #parlist = parameters
+    #for(i in seq_along(parlist)){
+    #  parlist[[i]][] = par[which(names(par)==names(parameters)[i])]
+    #}
+    #func( parlist )
+    tape_x( x )
   }
 
   # Get tape w.r.t. profile and random effects for optimizing inner problem

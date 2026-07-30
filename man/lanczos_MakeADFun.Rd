@@ -17,7 +17,8 @@ lanczos_MakeADFun(
   seed = 123,
   make_gr = TRUE,
   pu_update = c("implicit", "FD", "exact", "implicit_FD"),
-  silent = TRUE
+  silent = TRUE,
+  tmb_obj = NULL
 )
 }
 \arguments{
@@ -59,6 +60,10 @@ gradient of the Lanczos approximation to the log-determinant.
 pu_update="FD" can be very slow for dense inner-Hessians.}
 
 \item{silent}{Disable all tracing information?}
+
+\item{tmb_obj}{optional output from \code{MakeADFun}, e.g., from an existing TMB or RTMB object.
+Supplying \code{tmb_obj} then is used in place of (and overrides) \code{func} and \code{map},
+and allows \code{lanczos_MakeADFun} to be used for a TMB model.}
 }
 \value{
 An object (list), where elements include:
