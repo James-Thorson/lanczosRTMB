@@ -154,6 +154,7 @@ function( b,
 #' @param beta updates in line search stepsize alpha when Armijo sufficient decrease condition fails
 #' @param diagnostics whether to provide extra diagnostics for each Newton iteration
 #' @param silent Be silent or print progress?
+#' @param smart_x0 whether to use previous solution as x0 for next CG iteration
 #'
 #' @details
 #' This minimizer approximates Newton steps \eqn{x_{i+1} = x_{i} - H(x_i)^{-1} g(x_i)},
@@ -259,6 +260,7 @@ function( par,
           beta = 0.5,
           line_steps = 20,
           smartsearch = TRUE,
+          smart_x0 = TRUE,
           ustep = 1, ## Start out optimistic: Newton step
           power = 0.5, ## decrease=function(u)const*u^power
           u0 = 1e-4,  ## Increase u=0 to this value
@@ -302,7 +304,7 @@ function( par,
     Hq_regularized = function(q,update_H=TRUE) Hq(q,x,update_H) + phi(ustep)*q
 
     # Update start value for CG solve
-    if( newton_iter == 1 ){
+    if( (newton_iter==1) || isFALSE(smart_x0) ){
       x0 = 0 * grad
     }else{
       # candidate warm start: previous solution, optionally rescaled (don't apply stepsize)

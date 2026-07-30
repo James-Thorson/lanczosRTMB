@@ -17,6 +17,7 @@ newton_CG(
   beta = 0.5,
   line_steps = 20,
   smartsearch = TRUE,
+  smart_x0 = TRUE,
   ustep = 1,
   power = 0.5,
   u0 = 1e-04,
@@ -51,6 +52,8 @@ newton_CG(
 \item{line_steps}{number of steps to explore for linear-search given Newton update}
 
 \item{smartsearch}{Turn on adaptive stepsize algorithm for non-convex problems?}
+
+\item{smart_x0}{whether to use previous solution as x0 for next CG iteration}
 
 \item{ustep}{Adaptive stepsize initial guess between 0 and 1.}
 
