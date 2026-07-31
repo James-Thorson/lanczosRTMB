@@ -59,7 +59,7 @@ nll = function(p){
 }
 
 # Starting list of parameters
-parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0)
+parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0, eps = 0)
 ```
 
 Finally, we fit this model as a log-linked generalized linear mixed
@@ -73,6 +73,7 @@ obj = RTMB::MakeADFun(
   nll, 
   parlist,
   random = "u",
+  map = list(eps = factor(NA)),
   profile = "mu",
   silent = TRUE
 )
@@ -110,10 +111,12 @@ factorization that is default in TMB:
 ``` r
 
 lan_obj = lanczos_MakeADFun(
-  nll, 
-  parlist,
+  #tmb_obj = obj,
+  func = nll, 
+  parameters = parlist,
   random = "u",
   profile = "mu",
+  map = list(eps = factor(NA)),
   k = 10,
   silent = TRUE,
 )
@@ -157,7 +160,8 @@ conditional upon fixed values for variance parameters:
 newmap = list(
   mu = factor(NA), 
   logsd = factor(NA), 
-  logcv = factor(NA)
+  logcv = factor(NA),
+  eps = factor(NA)
 )
 pen = RTMB::MakeADFun( 
   nll, 
@@ -317,8 +321,7 @@ dummy variable epsilon to correct for retransformation bias:
 # One-sided finite difference
 what = "biascorr"
 phat = obj$env$parList()
-phat$eps = 0.0001
-newmap$eps = factor(NA)
+  phat$eps = 0.0001
 pen_hi = RTMB::MakeADFun( 
   nll, 
   parameters = phat, 
@@ -532,8 +535,8 @@ knitr::kable( runtime, digits=2, caption="Run-times" )
 
 |         | x         |
 |:--------|:----------|
-| RTMB    | 3.13 mins |
-| Lanczos | 1.49 mins |
+| RTMB    | 3.29 mins |
+| Lanczos | 1.61 mins |
 
 Run-times {.table}
 
@@ -565,11 +568,11 @@ knitr::kable( max_memory, digits=2, caption="Maximum memory use (GB)" )
 
 |         |    x |
 |:--------|-----:|
-| RTMB    | 0.99 |
-| Lanczos | 0.99 |
+| RTMB    | 1.01 |
+| Lanczos | 0.95 |
 
 Maximum memory use (GB) {.table}
 
-Runtime for this vignette: 5.02 mins
+Runtime for this vignette: 5.31 mins
 
 ### Works cited

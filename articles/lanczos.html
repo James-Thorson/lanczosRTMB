@@ -116,7 +116,7 @@ allowing us to calculate other outputs for later use:</p>
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># Starting list of parameters</span></span>
-<span><span class="va">parlist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>u<span class="op">=</span><span class="va">u</span><span class="op">*</span><span class="fl">0</span>, mu <span class="op">=</span> <span class="fl">0</span>, logsd <span class="op">=</span> <span class="fl">0</span>, logcv <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">parlist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>u<span class="op">=</span><span class="va">u</span><span class="op">*</span><span class="fl">0</span>, mu <span class="op">=</span> <span class="fl">0</span>, logsd <span class="op">=</span> <span class="fl">0</span>, logcv <span class="op">=</span> <span class="fl">0</span>, eps <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, we fit this model as a log-linked generalized linear mixed
 model (GLMM):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -126,6 +126,7 @@ model (GLMM):</p>
 <span>  <span class="va">nll</span>, </span>
 <span>  <span class="va">parlist</span>,</span>
 <span>  random <span class="op">=</span> <span class="st">"u"</span>,</span>
+<span>  map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  profile <span class="op">=</span> <span class="st">"mu"</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
@@ -161,10 +162,12 @@ likelihood, evaluated using Hutchinson-Lanczos instead of the Cholesky
 factorization that is default in TMB:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lan_obj</span> <span class="op">=</span> <span class="fu"><a href="../reference/lanczos_MakeADFun.html">lanczos_MakeADFun</a></span><span class="op">(</span></span>
-<span>  <span class="va">nll</span>, </span>
-<span>  <span class="va">parlist</span>,</span>
+<span>  <span class="co">#tmb_obj = obj,</span></span>
+<span>  func <span class="op">=</span> <span class="va">nll</span>, </span>
+<span>  parameters <span class="op">=</span> <span class="va">parlist</span>,</span>
 <span>  random <span class="op">=</span> <span class="st">"u"</span>,</span>
 <span>  profile <span class="op">=</span> <span class="st">"mu"</span>,</span>
+<span>  map <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  k <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  silent <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span><span class="op">)</span></span>
@@ -206,7 +209,8 @@ likelihood, conditional upon fixed values for variance parameters:</p>
 <span><span class="va">newmap</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>, </span>
 <span>  logsd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>, </span>
-<span>  logcv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span>
+<span>  logcv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  eps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">pen</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> </span>
 <span>  <span class="va">nll</span>, </span>
@@ -338,8 +342,7 @@ to a dummy variable epsilon to correct for retransformation bias:</p>
 <code class="sourceCode R"><span><span class="co"># One-sided finite difference</span></span>
 <span><span class="va">what</span> <span class="op">=</span> <span class="st">"biascorr"</span></span>
 <span><span class="va">phat</span> <span class="op">=</span> <span class="va">obj</span><span class="op">$</span><span class="va">env</span><span class="op">$</span><span class="fu">parList</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">phat</span><span class="op">$</span><span class="va">eps</span> <span class="op">=</span> <span class="fl">0.0001</span></span>
-<span><span class="va">newmap</span><span class="op">$</span><span class="va">eps</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span></span>
+<span>  <span class="va">phat</span><span class="op">$</span><span class="va">eps</span> <span class="op">=</span> <span class="fl">0.0001</span></span>
 <span><span class="va">pen_hi</span> <span class="op">=</span> <span class="fu">RTMB</span><span class="fu">::</span><span class="fu">MakeADFun</span><span class="op">(</span> </span>
 <span>  <span class="va">nll</span>, </span>
 <span>  parameters <span class="op">=</span> <span class="va">phat</span>, </span>
@@ -536,11 +539,11 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="left">3.13 mins</td>
+<td align="left">3.29 mins</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="left">1.49 mins</td>
+<td align="left">1.61 mins</td>
 </tr>
 </tbody>
 </table>
@@ -570,15 +573,15 @@ likelihood, pending improvements:</p>
 <tbody>
 <tr class="odd">
 <td align="left">RTMB</td>
-<td align="right">0.99</td>
+<td align="right">1.01</td>
 </tr>
 <tr class="even">
 <td align="left">Lanczos</td>
-<td align="right">0.99</td>
+<td align="right">0.95</td>
 </tr>
 </tbody>
 </table>
-<p>Runtime for this vignette: 5.02 mins</p>
+<p>Runtime for this vignette: 5.31 mins</p>
 <div class="section level3">
 <h3 id="works-cited">Works cited<a class="anchor" aria-label="anchor" href="#works-cited"></a>
 </h3>
