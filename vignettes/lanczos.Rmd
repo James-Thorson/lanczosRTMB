@@ -68,7 +68,7 @@ nll = function(p){
 }
 
 # Starting list of parameters
-parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0)
+parlist = list(u=u*0, mu = 0, logsd = 0, logcv = 0, eps = 0)
 ```
 
 Finally, we fit this model as a log-linked generalized linear mixed model (GLMM): 
@@ -80,6 +80,7 @@ obj = RTMB::MakeADFun(
   nll, 
   parlist,
   random = "u",
+  map = list(eps = factor(NA)),
   profile = "mu",
   silent = TRUE
 )
@@ -94,10 +95,12 @@ We first show that we can re-fit the model using the marginal likelihood, evalua
 
 ```{r}
 lan_obj = lanczos_MakeADFun(
-  nll, 
-  parlist,
+  #tmb_obj = obj,
+  func = nll, 
+  parameters = parlist,
   random = "u",
   profile = "mu",
+  map = list(eps = factor(NA)),
   k = 10,
   silent = TRUE,
 )
@@ -120,7 +123,8 @@ Next, we show that the model can be refitted using penalized likelihood, conditi
 newmap = list(
   mu = factor(NA), 
   logsd = factor(NA), 
-  logcv = factor(NA)
+  logcv = factor(NA),
+  eps = factor(NA)
 )
 pen = RTMB::MakeADFun( 
   nll, 
@@ -241,8 +245,7 @@ Finally, we can use the gradient of the log-likelihood with respect to a dummy v
 # One-sided finite difference
 what = "biascorr"
 phat = obj$env$parList()
-phat$eps = 0.0001
-newmap$eps = factor(NA)
+  phat$eps = 0.0001
 pen_hi = RTMB::MakeADFun( 
   nll, 
   parameters = phat, 
