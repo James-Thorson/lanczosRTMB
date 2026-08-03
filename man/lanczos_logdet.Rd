@@ -12,7 +12,7 @@ lanczos_logdet(
   which_random = attr(Hq, "env")$which_random,
   seed = NULL,
   orthogonalize = TRUE,
-  Q_list = NULL,
+  L_extra = NULL,
   V = matrix(1, nrow = length(x), ncol = 0),
   return_extra = FALSE
 )
@@ -37,8 +37,8 @@ lower variance using a fixed seed.}
 \item{orthogonalize}{Whether to do two-pass Gram-Schmidt re-normalization
 (much slower)}
 
-\item{Q_list}{optional list of probes returned by a prior Lanczos run.  This
-then uses fixed probes to speed up evaluations during gradients.}
+\item{L_extra}{optional output from \code{lanczos_logdet(...,return_extra=TRUE)}.
+This then uses fixed probes to speed up evaluations during gradients.}
 
 \item{V}{deflation matrix, where we transform probes \eqn{q' = (I-V V^T) q}
 and the Hessian by \eqn{(I-V V^T) H (I-V V^T)} to eliminate axes in \eqn{V}.

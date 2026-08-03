@@ -4,12 +4,14 @@
 \alias{tridiag}
 \title{Assemble tri-diagonal symmetric matrix}
 \usage{
-tridiag(alpha, beta)
+tridiag(alpha, beta, sparse = TRUE)
 }
 \arguments{
 \item{alpha}{vector for diagonal}
 
 \item{beta}{vector for off-diagonal}
+
+\item{sparse}{whether to return a sparse matrix or not}
 }
 \description{
 Assemble tri-diagonal matrix from alpha and beta from Lanczos method

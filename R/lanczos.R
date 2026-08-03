@@ -122,6 +122,10 @@ function( Hq,
           x = attr(Hq,"env")$x0,
           V = matrix(1, nrow=length(x), ncol = 0) ) {
 
+  # Designed to be taped, so need overloads
+  "c" <- ADoverload("c")
+  "[<-" <- ADoverload("[<-")
+
   if(ncol(V) > 0) stop("`V` not implemented in `lanczos_fixedQ`")
   n = nrow(Q)
   k = ncol(Q)
@@ -354,14 +358,25 @@ function( tape,
 #'
 #' @param alpha vector for diagonal
 #' @param beta vector for off-diagonal
+#' @param sparse whether to return a sparse matrix or not
 #'
 #' @export
 tridiag <-
 function( alpha,
-          beta ) {
+          beta,
+          sparse = TRUE ) {
+
+  # Designed to be taped, so need overloads
+  "c" <- ADoverload("c")
+  "[<-" <- ADoverload("[<-")
+  "diag<-" <- ADoverload("diag<-")
 
   k = length(alpha)
-  Tri = Matrix(0, k, k)
+  if( isTRUE(sparse) ){
+    Tri = Matrix(0, k, k)
+  }else{
+    Tri = matrix(0, k, k)
+  }
   diag(Tri) = alpha
   for (i in seq_len(k-1)) {
     Tri[i, i+1] = beta[i]
@@ -547,8 +562,8 @@ function( Hq,
 #'    the Hutchinson probe vectors are randomly sampled, and comparisons have
 #'    lower variance using a fixed seed.
 #' @param return_extra whether to return probes and other internal constructions.
-#' @param Q_list optional list of probes returned by a prior Lanczos run.  This
-#'    then uses fixed probes to speed up evaluations during gradients.
+#' @param L_extra optional output from \code{lanczos_logdet(...,return_extra=TRUE)}.
+#'    This then uses fixed probes to speed up evaluations during gradients.
 #'
 #' @details
 #' For a model with independent random effects, the variance of stochastic
@@ -601,32 +616,41 @@ function( Hq,
           which_random = attr(Hq,"env")$which_random,
           seed = NULL,
           orthogonalize = TRUE,
-          Q_list = NULL,
+          L_extra = NULL,
           V = matrix(1, nrow=length(x), ncol = 0),
           return_extra = FALSE ) {
+
+  # Designed to be taped, so need overloads
+  "c" <- ADoverload("c")
+  "[<-" <- ADoverload("[<-")
+  "diag<-" <- ADoverload("diag<-")
 
   if( !is.null(seed) ){
     set.seed(seed)
   }
-  if( !is.null(Q_list) ){
-    m = length(Q_list)
+  if( !is.null(L_extra) ){
+    m = length(L_extra$L)
   }
   nv = ncol(V)
   n = length(which_random)
   q_m = matrix( sample( c(-1,1), size = n*m, replace=TRUE), ncol = m )  # Rademacher vector
-  logdet = numeric(m)
+  logdet = rep(0, m)
   which_pos = Tri = eig = L = vector("list", length = m)
 
   for (mi in 1:m) {
     q = q_m[,mi]
-    if( is.null(Q_list) ){
+    if( is.null(L_extra) ){
       L[[mi]] = lanczos( Hq = Hq, x = x, q = q, k = max(k), orthogonalize = orthogonalize, V = V  )
     }else{
-      L[[mi]] = lanczos_fixedQ( Hq = Hq, x = x, Q = Q_list[[mi]], V = V )
+      L[[mi]] = lanczos_fixedQ( Hq = Hq, x = x, Q = L_extra$L[[mi]]$Q, V = V )
     }
-    Tri[[mi]] = tridiag(L[[mi]]$alpha, L[[mi]]$beta)
+    Tri[[mi]] = tridiag(L[[mi]]$alpha, L[[mi]]$beta, sparse = is.null(L_extra) )
     eig[[mi]] = eigen(Tri[[mi]], symmetric = TRUE)
-    which_pos[[mi]] = which( eig[[mi]]$values > 0 )
+    if( is.null(L_extra) ){
+      which_pos[[mi]] = which( eig[[mi]]$values > 0 )
+    }else{
+      which_pos[[mi]] = L_extra$which_pos[[mi]]
+    }
     log_quad = sum(log(eig[[mi]]$values[which_pos[[mi]]]) * eig[[mi]]$vectors[1, which_pos[[mi]]]^2)
     logdet[mi] = log_quad * (n - nv)
   }
@@ -640,6 +664,13 @@ function( Hq,
   #
   if( isFALSE(return_extra) ){
     return( logdet )
+    # Used to test grad_logdet using scratch/test_grad_logdet.R
+    # SOME FAIL
+    #return( log(eig[[mi]]$values[which_pos[[mi]]]) * eig[[mi]]$vectors[1, which_pos[[mi]]]^2 )
+    # TESTS ... works
+    #return( log(eig[[mi]]$values[which_pos[[mi]]]) )
+    # TESTS ... works
+    #return( eig[[mi]]$vectors[1, which_pos[[mi]]]^2 )
   }else{
     return( list(logdet = logdet, q_m = q_m, L = L, Tri = Tri, eig = eig, which_pos = which_pos) )
   }
@@ -1162,9 +1193,9 @@ function( func,
       env$x[x_fixed] = v
       env$x[x_profile_random] = pu
       if( isTRUE(fixed_Q) ){
-        Q_list = lapply(env$L$L, \(x) x$Q )
+        L_extra = env$L
       }else{
-        Q_list = NULL
+        L_extra = NULL
       }
 
       # Get grad_jnll ... no need to re-optimize random effects given envelop theorem
@@ -1214,7 +1245,7 @@ function( func,
           logdet_m = lanczos_logdet(
             Hq = env$Hq_u,
             x = env$x[x_random],
-            Q_list = Q_list,
+            L_extra = L_extra,
             k = env$k,
             m = env$m,
             seed = env$seed,
