@@ -5,7 +5,7 @@ Assemble tri-diagonal matrix from alpha and beta from Lanczos method
 ## Usage
 
 ``` r
-tridiag(alpha, beta)
+tridiag(alpha, beta, sparse = TRUE)
 ```
 
 ## Arguments
@@ -17,3 +17,7 @@ tridiag(alpha, beta)
 - beta:
 
   vector for off-diagonal
+
+- sparse:
+
+  whether to return a sparse matrix or not
